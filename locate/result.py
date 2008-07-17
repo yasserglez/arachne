@@ -28,5 +28,5 @@ class CrawlResult(object):
 class ResultQueue(object):
     """Crawl result queue.
 
-    Collects and organizes the `CrawlResults` waiting to be processed.
+    Collects and organizes the `CrawlResult` waiting to be processed.
     """

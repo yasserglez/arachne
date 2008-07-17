@@ -28,5 +28,5 @@ class CrawlTask(object):
 class TaskQueue(object):
     """Task queue.
 
-    Collects and organizes the pending `CrawlTasks`.
+    Collects and organizes the pending `CrawlTask`.
     """

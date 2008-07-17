@@ -19,7 +19,8 @@
 class ProtocolHandler(object):
     """Protocol handler.
 
-    Abstract class that should be subclassed by all supported protocols in the
-    crawler.  This provides a way for extending the crawler to support new
-    protocols.  Instances of this class are used by the `CrawlWorker`.
+    Abstract base class that should be subclassed by all the supported
+    protocols by the crawler.  This provides a way for extending the crawler to
+    support new protocols.  Instances of subclasses of this class are used by
+    the `CrawlWorker`.
     """

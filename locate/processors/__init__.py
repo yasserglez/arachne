@@ -19,8 +19,8 @@
 class ResultProcessor(object):
     """Crawl result processor.
 
-    Abstract class that should be subclassed by all the available processors in
-    the crawler.  Provides a way for extending the crawler to support other
-    ways of processing the `CrawlResults`.  Instances of subclasses of this
-    class are managed by the `ProcessorManager`.
+    Abstract base class that should be subclassed by all the available
+    processors in the crawler.  Provides a way for extending the crawler to
+    support other ways of processing the `CrawlResult`.  Instances of
+    subclasses of this class are managed by the `ProcessorManager`.
     """

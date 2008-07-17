@@ -19,7 +19,7 @@
 class CrawlWorker(object):
     """Crawl worker.
 
-    Executes each one of the `CrawlTasks` received from the `CrawlManager` and
+    Executes each one of the `CrawlTask` received from the `CrawlManager` and
     returns a `CrawlResult`.  Contacts the site and retrieves the list of files
     and directories found inside the given directory.
     """
@@ -28,7 +28,7 @@ class CrawlWorker(object):
 class CrawlManager(object):
     """Crawl manager.
 
-    Creates, manages and feeds a configurable number of `CrawlWorkers` with
-    `CrawlTasks` received from the `TaskQueue` and reports the `CrawlResults`
-    to the `ResultQueue`.
+    Creates, manages and feeds a configurable number of `CrawlWorker` with
+    `CrawlTask` received from the `TaskQueue` and reports the `CrawlResult` to
+    the `ResultQueue`.
     """

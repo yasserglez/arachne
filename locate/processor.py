@@ -19,5 +19,6 @@
 class ProcessorManager(object):
     """Processor manager.
 
-    Creates, manages and feeds each one of the `ResultProcessors`.
+    Creates, manages and feeds the selected `ResultProcessor` with
+    `CrawlResult` received from the `ResultQueue`.
     """
