@@ -14,3 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+class ProtocolHandler(object):
+    """Protocol handler.
+
+    Abstract class that should be subclassed by all supported protocols in the
+    crawler.  This provides a way for extending the crawler to support new
+    protocols.  Instances of this class are used by the `CrawlWorker`.
+    """

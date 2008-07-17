@@ -14,3 +14,13 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+class ResultProcessor(object):
+    """Crawl result processor.
+
+    Abstract class that should be subclassed by all the available processors in
+    the crawler.  Provides a way for extending the crawler to support other
+    ways of processing the `CrawlResults`.  Instances of subclasses of this
+    class are managed by the `ProcessorManager`.
+    """
