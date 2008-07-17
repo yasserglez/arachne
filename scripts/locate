@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
 
 # Copyright (C) 2008 Yasser González Fernández <yglez@uh.cu>
 #
@@ -15,10 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Yasser González Fernández'
+from locate.scripts.locate import main
 
-__email__ = 'yglez@uh.cu'
 
-__copyright__ = 'Copyright (C) 2008 Yasser González Fernández'
-
-__version__ = '0.0.0'
+if __name__ == '__main__':
+    main()

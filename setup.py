@@ -15,10 +15,18 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = 'Yasser González Fernández'
+from distutils.core import setup
 
-__email__ = 'yglez@uh.cu'
+import locate
 
-__copyright__ = 'Copyright (C) 2008 Yasser González Fernández'
 
-__version__ = '0.0.0'
+setup(name='locate',
+      description='',
+      url='',
+      version=locate.__version__,
+      author=locate.__author__,
+      author_email=locate.__email__,
+      packages=['locate', 'locate.handlers', 'locate.processors',
+                'locate.scripts', 'locate.utils'],
+      scripts=['scripts/locate'],
+)
