@@ -14,3 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = 'Yasser González Fernández <yglez@uh.cu>'
+
+__copyright__ = 'Copyright (C) 2008 Yasser González Fernández'
+
+__version__ = '0.0.0'
