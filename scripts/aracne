@@ -35,11 +35,11 @@ def _parse_args():
         ' WARRANTY, to the extent permitted by law.' % \
         (aracne.__version__, aracne.__copyright__)
     parser = optparse.OptionParser(usage=usage, version=version)
-    parser.add_option('-c', '--config-file', metavar='FILE',
-                      dest='config_file', default=DEFAULT_CONFIG_FILE,
+    parser.add_option('-c', '--configfile', metavar='FILE',
+                      dest='configfile', default=DEFAULT_CONFIG_FILE,
                       help='specify configuration file (default %default)')
-    parser.add_option('-p', '--pid-file', metavar='FILE',
-                      dest='pid_file', default=DEFAULT_PID_FILE,
+    parser.add_option('-p', '--pidfile', metavar='FILE',
+                      dest='pidfile', default=DEFAULT_PID_FILE,
                       help='specify PID file (default %default)')
     return parser.parse_args()
 
