@@ -17,16 +17,16 @@
 
 from distutils.core import setup
 
-import locate
+import aracne
 
 
-setup(name='locate',
+setup(name='aracne',
       description='',
       url='',
-      version=locate.__version__,
-      author=locate.__author__,
-      author_email=locate.__email__,
-      packages=['locate', 'locate.handlers', 'locate.processors',
-                'locate.scripts', 'locate.utils'],
-      scripts=['scripts/locate'],
+      version=aracne.__version__,
+      author=aracne.__author__,
+      author_email=aracne.__email__,
+      packages=['aracne', 'aracne.handlers', 'aracne.processors',
+                'aracne.scripts', 'aracne.utils'],
+      scripts=['scripts/aracne'],
 )
