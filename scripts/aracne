@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 # Copyright (C) 2008 Yasser González Fernández <yglez@uh.cu>
 #
@@ -14,3 +15,35 @@
 #
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import optparse
+
+import aracne
+
+
+DEFAULT_CONFIG_FILE = '/etc/aracne.conf'
+
+DEFAULT_PID_FILE = '/var/run/aracne.pid'
+
+
+def _parse_cmdline():
+    """Parse the command line arguments."""
+    USAGE = '%prog [options]'
+    VERSION = '%%prog %s' % aracne.__version__
+    parser = optparse.OptionParser(usage=USAGE, version=VERSION)
+    parser.add_option('-c', '--config-file', metavar='FILE',
+                      default=DEFAULT_CONFIG_FILE,
+                      help='specify configuration filename (default %default)')
+    parser.add_option('-p', '--pid-file', metavar='FILE',
+                      default=DEFAULT_PID_FILE,
+                      help='specify PID filename (default %default)')
+    return parser.parse_args()
+
+
+def main():
+    """Starts, stops or restarts the aracne daemon."""
+    (options, args) = _parse_cmdline()
+
+
+if __name__ == '__main__':
+    main()
