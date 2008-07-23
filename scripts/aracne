@@ -19,15 +19,22 @@
 import optparse
 
 import aracne
+from aracne.app import Application
 
 
 DEFAULT_CONFIG_FILE = '/etc/aracne.conf'
 
-DEFAULT_PID_FILE = '/var/run/aracne.pid'
+DEFAULT_PID_FILE = '/var/run/aracne/aracne.pid'
 
 
 def _parse_args():
-    """Parse the command line arguments."""
+    """Parse the command line arguments.
+
+    Parses the command line arguments and show information if invoked with the
+    --help and --version options or an error message if an invalid option is
+    specified.  Returns a dictionary mapping the names of the options to its
+    values.
+    """
     usage = '%prog [options]'
     version = '%%prog %s\n%s.\nThis is free software: you are free to change' \
         ' and redistribute it under the\nterms of the GNU GPL version 3 or' \
@@ -35,19 +42,29 @@ def _parse_args():
         ' WARRANTY, to the extent permitted by law.' % \
         (aracne.__version__, aracne.__copyright__)
     parser = optparse.OptionParser(usage=usage, version=version)
-    parser.add_option('-c', '--configfile', metavar='FILE',
-                      dest='configfile', default=DEFAULT_CONFIG_FILE,
+    parser.add_option('-c', '--configfile', metavar='FILE', dest='configfile',
                       help='specify configuration file (default %default)')
-    parser.add_option('-p', '--pidfile', metavar='FILE',
-                      dest='pidfile', default=DEFAULT_PID_FILE,
+    parser.add_option('-p', '--pidfile', metavar='FILE', dest='pidfile',
                       help='specify PID file (default %default)')
-    return parser.parse_args()
+    parser.set_defaults(configfile=DEFAULT_CONFIG_FILE,
+                        pidfile=DEFAULT_PID_FILE)
+    (options, args) = parser.parse_args()
+    return options.__dict__
+
+
+def _parse_configfile(configfile):
+    """Parse the configuration file.
+    """
+    return {}
 
 
 def main():
-    """Starts, stops or restarts the aracne daemon."""
-    (options, args) = _parse_args()
-
+    """Start the aracne daemon.
+    """
+    options = _parse_args()
+    config = _parse_configfile(options['configfile'])
+    app = Application(options['pidfile'], config)
+    app.start()
 
 
 if __name__ == '__main__':
