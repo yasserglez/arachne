@@ -18,6 +18,8 @@
 import time
 import threading
 
+from aracne.errors import EmptyQueueError
+
 
 class ProcessorManager(threading.Thread):
     """Processor manager.
@@ -31,7 +33,9 @@ class ProcessorManager(threading.Thread):
         """Initializes attributes.
         """
         super(ProcessorManager, self).__init__()
-        self._config = config
+        self._sleep_time = config['processormanager']['sleeptime']
+        args = (task_queue, result_queue)
+        self._processor =  config['processormanager']['processor'](*args)
         self._task_queue = task_queue
         self._result_queue = result_queue
         self._running = False
@@ -47,9 +51,17 @@ class ProcessorManager(threading.Thread):
         self._running = True
         while self._running:
             self._running_cond.release()
-            # TODO: Substitute this time.sleep() call with the code to get the
-            # crawl result and process it.
-            time.sleep(self._config['processormanager']['sleeptime'])
+            try:
+                # Try to get a crawl result to be processed.  Wait a few
+                # seconds for an item if not available right now.
+                result = self._result_queue.get(timeout=self._sleep_time)
+            except EmptyQueueError:
+                # Crawl result not available.  Check the running flag and if
+                # not cleared try to get another crawl result.
+                pass
+            else:
+                # Crawl result available.
+                self._processor.process(result)
             self._running_cond.acquire()
         self._running_cond.release()
 

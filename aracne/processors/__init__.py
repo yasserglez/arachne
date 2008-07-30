@@ -20,7 +20,25 @@ class ResultProcessor(object):
     """Crawl result processor.
 
     Abstract base class that should be subclassed by all the available
-    processors in the crawler.  Provides a way for extending the crawler to
-    support other ways of processing the `CrawlResult`.  Instances of
-    subclasses of this class are managed by the `ProcessorManager`.
+    processors.  Provides a way for extending the crawler to support other ways
+    of processing the crawl results (`CrawlResult`).  A instance of a subclass
+    of this class is managed by the `ProcessorManager`.
     """
+
+    def __init__(self, task_queue, result_queue):
+        """Initialize instances.
+
+        The `ProcessorManager` will create an instace of a subclass providing
+        an instance of `TaskQueue` and `ResultQueue` as arguments.  This
+        implementation just set the `task_queue` and `result_queue` arguments
+        as `_task_queue` and `_result_queue` attributes.
+        """
+        self._task_queue = task_queue
+        self._result_queue = result_queue
+
+    def process(self, result):
+        """Process the crawl result.
+
+        This is just an abstract method, it does nothing.  You should override
+        this method in a subclass to implement a result processor.
+        """

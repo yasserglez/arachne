@@ -20,6 +20,7 @@ import optparse
 
 from aracne import __version__, __copyright__
 from aracne.controller import Controller
+from aracne.processors.naive import NaiveProcessor
 
 
 DEFAULT_CONFIG_FILE = '/etc/aracne.conf'
@@ -64,6 +65,7 @@ def _parse_configfile(configfile):
         },
         'processormanager' : {
             'sleeptime' : 1,
+            'processor' : NaiveProcessor,
         },
     }
     return config
