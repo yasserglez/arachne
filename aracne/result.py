@@ -30,3 +30,8 @@ class ResultQueue(object):
 
     Collects and organizes the `CrawlResult` waiting to be processed.
     """
+
+    def __init__(self, config):
+        """Initialize attributes.
+        """
+        self._config = config

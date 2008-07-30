@@ -18,20 +18,19 @@
 
 import optparse
 
-import aracne
-from aracne.app import Application
+from aracne import __version__, __copyright__
+from aracne.controller import Controller
 
 
 DEFAULT_CONFIG_FILE = '/etc/aracne.conf'
-
 DEFAULT_PID_FILE = '/var/run/aracne/aracne.pid'
 
 
 def _parse_args():
-    """Parse the command line arguments.
+    """Parses the command line arguments.
 
     Parses the command line arguments and show information if invoked with the
-    --help and --version options or an error message if an invalid option is
+    --help or --version options or an error message if an invalid option is
     specified.  Returns a dictionary mapping the names of the options to its
     values.
     """
@@ -40,7 +39,7 @@ def _parse_args():
         ' and redistribute it under the\nterms of the GNU GPL version 3 or' \
         ' later <http://www.gnu.org/licenses/gpl.html>.\nThere is NO' \
         ' WARRANTY, to the extent permitted by law.' % \
-        (aracne.__version__, aracne.__copyright__)
+        (__version__, __copyright__)
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option('-c', '--configfile', metavar='FILE', dest='configfile',
                       help='specify configuration file (default %default)')
@@ -53,18 +52,35 @@ def _parse_args():
 
 
 def _parse_configfile(configfile):
-    """Parse the configuration file.
+    """Parses the configuration file.
     """
-    return {}
+    config = {
+        'general' : {
+            'user' : None,
+            'group' : None,
+        },
+        'crawlmanager' : {
+            'sleeptime' : 1,
+        },
+        'processormanager' : {
+            'sleeptime' : 1,
+        },
+    }
+    return config
 
 
 def main():
-    """Start the aracne daemon.
+    """Starts the aracne daemon.
+
+    Entry point of the application.  This method parses the command line
+    arguments and the configuration file and then creates and starts the
+    `Controller`.
     """
     options = _parse_args()
     config = _parse_configfile(options['configfile'])
-    app = Application(options['pidfile'], config)
-    app.start()
+    config['general']['pidfile'] = options['pidfile']
+    controller = Controller(config)
+    controller.start()
 
 
 if __name__ == '__main__':

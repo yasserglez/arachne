@@ -30,3 +30,8 @@ class TaskQueue(object):
 
     Collects and organizes the pending `CrawlTask`.
     """
+
+    def __init__(self, config):
+        """Initialize attributes.
+        """
+        self._config = config
