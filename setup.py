@@ -26,7 +26,6 @@ setup(name='aracne',
       version=aracne.__version__,
       author=' '.join(aracne.__author__.split()[:-1]),
       author_email=aracne.__author__.split()[-1][1:-1],
-      packages=['aracne', 'aracne.handlers', 'aracne.processors',
-                'aracne.utils'],
+      packages=['aracne', 'aracne.utils'],
       scripts=['scripts/aracne'],
 )

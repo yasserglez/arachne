@@ -19,22 +19,22 @@ import time
 import threading
 
 
-class CrawlWorker(object):
-    """Crawl worker.
+class SiteCrawler(object):
+    """Site crawler.
 
     Executes each one of the crawl tasks (`CrawlTask`) received from the
-    `CrawlManager` and returns a `CrawlResult` instance.  It does the real work
-    crawling a site: contact the site and retrieve the list of files and
+    `CrawlerManager` and returns a `CrawlResult` instance.  It does the real
+    work crawling a site: contact the site and retrieve the list of files and
     directories found inside the given directory.  It runs in an independent
     thread of execution.
     """
 
 
-class CrawlManager(threading.Thread):
+class CrawlerManager(threading.Thread):
     """Crawl manager.
 
     Creates, manages and feeds a configurable number of crawl workers
-    (`CrawlWorker`) with crawl tasks (`CrawlTask`) received from the
+    (`SiteCrawler`) with crawl tasks (`CrawlTask`) received from the
     `TaskQueue` and reports the results (`CrawlResult`) to the `ResultQueue`.
     It runs in an independent thread of execution.
     """

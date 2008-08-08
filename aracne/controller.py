@@ -20,16 +20,16 @@ import signal
 from aracne.utils.daemon import Daemon
 from aracne.task import TaskQueue
 from aracne.result import ResultQueue
-from aracne.crawl import CrawlManager
+from aracne.crawler import CrawlerManager
 from aracne.processor import ProcessorManager
 
 
 class Controller(Daemon):
     """Controls the execution of the components of the application.
 
-    Creates the `TaskQueue`, `ResultQueue`, `CrawlManager` and
+    Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
     `ProcessorManager` instances.  When the `start()` method is invoked, the
-    process is daemonized, starts the `CrawlManager` and the
+    process is daemonized, starts the `CrawlerManager` and the
     `ProcessorManager`.  Then, sleeps until a SIGTERM signal is received and
     stops the components.
     """
@@ -37,7 +37,7 @@ class Controller(Daemon):
     def __init__(self, config):
         """Initializes attributes.
 
-        Creates the `TaskQueue`, `ResultQueue`, `CrawlManager` and
+        Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
         `ProcessorManager` instances.  The `config` parameter should be a
         dictionary with the configurations of the application.
         """
@@ -46,8 +46,8 @@ class Controller(Daemon):
                         group=config['general']['group'])
         self._task_queue = TaskQueue(config)
         self._result_queue = ResultQueue(config)
-        self._crawl_manager = CrawlManager(config, self._task_queue,
-                                           self._result_queue)
+        self._crawl_manager = CrawlerManager(config, self._task_queue,
+                                             self._result_queue)
         self._processor_manager = ProcessorManager(config, self._task_queue,
                                                    self._result_queue)
         self._running = False
@@ -55,7 +55,7 @@ class Controller(Daemon):
     def run(self):
         """Starts the execution of the controller.
 
-        Sets the running flag, starts the `CrawlManager` and the
+        Sets the running flag, starts the `CrawlerManager` and the
         `ProcessorManager`, sleeps until a SIGTERM signal is received and then
         stops the components.
         """
