@@ -42,35 +42,35 @@ class CrawlManager(threading.Thread):
     def __init__(self, config, task_queue, result_queue):
         """Initializes attributes.
         """
-        super(CrawlManager, self).__init__()
-        self._config = config
+        threading.Thread.__init__(self)
         self._task_queue = task_queue
         self._result_queue = result_queue
+        self._sleep_time = config['crawlmanager']['sleeptime']
         self._running = False
-        self._running_cond = threading.Condition()
+        self._running_lock = threading.Lock()
 
     def run(self):
-        """Starts the execution of the crawl manager.
+        """Runs the crawl manager.
 
         Sets the running flag and then enters a loop processing the crawl tasks
         (`CrawlTask`) and reporting the results (`CrawlResult`) until the flag
         is cleared.
         """
-        self._running_cond.acquire()
+        self._running_lock.acquire()
         self._running = True
         while self._running:
-            self._running_cond.release()
+            self._running_lock.release()
             # TODO: Substitute this time.sleep() call with the code to get the
             # crawl task, process it and the report the result.
-            time.sleep(self._config['crawlmanager']['sleeptime'])
-            self._running_cond.acquire()
-        self._running_cond.release()
+            time.sleep(self._sleep_time)
+            self._running_lock.acquire()
+        self._running_lock.release()
 
     def terminate(self):
-        """Orders to end the thread execution.
+        """Terminates thread execution.
 
-        Clears the running flag.
+        Clears the running flag and then the main loop is exited.
         """
-        self._running_cond.acquire()
+        self._running_lock.acquire()
         self._running = False
-        self._running_cond.release()
+        self._running_lock.release()

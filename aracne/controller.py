@@ -41,9 +41,9 @@ class Controller(Daemon):
         `ProcessorManager` instances.  The `config` parameter should be a
         dictionary with the configurations of the application.
         """
-        super(Controller, self).__init__(pidfile=config['general']['pidfile'],
-                                         user=config['general']['user'],
-                                         group=config['general']['group'])
+        Daemon.__init__(self, pidfile=config['general']['pidfile'],
+                        user=config['general']['user'],
+                        group=config['general']['group'])
         self._task_queue = TaskQueue(config)
         self._result_queue = ResultQueue(config)
         self._crawl_manager = CrawlManager(config, self._task_queue,

@@ -15,16 +15,36 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
 import threading
 
 from aracne.errors import EmptyQueueError
 
 
+class ResultProcessor(object):
+    """Crawl result processor.
+
+    An instance of this class will be used to process each one of the crawl
+    results from the `ResultQueue`.
+    """
+
+    def __init__(self, task_queue, result_queue):
+        """Initialize instances.
+
+        The `ProcessorManager` will create an instance of this class providing
+        the `TaskQueue` and the `ResultQueue` as arguments.
+        """
+        self._task_queue = task_queue
+        self._result_queue = result_queue
+
+    def process(self, result):
+        """Process the crawl result.
+        """
+
+
 class ProcessorManager(threading.Thread):
     """Processor manager.
 
-    Creates, manages and feeds the selected `ResultProcessor` with the results
+    Creates, manages and feeds the `ResultProcessor` with the results
     (`CrawlResult`) received from the `ResultQueue`.  It runs in an independent
     thread of execution.
     """
@@ -32,25 +52,24 @@ class ProcessorManager(threading.Thread):
     def __init__(self, config, task_queue, result_queue):
         """Initializes attributes.
         """
-        super(ProcessorManager, self).__init__()
+        threading.Thread.__init__(self)
+        self._processor = ResultProcessor(task_queue, result_queue)
         self._sleep_time = config['processormanager']['sleeptime']
-        args = (task_queue, result_queue)
-        self._processor =  config['processormanager']['processor'](*args)
         self._task_queue = task_queue
         self._result_queue = result_queue
         self._running = False
-        self._running_cond = threading.Condition()
+        self._running_lock = threading.Lock()
 
     def run(self):
-        """Starts the execution of the processor manager.
+        """Runs the processor manager.
 
         Sets the running flag and then enters a loop processing the results
         (`CrawlResults`) until the flag is cleared.
         """
-        self._running_cond.acquire()
+        self._running_lock.acquire()
         self._running = True
         while self._running:
-            self._running_cond.release()
+            self._running_lock.release()
             try:
                 # Try to get a crawl result to be processed.  Wait a few
                 # seconds for an item if not available right now.
@@ -62,14 +81,14 @@ class ProcessorManager(threading.Thread):
             else:
                 # Crawl result available.
                 self._processor.process(result)
-            self._running_cond.acquire()
-        self._running_cond.release()
+            self._running_lock.acquire()
+        self._running_lock.release()
 
     def terminate(self):
-        """Orders to end the thread execution.
+        """Terminates the thread execution.
 
-        Clears the running flag.
+        Clears the running flag and then the main loop is exited.
         """
-        self._running_cond.acquire()
+        self._running_lock.acquire()
         self._running = False
-        self._running_cond.release()
+        self._running_lock.release()
