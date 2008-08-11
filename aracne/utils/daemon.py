@@ -22,7 +22,7 @@ import pwd
 import grp
 
 
-# Based on the description found in the Python Cookbook, 2nd Edition and the
+# Based on the description found in the Python Cookbook 2nd Edition and the
 # implementation of the Living Logic collection of Python modules
 # (http://www.livinglogic.de/Python/index.html).
 
@@ -37,9 +37,9 @@ class Daemon(object):
     initializer it must be sure to invoke the base class initializer.  Once a
     `Daemon` instance is created its activity must be started by calling the
     daemon's `start()` method.  This invokes the `run()` method when the
-    process is daemonized.  The `terminate()` method is called when the process
-    receives a SIGTERM signal it's responsable of exiting the process
-    (e.g. invoke `sys.exit()`).
+    process is daemonized.  The daemon stops when the process receives a
+    SIGTERM signal or the `stop()` method gets invoked and then the
+    `terminate()` method is invoked.
     """
 
     def __init__(self, pidfile=None, stdin='/dev/null', stdout='/dev/null',
@@ -97,6 +97,14 @@ class Daemon(object):
         # Now it's a daemon process.  Invoke run().
         self.run()
 
+    def stop(self):
+        """Stops the daemon.
+
+        Removes the pidfile and then invokes the `terminate()` method.
+        """
+        self._remove_pidfile()
+        self.terminate()
+
     def run(self):
         """Represents the daemon activity.
 
@@ -109,9 +117,9 @@ class Daemon(object):
 
         This method is responsable of doing any required cleanup (e.g. closing
         connections, file descriptors, etc) and exiting the process
-        (e.g. invoke `sys.exit()`).  It gets invoked when the process receives
-        a SIGTERM signal.  The implementation provided by the `Daemon` class
-        just invokes `sys.exit()`), maybe you want to override this.
+        (e.g. invoke `sys.exit()`).  It gets invoked by the `stop()`
+        method. The implementation provided by the `Daemon` class just invokes
+        `sys.exit()`), maybe you want to override this.
         """
         sys.exit()
 
@@ -177,7 +185,6 @@ class Daemon(object):
     def _sigterm_handler(self, signum, frame):
         """SIGTERM signal handler.
 
-        Removes the pidfile and then invoke the `terminate()`.
+        Invokes the `stop()` method.
         """
-        self._remove_pidfile()
-        self.terminate()
+        self.stop()
