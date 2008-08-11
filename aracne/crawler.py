@@ -31,9 +31,9 @@ class SiteCrawler(object):
 
 
 class CrawlerManager(threading.Thread):
-    """Crawl manager.
+    """Crawler manager.
 
-    Creates, manages and feeds a configurable number of crawl workers
+    Creates, manages and feeds a configurable number of site crawlers
     (`SiteCrawler`) with crawl tasks (`CrawlTask`) received from the
     `TaskQueue` and reports the results (`CrawlResult`) to the `ResultQueue`.
     It runs in an independent thread of execution.
@@ -45,7 +45,7 @@ class CrawlerManager(threading.Thread):
         threading.Thread.__init__(self)
         self._task_queue = task_queue
         self._result_queue = result_queue
-        self._sleep_time = config['crawlmanager']['sleeptime']
+        self._sleep_time = config['sleep']
         self._running = False
         self._running_lock = threading.Lock()
 
@@ -66,10 +66,10 @@ class CrawlerManager(threading.Thread):
             self._running_lock.acquire()
         self._running_lock.release()
 
-    def terminate(self):
-        """Terminates thread execution.
+    def stop(self):
+        """Stops thread execution.
 
-        Clears the running flag and then the main loop is exited.
+        Clears the running flag and then the main loop exits.
         """
         self._running_lock.acquire()
         self._running = False

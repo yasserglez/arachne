@@ -54,7 +54,7 @@ class ProcessorManager(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._processor = ResultProcessor(task_queue, result_queue)
-        self._sleep_time = config['processormanager']['sleeptime']
+        self._sleep_time = config['sleep']
         self._task_queue = task_queue
         self._result_queue = result_queue
         self._running = False
@@ -84,10 +84,10 @@ class ProcessorManager(threading.Thread):
             self._running_lock.acquire()
         self._running_lock.release()
 
-    def terminate(self):
-        """Terminates the thread execution.
+    def stop(self):
+        """Stops the thread execution.
 
-        Clears the running flag and then the main loop is exited.
+        Clears the running flag and then the main loop exits.
         """
         self._running_lock.acquire()
         self._running = False

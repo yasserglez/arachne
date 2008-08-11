@@ -22,8 +22,9 @@ from aracne import __version__, __copyright__
 from aracne.controller import Controller
 
 
-DEFAULT_CONFIG_FILE = '/etc/aracne.conf'
-DEFAULT_PID_FILE = '/var/run/aracne/aracne.pid'
+DEFAULT_CONFIGFILE = '/etc/aracne/default.conf'
+DEFAULT_PIDFILE = '/var/run/aracne/aracne.pid'
+DEFAULT_LOGFILE = '/var/log/aracne/aracne.log'
 
 
 def _parse_args():
@@ -41,36 +42,45 @@ def _parse_args():
         ' WARRANTY, to the extent permitted by law.' % \
         (__version__, __copyright__)
     parser = optparse.OptionParser(usage=usage, version=version)
-    parser.add_option('-c', '--configfile', metavar='FILE', dest='configfile',
+    parser.add_option('-c', '--config', metavar='FILE', dest='configfile',
                       help='specify configuration file (default %default)')
-    parser.add_option('-p', '--pidfile', metavar='FILE', dest='pidfile',
-                      help='specify PID file (default %default)')
-    parser.set_defaults(configfile=DEFAULT_CONFIG_FILE,
-                        pidfile=DEFAULT_PID_FILE)
+    parser.set_defaults(configfile=DEFAULT_CONFIGFILE)
     (options, args) = parser.parse_args()
     return options.__dict__
 
 
 def _parse_configfile(configfile):
     """Parses the configuration file.
+
+    Parses the configuration file specified by the `configfile` argument and
+    returns a dictionary mapping the option names and its values for the
+    components of the application.
     """
     config = {
-        'general' : {
+        'core' : {
             'user' : None,
             'group' : None,
+            'pidfile' : DEFAULT_PIDFILE,
+            'logfile' : DEFAULT_LOGFILE,
         },
-        'crawlmanager' : {
-            'sleeptime' : 1,
+        'taskqueue' : {
+        },
+        'resultqueue' : {
+        },
+        'crawlermanager' : {
+            'sleep' : 1,
         },
         'processormanager' : {
-            'sleeptime' : 1,
+            'sleep' : 1,
+            'processor' : {
+            },
         },
     }
     return config
 
 
 def main():
-    """Starts the aracne daemon.
+    """Starts the Aracne daemon.
 
     Entry point of the application.  This method parses the command line
     arguments and the configuration file and then creates and starts the
@@ -78,7 +88,6 @@ def main():
     """
     options = _parse_args()
     config = _parse_configfile(options['configfile'])
-    config['general']['pidfile'] = options['pidfile']
     controller = Controller(config)
     controller.start()
 

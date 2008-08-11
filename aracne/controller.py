@@ -28,50 +28,52 @@ class Controller(Daemon):
     """Controls the execution of the components of the application.
 
     Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
-    `ProcessorManager` instances.  When the `start()` method is invoked, the
-    process is daemonized, starts the `CrawlerManager` and the
-    `ProcessorManager`.  Then, sleeps until a SIGTERM signal is received and
-    stops the components.
+    `ProcessorManager` instances.  When the `start()` method is invoked starts
+    the execution of the components and then, sleeps until a SIGTERM signal is
+    received to stop the components.
     """
 
     def __init__(self, config):
-        """Initializes attributes.
+        """Initializes components.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
         `ProcessorManager` instances.  The `config` parameter should be a
-        dictionary with the configurations of the application.
+        dictionary with the configurations for all the components.
         """
-        Daemon.__init__(self, pidfile=config['general']['pidfile'],
-                        user=config['general']['user'],
-                        group=config['general']['group'])
-        self._task_queue = TaskQueue(config)
-        self._result_queue = ResultQueue(config)
-        self._crawl_manager = CrawlerManager(config, self._task_queue,
-                                             self._result_queue)
-        self._processor_manager = ProcessorManager(config, self._task_queue,
-                                                   self._result_queue)
+        Daemon.__init__(self, pidfile=config['core']['pidfile'],
+                        user=config['core']['user'],
+                        group=config['core']['group'])
+        self._tasks = TaskQueue(config['taskqueue'])
+        self._results = ResultQueue(config['resultqueue'])
+        self._crawler = CrawlerManager(config['crawlermanager'],
+                                       self._tasks, self._results)
+        self._processor = ProcessorManager(config['processormanager'],
+                                           self._tasks, self._results)
+        # Flag used to stop the loop started by the run() method.
         self._running = False
 
     def run(self):
-        """Starts the execution of the controller.
+        """Starts the execution of the components.
 
         Sets the running flag, starts the `CrawlerManager` and the
         `ProcessorManager`, sleeps until a SIGTERM signal is received and then
         stops the components.
         """
         self._running = True
-        self._crawl_manager.start()
-        self._processor_manager.start()
+        self._crawler.start()
+        self._processor.start()
         while self._running:
             signal.pause()
-        self._crawl_manager.terminate()
-        self._processor_manager.terminate()
-        self._crawl_manager.join()
-        self._processor_manager.join()
+        # Order to stop.
+        self._crawler.stop()
+        self._processor.stop()
+        # Wait for the threads to join.
+        self._crawler.join()
+        self._processor.join()
 
     def terminate(self):
         """Orders to end the application.
 
-        Clears the running flag.
+        Clears the running flag and then the main loop exits.
         """
         self._running = False
