@@ -69,6 +69,7 @@ def _parse_configfile(configfile):
         },
         'crawlermanager' : {
             'sleep' : 1,
+            'numcrawlers' : 5,
         },
         'processormanager' : {
             'sleep' : 1,

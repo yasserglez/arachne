@@ -18,59 +18,105 @@
 import time
 import threading
 
+from aracne.errors import EmptyQueueError
 
-class SiteCrawler(object):
+
+class SiteCrawler(threading.Thread):
     """Site crawler.
 
-    Executes each one of the crawl tasks (`CrawlTask`) received from the
-    `CrawlerManager` and returns a `CrawlResult` instance.  It does the real
-    work crawling a site: contact the site and retrieve the list of files and
-    directories found inside the given directory.  It runs in an independent
-    thread of execution.
+    When the `start()` method is invoked it enters in a loop getting crawl
+    tasks (`CrawlTask`) from the `TaskQueue`, executing the tasks and reporting
+    results to the `ResultQueue` until the `stop()` method is invoked.  It runs
+    in an independent thread of execution.
     """
 
-
-class CrawlerManager(threading.Thread):
-    """Crawler manager.
-
-    Creates, manages and feeds a configurable number of site crawlers
-    (`SiteCrawler`) with crawl tasks (`CrawlTask`) received from the
-    `TaskQueue` and reports the results (`CrawlResult`) to the `ResultQueue`.
-    It runs in an independent thread of execution.
-    """
-
-    def __init__(self, config, task_queue, result_queue):
-        """Initializes attributes.
+    def __init__(self, config, tasks, results):
+        """Initializes the site crawler.
         """
         threading.Thread.__init__(self)
-        self._task_queue = task_queue
-        self._result_queue = result_queue
-        self._sleep_time = config['sleep']
+        self._config = config
+        self._tasks = tasks
+        self._results = results
         self._running = False
         self._running_lock = threading.Lock()
+        # TODO: Create the protocol handlers.
 
     def run(self):
-        """Runs the crawl manager.
+        """Starts the execution.
 
-        Sets the running flag and then enters a loop processing the crawl tasks
-        (`CrawlTask`) and reporting the results (`CrawlResult`) until the flag
-        is cleared.
+        Sets the running flag and then enters a loop getting crawl tasks
+        (`CrawlTask`) from the `TaskQueue`, executing the tasks and reporting
+        results (`CrawlResults`) to the `ResultQueue` until the flag is
+        cleared.
         """
         self._running_lock.acquire()
         self._running = True
         while self._running:
             self._running_lock.release()
-            # TODO: Substitute this time.sleep() call with the code to get the
-            # crawl task, process it and the report the result.
-            time.sleep(self._sleep_time)
+            try:
+                # Try to get a crawl task to be executed.  If there is no task
+                # available an EmptyQueueError exception will be raised and it
+                # should sleep.
+                task = self._tasks.get()
+            except EmptyQueueError:
+                time.sleep(self._config['sleep'])
+            else:
+                self._execute(task)
             self._running_lock.acquire()
         self._running_lock.release()
 
     def stop(self):
-        """Stops thread execution.
+        """Stops the execution.
 
         Clears the running flag and then the main loop exits.
         """
         self._running_lock.acquire()
         self._running = False
         self._running_lock.release()
+
+    def _execute(self, taks):
+        """Execute the crawl task.
+
+        Execute the crawl task (`CrawlTask`) received as argument.  Reports
+        error or success to the `TaskQueue` and the crawl result
+        (`CrawlResult`) to the `ResultQueue`.
+        """
+        # TODO: Execute the crawl task.
+
+
+class CrawlerManager(object):
+    """Crawler manager.
+
+    Creates and manages a configurable number of site crawlers (`SiteCrawler`).
+    It's just a way to represent the group of crawlers as a single component.
+    """
+
+    def __init__(self, config, tasks, results):
+        """Initializes the site crawlers.
+
+        Creates the group of site crawlers (`SiteCrawler`) according the the
+        value set in the configuration.
+        """
+        self._crawlers = [SiteCrawler(config, tasks, results)
+                          for i in range(config['numcrawlers'])]
+
+    def start(self):
+        """Starts the site crawlers (`SiteCrawler`).
+        """
+        for crawler in self._crawlers:
+            crawler.start()
+
+    def stop(self):
+        """Stops the site crawlers (`SiteCrawler`).
+        """
+        for crawler in self._crawlers:
+            crawler.stop()
+
+    def join(self):
+        """Waits until the site crawlers terminates.
+
+        Invokes the `join()` method of each one of the site crawlers
+        (`SiteCrawler`).
+        """
+        for crawler in self._crawlers:
+            crawler.join()

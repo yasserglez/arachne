@@ -45,19 +45,11 @@ class TaskQueue(object):
         """
         self._queue.put(item)
 
-    def get(self, block=True, timeout=None):
+    def get(self):
         """Remove and return an item from the queue.
-
-        If the optional args `block` is `True` and `timeout` is `None` (the
-        default), block if necessary until an item is available. If `timeout`
-        is a positive number, it blocks at most `timeout` seconds and raises
-        the `EmptyQueueError` exception if no item was available within that
-        time.  Otherwise (`block` is `False`), return an item if one is
-        immediately available, else raise the `EmptyQueueError` exception
-        (`timeout` is ignored in that case).
         """
         try:
-            item = self._queue.get(block, timeout)
+            item = self._queue.get(False)
         except Queue.Empty:
             raise EmptyQueueError()
         else:

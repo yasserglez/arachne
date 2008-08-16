@@ -45,8 +45,8 @@ class Controller(Daemon):
                         group=config['core']['group'])
         self._tasks = TaskQueue(config['taskqueue'])
         self._results = ResultQueue(config['resultqueue'])
-        self._crawler = CrawlerManager(config['crawlermanager'],
-                                       self._tasks, self._results)
+        self._crawlers = CrawlerManager(config['crawlermanager'],
+                                        self._tasks, self._results)
         self._processor = ProcessorManager(config['processormanager'],
                                            self._tasks, self._results)
         # Flag used to stop the loop started by the run() method.
@@ -60,15 +60,15 @@ class Controller(Daemon):
         until a SIGTERM signal is received and then stops the components.
         """
         self._running = True
-        self._crawler.start()
+        self._crawlers.start()
         self._processor.start()
         while self._running:
             signal.pause()
         # Order to stop.
-        self._crawler.stop()
+        self._crawlers.stop()
         self._processor.stop()
         # Wait for the threads to join.
-        self._crawler.join()
+        self._crawlers.join()
         self._processor.join()
 
     def terminate(self):
