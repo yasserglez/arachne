@@ -55,9 +55,9 @@ class Controller(Daemon):
     def run(self):
         """Starts the execution of the components.
 
-        Sets the running flag, starts the `CrawlerManager` and the
-        `ProcessorManager`, sleeps until a SIGTERM signal is received and then
-        stops the components.
+        Overrides the `run()` method from the `Daemon` class.  Sets the running
+        flag, starts the `CrawlerManager` and the `ProcessorManager`, sleeps
+        until a SIGTERM signal is received and then stops the components.
         """
         self._running = True
         self._crawler.start()
@@ -74,6 +74,7 @@ class Controller(Daemon):
     def terminate(self):
         """Orders to end the application.
 
-        Clears the running flag and then the main loop exits.
+        Overrides the `terminate()` method from the `Daemon` class.  Clears the
+        running flag and then the main loop exits.
         """
         self._running = False
