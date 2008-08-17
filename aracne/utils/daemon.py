@@ -170,7 +170,7 @@ class Daemon(object):
         # TODO: Check for errors.
         if self._pidfile is not None:
             pidfile = open(self._pidfile, 'wb')
-            pidfile.write(str(os.getpid()))
+            pidfile.write('%d\n' % os.getpid())
             pidfile.close()
 
     def _remove_pidfile(self):
