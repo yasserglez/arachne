@@ -43,7 +43,7 @@ class Controller(Daemon):
         Daemon.__init__(self, pidfile=config['core']['pidfile'],
                         user=config['core']['user'],
                         group=config['core']['group'])
-        self._tasks = TaskQueue(config['taskqueue'])
+        self._tasks = TaskQueue(config['taskqueue'], [])
         self._results = ResultQueue(config['resultqueue'])
         self._crawlers = CrawlerManager(config['crawlermanager'], self._tasks,
                                         self._results)
