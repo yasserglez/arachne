@@ -32,7 +32,7 @@ def _parse_args():
 
     Parses the command line arguments and show information if invoked with the
     --help or --version options or an error message if an invalid option is
-    specified.  Returns a dictionary mapping the names of the options to its
+    specified.  Returns a dictionary mapping the names of the options to the
     values.
     """
     usage = '%prog [options]'
@@ -53,8 +53,7 @@ def _parse_configfile(configfile):
     """Parses the configuration file.
 
     Parses the configuration file specified by the `configfile` argument and
-    returns a dictionary mapping the option names and its values for the
-    components of the application.
+    returns a dictionary mapping the option names to the values.
     """
     config = {
         'core' : {
@@ -79,7 +78,7 @@ def _parse_configfile(configfile):
 
 
 def main():
-    """Starts the Aracne daemon.
+    """Starts the daemon.
 
     Entry point of the application.  This method parses the command line
     arguments and the configuration file and then creates and starts the

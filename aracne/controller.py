@@ -25,56 +25,54 @@ from aracne.processor import ProcessorManager
 
 
 class Controller(Daemon):
-    """Controls the execution of the components of the application.
+    """Controls the execution of the components.
 
     Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
-    `ProcessorManager` instances.  When the `start()` method is invoked starts
-    the execution of the components and then, sleeps until a SIGTERM signal is
-    received to stop the components.
+    `ProcessorManager` instances.  When the `start()` method is invoked it
+    starts the components and then sleeps until a SIGTERM signal is received to
+    stop the components.  It runs in the main thread of execution.
     """
 
     def __init__(self, config):
-        """Initializes components.
+        """Initializes the components.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
         `ProcessorManager` instances.  The `config` parameter should be a
-        dictionary with the configurations for all the components.
+        dictionary with the configuration.
         """
         Daemon.__init__(self, pidfile=config['core']['pidfile'],
                         user=config['core']['user'],
                         group=config['core']['group'])
         self._tasks = TaskQueue(config['taskqueue'])
         self._results = ResultQueue(config['resultqueue'])
-        self._crawlers = CrawlerManager(config['crawlermanager'],
-                                        self._tasks, self._results)
+        self._crawlers = CrawlerManager(config['crawlermanager'], self._tasks,
+                                        self._results)
         self._processor = ProcessorManager(config['processormanager'],
                                            self._tasks, self._results)
         # Flag used to stop the loop started by the run() method.
         self._running = False
 
     def run(self):
-        """Starts the execution of the components.
+        """Runs the main loop.
 
         Overrides the `run()` method from the `Daemon` class.  Sets the running
-        flag, starts the `CrawlerManager` and the `ProcessorManager`, sleeps
-        until a SIGTERM signal is received and then stops the components.
+        flag, starts the components and then sleeps until a SIGTERM signal is
+        received to stop the components.
         """
         self._running = True
         self._crawlers.start()
         self._processor.start()
         while self._running:
             signal.pause()
-        # Order to stop.
         self._crawlers.stop()
         self._processor.stop()
-        # Wait for the threads to join.
         self._crawlers.join()
         self._processor.join()
 
     def terminate(self):
-        """Orders to end the application.
+        """Orders the main loop to end.
 
         Overrides the `terminate()` method from the `Daemon` class.  Clears the
-        running flag and then the main loop exits.
+        running flag and the main loop should exit.
         """
         self._running = False

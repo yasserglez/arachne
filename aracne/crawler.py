@@ -31,18 +31,19 @@ class SiteCrawler(threading.Thread):
     """
 
     def __init__(self, config, tasks, results):
-        """Initializes the site crawler.
+        """Initializes instance attributes.
         """
         threading.Thread.__init__(self)
         self._config = config
         self._tasks = tasks
         self._results = results
+        # Flag used to stop the loop started by the run() method.
         self._running = False
         self._running_lock = threading.Lock()
         # TODO: Create the protocol handlers.
 
     def run(self):
-        """Starts the execution.
+        """Runs the main loop.
 
         Sets the running flag and then enters a loop getting crawl tasks
         (`CrawlTask`) from the `TaskQueue`, executing the tasks and reporting
@@ -54,9 +55,8 @@ class SiteCrawler(threading.Thread):
         while self._running:
             self._running_lock.release()
             try:
-                # Try to get a crawl task to be executed.  If there is no task
-                # available an EmptyQueueError exception will be raised and it
-                # should sleep.
+                # Try to get a crawl task to execute.  If there is not task
+                # available the thread should sleep.
                 task = self._tasks.get()
             except EmptyQueueError:
                 time.sleep(self._config['sleep'])
@@ -66,18 +66,18 @@ class SiteCrawler(threading.Thread):
         self._running_lock.release()
 
     def stop(self):
-        """Stops the execution.
+        """Orders the main loop to end.
 
-        Clears the running flag and then the main loop exits.
+        Clears the running flag and the main loop exits.
         """
         self._running_lock.acquire()
         self._running = False
         self._running_lock.release()
 
     def _execute(self, taks):
-        """Execute the crawl task.
+        """Executes a crawl task.
 
-        Execute the crawl task (`CrawlTask`) received as argument.  Reports
+        Executes the crawl task (`CrawlTask`) received as argument.  Reports
         error or success to the `TaskQueue` and the crawl result
         (`CrawlResult`) to the `ResultQueue`.
         """
@@ -87,8 +87,8 @@ class SiteCrawler(threading.Thread):
 class CrawlerManager(object):
     """Crawler manager.
 
-    Creates and manages a configurable number of site crawlers (`SiteCrawler`).
-    It's just a way to represent the group of crawlers as a single component.
+    Creates and manages a number of site crawlers (`SiteCrawler`).  It is just
+    a way to represent the group of crawlers as a single component.
     """
 
     def __init__(self, config, tasks, results):

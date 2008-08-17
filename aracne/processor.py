@@ -30,27 +30,27 @@ class ResultProcessor(object):
     """
 
     def __init__(self, config, tasks, results):
-        """Initializes the result processor.
+        """Initializes instance attributes.
         """
         self._config = config
         self._tasks = tasks
         self._results = results
 
     def process(self, result):
-        """Process the crawl result.
+        """Process a crawl result.
         """
 
 
 class ProcessorManager(threading.Thread):
     """Processor manager.
 
-    Creates, manages and feeds the selected `ResultProcessor` with the results
+    Creates, manages and feeds a `ResultProcessor` with crawl results
     (`CrawlResult`) received from the `ResultQueue`.  It runs in an independent
     thread of execution.
     """
 
     def __init__(self, config, tasks, results):
-        """Initializes processor.
+        """Initializes result processor.
         """
         threading.Thread.__init__(self)
         self._config = config
@@ -61,7 +61,7 @@ class ProcessorManager(threading.Thread):
         self._running_lock = threading.Lock()
 
     def run(self):
-        """Runs the processor manager.
+        """Runs the main loop.
 
         Sets the running flag and then enters a loop processing crawl results
         (`CrawlResult`) until the flag is cleared.
@@ -83,9 +83,9 @@ class ProcessorManager(threading.Thread):
         self._running_lock.release()
 
     def stop(self):
-        """Stops the thread execution.
+        """Orders the main loop to end.
 
-        Clears the running flag and then the main loop exits.
+        Clears the running flag and the main loop exits.
         """
         self._running_lock.acquire()
         self._running = False
