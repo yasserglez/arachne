@@ -73,8 +73,6 @@ def _parse_configfile(configfile):
         },
         'processormanager' : {
             'sleep' : 1,
-            'processor' : {
-            },
         },
     }
     return config

@@ -22,18 +22,19 @@ from aracne.errors import EmptyQueueError
 
 
 class ResultProcessor(object):
-    """Crawl result processor.
+    """Result processor.
 
-    An instance of this class will be used to process each one of the crawl
-    results from the `ResultQueue`.
+    An instance of this class is created by the `ProcessorManager` and then it
+    invokes the `process()` method for each `CrawlResult` that it gets from the
+    `ResultQueue`.
     """
 
     def __init__(self, config, tasks, results):
-        """Initialize instances.
-
-        The `ProcessorManager` will create an instance of this class providing
-        the `TaskQueue` and the `ResultQueue` as arguments.
+        """Initializes the result processor.
         """
+        self._config = config
+        self._tasks = tasks
+        self._results = results
 
     def process(self, result):
         """Process the crawl result.
@@ -55,7 +56,6 @@ class ProcessorManager(threading.Thread):
         self._config = config
         self._tasks = tasks
         self._results = results
-        # TODO: Create the configured processor.
         self._processor = ResultProcessor(config, tasks, results)
         self._running = False
         self._running_lock = threading.Lock()
