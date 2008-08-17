@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import Queue
-
 from aracne.errors import EmptyQueueError
 
 
@@ -32,25 +30,30 @@ class CrawlResult(object):
 class ResultQueue(object):
     """Crawl result queue.
 
-    Collects and organizes the `CrawlResult` waiting to be processed.
+    Collects and organizes the crawl results (`CrawlResult`) waiting to be
+    processed.
     """
 
-    def __init__(self, config):
-        """Initialize attributes.
+    def __init__(self, config, sites):
+        """Initializes the queue.
         """
-        self._queue = Queue.Queue()
 
-    def put(self, item):
-        """Put an item into the queue.
+    def put(self, result):
+        """Enqueue a result.
+
+        Puts the crawl result (`CrawlResult`) received as argument in the
+        queue.
         """
-        self._queue.put(item)
 
     def get(self):
-        """Remove and return an item from the queue.
+        """Returns the result at the top of the queue.
+
+        Returns the crawl result (`CrawlResult`) at the top of the queue.  The
+        result should be reported as processed using `report_done()`.  If there
+        is not an available result an `EmptyQueueError` exception is raised.
         """
-        try:
-            item = self._queue.get(False)
-        except Queue.Empty:
-            raise EmptyQueueError()
-        else:
-            return item
+        raise EmptyQueueError()
+
+    def report_done(self, result):
+        """Reports a result as processed.
+        """
