@@ -17,15 +17,24 @@
 
 from distutils.core import setup
 
-import aracne
+from aracne import __version__
 
 
-setup(name='aracne',
+setup(name='Aracne',
+      version=__version__,
+      license='GNU General Public License version 3 or any later version',
       description='',
       url='',
-      version=aracne.__version__,
-      author=' '.join(aracne.__author__.split()[:-1]),
-      author_email=aracne.__author__.split()[-1][1:-1],
+      download_url='',
+      author='Yasser González Fernández',
+      author_email='yglez@uh.cu',
       packages=['aracne', 'aracne.utils'],
+      package_dir={'aracne': 'aracne'},
       scripts=['scripts/aracne'],
+      data_files=[
+        ('/etc/init.d/', ['data/aracne']),
+        ('/etc/aracne/', ['data/default.conf']),
+        ('share/doc/aracne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
+                               'THANKS']),
+      ],
 )
