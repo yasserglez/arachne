@@ -21,6 +21,10 @@ import sys
 import optparse
 import unittest
 
+TESTDIR = os.path.dirname(os.path.abspath(__file__))
+SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
+sys.path.insert(0, SRCDIR)
+
 
 def main():
     """Run test in this module
@@ -30,9 +34,6 @@ def main():
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
     options, args = parser.parse_args()
-    testdir = os.path.dirname(os.path.abspath(__file__))
-    srcdir = os.path.abspath(os.path.join(testdir, os.path.pardir))
-    sys.path.append(srcdir)
     suite = unittest.TestLoader().loadTestsFromModule('__main__')
     runner = unittest.TextTestRunner(verbosity=options.verbosity)
     result = runner.run(suite)

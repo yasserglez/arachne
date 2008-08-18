@@ -21,6 +21,10 @@ import sys
 import optparse
 import unittest
 
+TESTDIR = os.path.dirname(os.path.abspath(__file__))
+SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
+sys.path.insert(0, SRCDIR)
+
 
 def main():
     """Run all tests in the directory
@@ -30,12 +34,10 @@ def main():
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
     options, args = parser.parse_args()
-    testdir = os.path.dirname(os.path.abspath(__file__))
-    srcdir = os.path.abspath(os.path.join(testdir, os.path.pardir))
-    sys.path.append(testdir)
-    sys.path.append(srcdir)
-    names = [f[:-3] for f in os.listdir(testdir)
-             if f.startswith('test') and f.endswith('.py') and f != 'testall.py']
+    sys.path.append(TESTDIR)
+    names = [f[:-3] for f in os.listdir(TESTDIR)
+             if (f.startswith('test') and f.endswith('.py')
+                 and f != os.path.basename(__file__))]
     suite = unittest.TestLoader().loadTestsFromNames(names)
     runner = unittest.TextTestRunner(verbosity=options.verbosity)
     result = runner.run(suite)
