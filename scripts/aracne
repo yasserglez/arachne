@@ -16,15 +16,12 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import optparse
+import ConfigParser
 
 from aracne import __version__, __copyright__
 from aracne.controller import Controller
-
-
-DEFAULT_CONFIGFILE = '/etc/aracne/default.conf'
-DEFAULT_PIDFILE = '/var/run/aracne/aracne.pid'
-DEFAULT_LOGFILE = '/var/log/aracne/aracne.log'
 
 
 def _parse_args():
@@ -44,7 +41,7 @@ def _parse_args():
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option('-c', '--config', metavar='FILE', dest='configfile',
                       help='specify configuration file (default %default)')
-    parser.set_defaults(configfile=DEFAULT_CONFIGFILE)
+    parser.set_defaults(configfile='/etc/aracne/aracned.conf')
     (options, args) = parser.parse_args()
     return options.__dict__
 
@@ -56,25 +53,55 @@ def _parse_configfile(configfile):
     returns a dictionary mapping the option names to the values.
     """
     config = {
-        'core' : {
-            'user' : None,
-            'group' : None,
-            'pidfile' : DEFAULT_PIDFILE,
-            'logfile' : DEFAULT_LOGFILE,
-        },
-        'taskqueue' : {
-        },
-        'resultqueue' : {
-        },
-        'crawlermanager' : {
-            'sleep' : 1,
-            'numcrawlers' : 5,
-        },
-        'processormanager' : {
-            'sleep' : 1,
-        },
+        'maintainer': '',
+        'numcrawlers': 3,
+        'user': None,
+        'group': None,
+        'sitesfile': '/etc/aracne/sites.conf',
+        'pidfile': '/var/run/aracne/aracned.pid',
+        'spooldir': '/var/lib/spool/aracne/',
+        'databasedir': '/var/lib/aracne/',
+        'logfile': '/var/log/aracne/aracned.log',
     }
-    return config
+    parser = ConfigParser.ConfigParser()
+    try:
+        parser.read(configfile)
+        for option in config.iterkeys():
+            try:
+                value = parser.get('daemon', option)
+            except ConfigParser.NoOptionError:
+                # Ignore missing options, use the default values.
+                pass
+            else:
+                # Use the value from the configuration file.
+                config[option] = value
+    except ConfigParser.NoSectionError:
+        _error('Failed to read configration file or daemon section missing.')
+    except ConfigParser.ParsingError:
+        _error('Invalid syntax found in the configuration file.')
+    except ConfigParser.Error:
+        _error('An error has occurred parsing the configuration file.')
+    else:
+        # The configuration file seems good.
+        config['numcrawlers'] = int(config['numcrawlers'])
+        if config['user'] is not None:
+            try:
+                config['user'] = int(config['user'])
+            except ValueError:
+                pass
+        if config['group'] is not None:
+            try:
+                config['group'] = int(config['group'])
+            except ValueError:
+                pass
+        return config
+
+
+def _error(message):
+    """Prints `message` and exits.
+    """
+    sys.stderr.write('Error: %s\n' % message)
+    sys.exit(1)
 
 
 def main():
