@@ -41,7 +41,7 @@ def _parse_args():
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option('-c', '--config', metavar='FILE', dest='configfile',
                       help='specify configuration file (default %default)')
-    parser.set_defaults(configfile='/etc/aracne/aracned.conf')
+    parser.set_defaults(configfile='/etc/aracne/daemon.conf')
     (options, args) = parser.parse_args()
     return options.__dict__
 
