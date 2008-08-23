@@ -30,7 +30,7 @@ setup(name='Aracne',
       author_email='yglez@uh.cu',
       packages=['aracne', 'aracne.utils'],
       package_dir={'aracne': 'aracne'},
-      scripts=['scripts/aracne'],
+      scripts=['scripts/aracned'],
       data_files=[
         ('/etc/init.d/', ['data/aracne']),
         ('/etc/aracne/', ['data/aracned.conf', 'data/sites.conf']),
