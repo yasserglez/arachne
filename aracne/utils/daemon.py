@@ -56,10 +56,10 @@ class Daemon(object):
         `sys.stdin`, `sys.stdout`, and `sys.stderr`.  These arguments are
         optional and default to /dev/null.
 
-        The `user` argument can be the name or uid of a user.  The `start()`
+        The `user` argument can be the name or UID of a user.  The `start()`
         method will switch to this user for running the daemon.  If `user` is
         `None` no user switching will be done (default).  In the same way
-        `group` can be the name or gid of a group.
+        `group` can be the name or GID of a group.
         """
         self._pidfile = pidfile
         self._stdin = stdin
