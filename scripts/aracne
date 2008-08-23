@@ -82,7 +82,6 @@ def _parse_configfile(configfile):
     except ConfigParser.Error:
         _error('An error has occurred parsing the configuration file.')
     else:
-        # The configuration file seems good.
         config['numcrawlers'] = int(config['numcrawlers'])
         if config['user'] is not None:
             try:
@@ -95,6 +94,39 @@ def _parse_configfile(configfile):
             except ValueError:
                 pass
         return config
+
+
+def _parse_sitesfile(sitesfile):
+    """Parses the file with the settings each site.
+    """
+    # The format of this file is based on the format used by the configuration
+    # file of Planet <http://www.planetplanet.org>.
+    defaults = {
+        'errorwait': 1800,
+        'requestwait': 30,
+        'updatewait': 604800,
+    }
+    ConfigParser.DEFAULTSECT = 'default'
+    parser = ConfigParser.ConfigParser(defaults)
+    try:
+        sites = []
+        parser.read(sitesfile)
+        for section in parser.sections():
+            site = {}
+            site['url'] = section
+            site.update(parser.items(section))
+            sites.append(site)
+    except ConfigParser.Error:
+        _error('An error has occured parsing the sites file.')
+    else:
+        if not sites:
+            _error('Failed to read the sites file or no sites configured.')
+        else:
+            for site in sites:
+                site['errorwait'] = int(site['errorwait'])
+                site['requestwait'] = int(site['requestwait'])
+                site['updatewait'] = int(site['updatewait'])
+            return sites
 
 
 def _error(message):
@@ -113,7 +145,8 @@ def main():
     """
     options = _parse_args()
     config = _parse_configfile(options['configfile'])
-    controller = Controller(config)
+    sites = _parse_sitesfile(config['sitesfile'])
+    controller = Controller(config, sites)
     controller.start()
 
 

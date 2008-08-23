@@ -33,7 +33,7 @@ setup(name='Aracne',
       scripts=['scripts/aracne'],
       data_files=[
         ('/etc/init.d/', ['data/aracne']),
-        ('/etc/aracne/', ['data/aracned.conf']),
+        ('/etc/aracne/', ['data/aracned.conf', 'data/sites.conf']),
         ('share/doc/aracne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
                                'THANKS']),
       ],
