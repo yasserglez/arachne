@@ -23,7 +23,7 @@ from aracne import __version__
 setup(name='Aracne',
       version=__version__,
       license='GNU General Public License version 3 or any later version',
-      description='',
+      description='Networked file search engine.',
       url='',
       download_url='',
       author='Yasser González Fernández',
