@@ -39,7 +39,7 @@ def main():
              if (f.startswith('test') and f.endswith('.py')
                  and f != os.path.basename(__file__))]
     suite = unittest.TestLoader().loadTestsFromNames(names)
-    runner = unittest.TextTestRunner(verbosity=options.verbosity)
+    runner = unittest.TextTestRunner(verbosity=int(options.verbosity))
     result = runner.run(suite)
     sys.exit(not result.wasSuccessful())
 

@@ -35,7 +35,7 @@ def main():
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
     options, args = parser.parse_args()
     suite = unittest.TestLoader().loadTestsFromModule('__main__')
-    runner = unittest.TextTestRunner(verbosity=options.verbosity)
+    runner = unittest.TextTestRunner(verbosity=int(options.verbosity))
     result = runner.run(suite)
     sys.exit(not result.wasSuccessful())
 
