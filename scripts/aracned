@@ -69,11 +69,11 @@ def _parse_configfile(configfile):
                 # Use the value from the configuration file.
                 config[option] = value
     except ConfigParser.NoSectionError:
-        _error('Failed to read configuration file or daemon section missing.')
+        _error('failed to read configuration file or daemon section missing.')
     except ConfigParser.ParsingError:
-        _error('Invalid syntax found in the configuration file.')
+        _error('invalid syntax found in the configuration file.')
     except ConfigParser.Error:
-        _error('An error has occurred parsing the configuration file.')
+        _error('an error has occurred parsing the configuration file.')
     else:
         config['numcrawlers'] = int(config['numcrawlers'])
         if config['user'] is not None:
@@ -110,10 +110,10 @@ def _parse_sitesfile(sitesfile):
             site.update(parser.items(section))
             sites.append(site)
     except ConfigParser.Error:
-        _error('An error has occurred parsing the sites file.')
+        _error('an error has occurred parsing the sites file.')
     else:
         if not sites:
-            _error('Failed to read the sites file or no sites configured.')
+            _error('failed to read the sites file or no sites configured.')
         else:
             for site in sites:
                 site['errorwait'] = int(site['errorwait'])
