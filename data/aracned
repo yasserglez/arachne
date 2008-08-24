@@ -1,0 +1,39 @@
+#!/bin/sh
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="networked file search engine"
+NAME=aracned
+DAEMON=/usr/sbin/aracned
+PIDFILE=/var/run/aracne/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+[ -x "$DAEMON" ] || exit 0
+
+case "$1" in
+	start)
+		echo -n "Starting $DESC: "
+		start-stop-daemon --start --quiet --pidfile $PIDFILE \
+			--exec $DAEMON
+		echo "$NAME."
+		;;
+	stop)
+		echo -n "Stopping $DESC: "
+		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+			--retry=TERM/30/KILL/forever
+		echo "$NAME."
+		;;
+	restart|force-reload)
+		echo -n "Restarting $DESC: "
+		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+			--retry=TERM/30/KILL/forever
+		start-stop-daemon --start --quiet --pidfile $PIDFILE \
+			--exec $DAEMON
+		echo "$NAME."
+		;;
+	*)
+		echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+		exit 1
+		;;
+esac
+
+exit 0
