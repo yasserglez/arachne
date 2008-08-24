@@ -29,10 +29,9 @@ class ResultProcessor(object):
     `ResultQueue`.
     """
 
-    def __init__(self, config, tasks, results):
-        """Initializes instance attributes.
+    def __init__(self, tasks, results):
+        """Initialize attributes.
         """
-        self._config = config
         self._tasks = tasks
         self._results = results
 
@@ -44,26 +43,26 @@ class ResultProcessor(object):
 class ProcessorManager(threading.Thread):
     """Processor manager.
 
-    Creates, manages and feeds a `ResultProcessor` with crawl results
+    Create, manage and feed a `ResultProcessor` with crawl results
     (`CrawlResult`) received from the `ResultQueue`.  It runs in an independent
     thread of execution.
     """
 
-    def __init__(self, config, tasks, results):
-        """Initializes result processor.
+    def __init__(self, tasks, results):
+        """Initialize the result processor.
         """
         threading.Thread.__init__(self)
-        self._config = config
         self._tasks = tasks
         self._results = results
-        self._processor = ResultProcessor(config, tasks, results)
+        self._sleep = 3
+        self._processor = ResultProcessor(tasks, results)
         self._running = False
         self._running_lock = threading.Lock()
 
     def run(self):
-        """Runs the main loop.
+        """Run the main loop.
 
-        Sets the running flag and then enters a loop processing crawl results
+        Set the running flag and then enter in a loop processing crawl results
         (`CrawlResult`) until the flag is cleared.
         """
         self._running_lock.acquire()
@@ -75,7 +74,7 @@ class ProcessorManager(threading.Thread):
                 # available the thread should sleep.
                 result = self._results.get()
             except EmptyQueueError:
-                time.sleep(self._config['sleep'])
+                time.sleep(self._sleep)
             else:
                 self._processor.process(result)
                 # TODO: Release the result from the queue.
@@ -83,9 +82,9 @@ class ProcessorManager(threading.Thread):
         self._running_lock.release()
 
     def stop(self):
-        """Orders the main loop to end.
+        """Order the main loop to end.
 
-        Clears the running flag and the main loop exits.
+        Clear the running flag and the main loop exits.
         """
         self._running_lock.acquire()
         self._running = False

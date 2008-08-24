@@ -34,7 +34,7 @@ class ResultQueue(object):
     processed.
     """
 
-    def __init__(self, config, sites):
+    def __init__(self, sites):
         """Initializes the queue.
         """
 

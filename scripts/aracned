@@ -20,8 +20,7 @@ import sys
 import optparse
 import ConfigParser
 
-from aracne import __version__, __copyright__
-from aracne.controller import Controller
+from aracne import AracneDaemon, __version__, __copyright__
 
 
 def _parse_args():
@@ -136,8 +135,8 @@ def main():
     options = _parse_args()
     config = _parse_configfile(options['configfile'])
     sites = _parse_sitesfile(config['sitesfile'])
-    controller = Controller(config, sites)
-    controller.start()
+    daemon = AracneDaemon(config, sites)
+    daemon.start()
     sys.exit(0)
 
 

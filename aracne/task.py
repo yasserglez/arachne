@@ -34,7 +34,7 @@ class TaskQueue(object):
     executed.
     """
 
-    def __init__(self, config, sites):
+    def __init__(self, sites):
         """Initializes the queue.
         """
 
