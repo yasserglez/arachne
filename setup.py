@@ -30,11 +30,18 @@ setup(name='Aracne',
       author_email='yglez@uh.cu',
       packages=['aracne', 'aracne.utils'],
       package_dir={'aracne': 'aracne'},
-      scripts=['scripts/aracned'],
       data_files=[
         ('/etc/init.d/', ['data/aracned']),
         ('/etc/aracne/', ['data/daemon.conf', 'data/sites.conf']),
         ('share/doc/aracne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
                                'THANKS']),
+        # The aracned script is currently installed as a data file as an ugly
+        # hack to install it under the /usr/sbin/ directory.
+        ('/usr/sbin/', ['scripts/aracned']),
+        # Empty directories required by the default configuration.
+        ('/var/run/aracne/', []),
+        ('/var/lib/spool/aracne', []),
+        ('/var/lib/aracne/', []),
+        ('/var/log/aracne/', []),
       ],
 )
