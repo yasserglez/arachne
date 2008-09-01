@@ -23,11 +23,13 @@ from aracne import __version__
 setup(name='Aracne',
       version=__version__,
       license='GNU General Public License version 3 or any later version',
-      description='File search engine.',
+      description='Networked file search engine.',
+      long_description='',
       url='',
       download_url='',
       author='Yasser González Fernández',
       author_email='yglez@uh.cu',
+      platforms=[],
       packages=['aracne', 'aracne.utils'],
       package_dir={'aracne': 'aracne'},
       data_files=[
@@ -35,8 +37,7 @@ setup(name='Aracne',
         ('/etc/aracne/', ['data/daemon.conf', 'data/sites.conf']),
         ('share/doc/aracne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
                                'THANKS']),
-        # The aracned script is currently installed as a data file as an ugly
-        # hack to install it under the /usr/sbin/ directory.
+        # The aracned script is currently installed as a data file.
         ('/usr/sbin/', ['scripts/aracned']),
         # Empty directories required by the default configuration.
         ('/var/run/aracne/', []),

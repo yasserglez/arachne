@@ -3,5 +3,8 @@ command from the command prompt:
 
     python setup.py install
 
-  Note this requires a working Internet connection if you don't already have
-the Python utility setuptools installed.
+  This will install the the aracne Python package, the /usr/sbin/aracned script
+used to execute the Aracne daemon and the /etc/init.d/aracned shell script that
+starts and stops it, the default configuration files and the documentation
+found in the distribution.  It also will create a few empty directories
+required by the default configuration.

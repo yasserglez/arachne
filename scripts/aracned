@@ -32,7 +32,7 @@ def _parse_args():
         ' version 3 or later <http://www.gnu.org/licenses/gpl.html>.\nThere' \
         ' is NO WARRANTY, to the extent permitted by law.' % \
         (__version__, __copyright__)
-    description = 'Daemon of the Aracne file search engine.'
+    description = 'Daemon of the Aracne networked file search engine.'
     parser = optparse.OptionParser(usage=usage, version=version,
                                    description=description)
     parser.add_option('-f', '--file', metavar='FILE', dest='configfile',
