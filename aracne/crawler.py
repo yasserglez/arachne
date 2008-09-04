@@ -16,6 +16,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
+import logging
 import threading
 
 from aracne.errors import EmptyQueueError
@@ -97,8 +98,11 @@ class CrawlerManager(object):
         Create the group of site crawlers (`SiteCrawler`) according the the
         value of the `numcrawlers` argument.
         """
+        logging.debug('Initializing crawler manager.')
+        logging.info('Crawler manager using %d crawlers.' % numcrawlers)
         self._crawlers = [SiteCrawler(tasks, results)
                           for i in range(numcrawlers)]
+        logging.debug('Crawler manager initialized.')
 
     def start(self):
         """Start the site crawlers (`SiteCrawler`).

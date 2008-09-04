@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 from aracne.errors import EmptyQueueError
 
 
@@ -37,6 +39,8 @@ class ResultQueue(object):
     def __init__(self, sites):
         """Initializes the queue.
         """
+        logging.debug('Initializing result queue.')
+        logging.debug('Result queue initialized.')
 
     def put(self, result):
         """Enqueue a result.

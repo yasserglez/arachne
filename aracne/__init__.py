@@ -16,6 +16,7 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import signal
+import logging
 
 from aracne.utils.daemon import Daemon
 from aracne.task import TaskQueue
@@ -48,6 +49,14 @@ class AracneDaemon(Daemon):
         """
         Daemon.__init__(self, pidfile=config['pidfile'], user=config['user'],
                         group=config['group'])
+        # Initialize logs.
+        logging.basicConfig(filename=config['logfile'],
+                            level=config['loglevel'],
+                            format='%(asctime)s %(levelname)s %(message)s',
+                            datefmt='%Y-%m-%d %H:%M:%S')
+        logging.info('Starting daemon version %s.' % __version__)
+        # Initialize components.
+        logging.debug('Initializing components of the daemon.')
         self._tasks = TaskQueue(sites)
         self._results = ResultQueue(sites)
         self._crawlers = CrawlerManager(config['numcrawlers'], self._tasks,
@@ -55,6 +64,7 @@ class AracneDaemon(Daemon):
         self._processor = ProcessorManager(self._tasks, self._results)
         # Flag used to stop the loop started by the run() method.
         self._running = False
+        logging.debug('Components of the daemon initialized.')
 
     def run(self):
         """Run the main loop.
@@ -64,14 +74,20 @@ class AracneDaemon(Daemon):
         received to stop the components.
         """
         self._running = True
+        logging.debug('Starting components of the daemon.')
         self._crawlers.start()
         self._processor.start()
+        logging.debug('Entering main loop of the daemon.')
         while self._running:
             signal.pause()
+        logging.debug('Main loop of the daemon exited.  Stopping components.')
         self._crawlers.stop()
         self._processor.stop()
         self._crawlers.join()
         self._processor.join()
+        logging.debug('Components of the daemon stopped.')
+        logging.info('Daemon stopped.  Exiting.')
+        logging.shutdown()
 
     def terminate(self):
         """Order the main loop to end.
