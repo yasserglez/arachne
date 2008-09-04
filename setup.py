@@ -34,7 +34,7 @@ setup(name='Aracne',
       package_dir={'aracne': 'aracne'},
       data_files=[
         ('/etc/init.d/', ['data/aracned']),
-        ('/etc/aracne/', ['data/daemon.conf', 'data/sites.conf']),
+        ('/etc/aracne/', ['data/aracned.conf', 'data/sites.conf']),
         ('share/doc/aracne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
                                'THANKS']),
         # The aracned script is currently installed as a data file.

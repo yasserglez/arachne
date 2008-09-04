@@ -46,7 +46,6 @@ def _parse_configfile(configfile):
     """Parse the configuration file.
     """
     config = {
-        'maintainer': '',
         'numcrawlers': 3,
         'user': None,
         'group': None,
@@ -61,7 +60,7 @@ def _parse_configfile(configfile):
         parser.read(configfile)
         for option in config.iterkeys():
             try:
-                value = parser.get('daemon', option)
+                value = parser.get('aracned', option)
             except ConfigParser.NoOptionError:
                 # Ignore missing options, use the default values.
                 pass
@@ -69,7 +68,7 @@ def _parse_configfile(configfile):
                 # Use the value from the configuration file.
                 config[option] = value
     except ConfigParser.NoSectionError:
-        _error('failed to read configuration file or daemon section missing.')
+        _error('failed to read configuration file or aracned section missing.')
     except ConfigParser.ParsingError:
         _error('invalid syntax found in the configuration file.')
     except ConfigParser.Error:
