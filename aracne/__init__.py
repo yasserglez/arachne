@@ -18,7 +18,7 @@
 import signal
 import logging
 
-from aracne.utils.daemon import Daemon
+from aracne.util.daemon import Daemon
 from aracne.task import TaskQueue
 from aracne.result import ResultQueue
 from aracne.crawler import CrawlerManager
