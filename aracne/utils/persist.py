@@ -22,7 +22,7 @@ import cPickle as pickle
 
 
 class QueueError(Exception):
-    """Base class for queue errors.
+    """Base class for exceptions related with the queues.
     """
 
 
@@ -54,7 +54,7 @@ class PriorityQueue(object):
         """Append a new item to the queue.
 
         Append a new item to the queue.  The item can be any pickable Python
-        object and the priority should be a possitive integer.
+        object and the priority should be a positive integer.
         """
         self._put(item, priority)
 
@@ -71,13 +71,13 @@ class PriorityQueue(object):
         """Return the item at the tail of the queue.
 
         Return a (item, priority) tuple for the item at the tail of the queue.
-        This item will be a copy of the item saved in the databse and you
+        This item will be a copy of the item saved in the database and you
         should not modify it.
         """
         return self._tail()
 
     def isempty(self):
-        """Return a boolen value indicating if the queue is empty.
+        """Return a boolean value indicating if the queue is empty.
         """
         return (self._counter == 0)
 
@@ -122,7 +122,7 @@ class PriorityQueue(object):
         """Decrease the items counter.
 
         Decrease by one the counter for the number of items in the queue and
-        updated the value saved in the databse.
+        updated the value saved in the database.
         """
         self._counter -= 1
         self._save(self._counter, self._counterkey)
@@ -156,7 +156,8 @@ class PriorityQueue(object):
             return (item, int(key))
 
     def _get(self):
-        """Return and delete the item at the head of the queue."""
+        """Return and delete the item at the head of the queue.
+        """
         if self.isempty():
             raise QueueError()
         else:
@@ -199,7 +200,7 @@ class Queue(PriorityQueue):
     def tail(self):
         """Return the item at the tail of the queue.
 
-        The returned item will be a copy of the item saved in the databse and
+        The returned item will be a copy of the item saved in the database and
         you should not modify it.
         """
         item, priority = PriorityQueue._tail(self)
