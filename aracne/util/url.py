@@ -42,9 +42,11 @@ class URL(object):
     def __getstate__(self):
         """Used by pickle when the class is serialized.
         """
-        return self.url
+        return {
+            'url': self.url,
+        }
 
-    def __setstate__(self, url):
+    def __setstate__(self, state):
         """Used by pickle when the class is unserialized.
         """
-        self.__init__(url)
+        self.__init__(state['url'])
