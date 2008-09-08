@@ -27,8 +27,6 @@ sys.path.insert(0, SRCDIR)
 
 
 def main():
-    """Run all tests in the directory
-    """
     parser = optparse.OptionParser()
     parser.add_option('-v', dest='verbosity', default='2',
                       type='choice', choices=['0', '1', '2'],
