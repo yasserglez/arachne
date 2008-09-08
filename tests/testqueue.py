@@ -65,16 +65,21 @@ class TestQueue(unittest.TestCase):
             self._queue.get()
             self.assertEquals(len(self._queue), self._numitems - i)
 
-    def test_put(self):
+    def test_putget(self):
+        self.assertRaises(QueueError, self._queue.get)
         for i in xrange(self._numitems):
             self._queue.put(i)
         for i in xrange(self._numitems):
             self.assertEquals(self._queue.get(), i)
-
-    def test_get(self):
-        # Here I just test if the exception is raised if empty.  Getting item
-        # from the queue is already tested in test_put().
         self.assertRaises(QueueError, self._queue.get)
+
+    def test_openclose(self):
+        for i in xrange(self._numitems):
+            self._queue.put(i)
+        self._queue.close()
+        self._queue = Queue(self._filename)
+        for i in xrange(self._numitems):
+            self.assertEquals(self._queue.get(), i)
 
     def tearDown(self):
         if os.path.isfile(self._filename):

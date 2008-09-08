@@ -66,19 +66,24 @@ class TestPriorityQueue(unittest.TestCase):
             self._queue.get()
             self.assertEquals(len(self._queue), self._numitems - i)
 
-    def test_put(self):
+    def test_putget(self):
+        self.assertRaises(QueueError, self._queue.get)
         items = random.sample(range(2 * self._numitems), self._numitems)
         for item in items:
             self._queue.put(item, item)
-        # Items should be returned in order.
+        # Items should be in order.
         items.sort()
         for item in items:
             self.assertEquals(self._queue.get()[0], item)
-
-    def test_get(self):
-        # Here I just test if the exception is raised if empty.  Getting item
-        # from the queue is already tested in test_put().
         self.assertRaises(QueueError, self._queue.get)
+
+    def test_openclose(self):
+        for i in xrange(self._numitems):
+            self._queue.put(i, i)
+        self._queue.close()
+        self._queue = PriorityQueue(self._filename)
+        for i in xrange(self._numitems):
+            self.assertEquals(self._queue.get(), (i, i))
 
     def tearDown(self):
         if os.path.isfile(self._filename):
