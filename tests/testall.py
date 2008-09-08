@@ -30,7 +30,7 @@ def main():
     """Run all tests in the directory
     """
     parser = optparse.OptionParser()
-    parser.add_option('-v', dest='verbosity', default='1',
+    parser.add_option('-v', dest='verbosity', default='2',
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
     options, args = parser.parse_args()
