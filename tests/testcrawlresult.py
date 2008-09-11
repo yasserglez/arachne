@@ -27,36 +27,38 @@ TESTDIR = os.path.dirname(os.path.abspath(__file__))
 SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
-from aracne.util.url import URL
+from aracne.result import CrawlResult
 
 
-class TestURL(unittest.TestCase):
+class TestCrawlResult(unittest.TestCase):
 
     def setUp(self):
-        self._urls = (
-            'ftp://deltha.uh.cu:21/debian/',
-            'http://deltha.uh.cu:80/~yglez/',
-            'smb://software.matcom.uh.cu/',
-        )
+        self._siteid = 'aa958756e769188be9f76fbdb291fe1b2ddd4777'
+        self._url = 'ftp://deltha.uh.cu/'
+        self._found = True
+        self._entries = (('directory', {}), ('file', {'size': 1024}))
+        self._result = CrawlResult(self._siteid, self._url, self._found)
 
-    def test_init(self):
-        for url in self._urls:
-            self._check(URL(url), url)
+    def test_properties(self):
+        self.assertEquals(self._result.siteid, self._siteid)
+        self.assertEquals(self._result.url, self._url)
+        self.assertEquals(self._result.found, self._found)
+
+    def test_entries(self):
+        for entry, metadata in self._entries:
+            self._result.append(entry, metadata)
+        self._entries = [(urlparse.urljoin(self._url, entry), metadata)
+                         for entry, metadata in self._entries]
+        self.assertEquals(list(self._result), self._entries)
 
     def test_pickling(self):
-        for url in self._urls:
-            data = pickle.dumps(URL(url))
-            self._check(pickle.loads(data), url)
-
-    def _check(self, urlobj, url):
-        result = urlparse.urlsplit(url)
-        self.assertEquals(urlobj.protocol, result.scheme)
-        self.assertEquals(urlobj.user, result.username)
-        self.assertEquals(urlobj.passwd, result.password)
-        self.assertEquals(urlobj.host, result.netloc)
-        self.assertEquals(urlobj.port, result.port)
-        self.assertEquals(urlobj.path, result.path)
-        self.assertEquals(str(urlobj), result.geturl())
+        for entry, metadata in self._entries:
+            self._result.append(entry, metadata)
+        loaded_result = pickle.loads(pickle.dumps(self._result))
+        self.assertEquals(self._result.siteid, loaded_result.siteid)
+        self.assertEquals(self._result.url, loaded_result.url)
+        self.assertEquals(self._result.found, loaded_result.found)
+        self.assertEquals(list(self._result), list(loaded_result))
 
 
 def main():
