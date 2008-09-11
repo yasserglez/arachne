@@ -25,7 +25,7 @@ TESTDIR = os.path.dirname(os.path.abspath(__file__))
 SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
-from aracne.util.persistent import Queue, QueueError
+from aracne.utils.persist import Queue, QueueError
 
 
 class TestQueue(unittest.TestCase):

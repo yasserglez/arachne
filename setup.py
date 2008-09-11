@@ -30,7 +30,7 @@ setup(name='Aracne',
       author='Yasser González Fernández',
       author_email='yglez@uh.cu',
       platforms=[],
-      packages=['aracne', 'aracne.util'],
+      packages=['aracne', 'aracne.utils'],
       package_dir={'aracne': 'aracne'},
       data_files=[
         ('/etc/init.d/', ['data/aracned']),

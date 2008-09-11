@@ -21,7 +21,7 @@ import urlparse
 import threading
 
 from aracne.errors import EmptyQueueError
-from aracne.util.persistent import Queue, QueueError
+from aracne.utils.persist import Queue, QueueError
 
 
 class CrawlResult(object):
