@@ -32,54 +32,54 @@ class TestQueue(unittest.TestCase):
 
     def setUp(self):
         self._filename = os.path.join(TESTDIR, 'testqueue.db')
-        self._numitems = 100
+        self._items = range(100)
         self._queue = Queue(self._filename)
 
     def test_isempty(self):
         self.assertTrue(self._queue.isempty())
-        self._queue.put(0)
+        self._queue.put(self._items[0])
         self.assertFalse(self._queue.isempty())
         self._queue.get()
         self.assertTrue(self._queue.isempty())
 
     def test_head(self):
         self.assertRaises(QueueError, self._queue.head)
-        self._queue.put(0)
-        self.assertEquals(self._queue.head(), 0)
-        self._queue.put(1)
-        self.assertEquals(self._queue.head(), 0)
+        self._queue.put(self._items[0])
+        self.assertEquals(self._queue.head(), self._items[0])
+        self._queue.put(self._items[1])
+        self.assertEquals(self._queue.head(), self._items[0])
 
     def test_tail(self):
         self.assertRaises(QueueError, self._queue.head)
-        self._queue.put(0)
-        self.assertEquals(self._queue.tail(), 0)
-        self._queue.put(1)
-        self.assertEquals(self._queue.tail(), 1)
+        self._queue.put(self._items[0])
+        self.assertEquals(self._queue.tail(), self._items[0])
+        self._queue.put(self._items[1])
+        self.assertEquals(self._queue.tail(), self._items[1])
 
     def test_length(self):
         self.assertEquals(len(self._queue), 0)
-        for i in xrange(1, self._numitems + 1):
-            self._queue.put(i)
-            self.assertEquals(len(self._queue), i)
-        for i in xrange(1, self._numitems + 1):
+        for i, item in enumerate(self._items):
+            self._queue.put(item)
+            self.assertEquals(len(self._queue), i + 1)
+        for i in xrange(len(self._items)):
             self._queue.get()
-            self.assertEquals(len(self._queue), self._numitems - i)
+            self.assertEquals(len(self._queue), len(self._items) - i - 1)
 
     def test_putget(self):
         self.assertRaises(QueueError, self._queue.get)
-        for i in xrange(self._numitems):
-            self._queue.put(i)
-        for i in xrange(self._numitems):
-            self.assertEquals(self._queue.get(), i)
+        for item in self._items:
+            self._queue.put(item)
+        for item in self._items:
+            self.assertEquals(self._queue.get(), item)
         self.assertRaises(QueueError, self._queue.get)
 
     def test_openclose(self):
-        for i in xrange(self._numitems):
-            self._queue.put(i)
+        for item in self._items:
+            self._queue.put(item)
         self._queue.close()
         self._queue = Queue(self._filename)
-        for i in xrange(self._numitems):
-            self.assertEquals(self._queue.get(), i)
+        for item in self._items:
+            self.assertEquals(self._queue.get(), item)
 
     def tearDown(self):
         if os.path.isfile(self._filename):
