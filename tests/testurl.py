@@ -33,30 +33,36 @@ from aracne.util.url import URL
 class TestURL(unittest.TestCase):
 
     def setUp(self):
-        self._urls = (
-            'ftp://deltha.uh.cu:21/debian/',
-            'http://deltha.uh.cu:80/~yglez/',
-            'smb://software.matcom.uh.cu/',
-        )
+        self._url = 'http://deltha.uh.cu:21/debian'
+        self._basename = 'debian'
+        self._join_path = 'pool'
+        self._joined_url = 'http://deltha.uh.cu:21/debian/pool'
+        self._urlobj = URL(self._url)
 
-    def test_init(self):
-        for url in self._urls:
-            self._check(URL(url), url)
+    def test_properties(self):
+        result = urlparse.urlsplit(self._url)
+        self.assertEquals(self._urlobj.protocol, result.scheme)
+        self.assertEquals(self._urlobj.username, result.username)
+        self.assertEquals(self._urlobj.password, result.password)
+        self.assertEquals(self._urlobj.host, result.netloc)
+        self.assertEquals(self._urlobj.port, result.port)
+        self.assertEquals(self._urlobj.path, result.path)
+
+    def test_basename(self):
+        self.assertEquals(self._urlobj.basename(), self._basename)
+
+    def test_join(self):
+        joined_urlobj = self._urlobj.join(self._join_path)
+        self.assertEquals(str(joined_urlobj), self._joined_url)
 
     def test_pickling(self):
-        for url in self._urls:
-            data = pickle.dumps(URL(url))
-            self._check(pickle.loads(data), url)
-
-    def _check(self, urlobj, url):
-        result = urlparse.urlsplit(url)
-        self.assertEquals(urlobj.protocol, result.scheme)
-        self.assertEquals(urlobj.user, result.username)
-        self.assertEquals(urlobj.passwd, result.password)
-        self.assertEquals(urlobj.host, result.netloc)
-        self.assertEquals(urlobj.port, result.port)
-        self.assertEquals(urlobj.path, result.path)
-        self.assertEquals(str(urlobj), result.geturl())
+        loaded_urlobj = pickle.loads(pickle.dumps(self._urlobj))
+        self.assertEquals(self._urlobj.protocol, loaded_urlobj.protocol)
+        self.assertEquals(self._urlobj.username, loaded_urlobj.username)
+        self.assertEquals(self._urlobj.password, loaded_urlobj.password)
+        self.assertEquals(self._urlobj.host, loaded_urlobj.host)
+        self.assertEquals(self._urlobj.port, loaded_urlobj.port)
+        self.assertEquals(self._urlobj.path, loaded_urlobj.path)
 
 
 def main():

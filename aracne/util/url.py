@@ -19,34 +19,65 @@ import urlparse
 
 
 class URL(object):
-    """Uniform Resource Locator representation.
+    """Uniform Resource Locator.
     """
+
+    protocol = property(lambda self: self._protocol)
+
+    username = property(lambda self: self._username)
+
+    password = property(lambda self: self._password)
+
+    host = property(lambda self: self._host)
+
+    port = property(lambda self: self._port)
+
+    path = property(lambda self: self._path)
 
     def __init__(self, url):
         """Initialize the URL from the string `url`.
         """
-        result = urlparse.urlsplit(url)
-        self.protocol = result.scheme
-        self.user = result.username
-        self.passwd = result.password
-        self.host = result.netloc
-        self.port = result.port
-        self.path = result.path
-        self.url = result.geturl()
+        result = urlparse.urlsplit(url.rstrip('/'))
+        self._protocol = result.scheme
+        self._username = result.username
+        self._password = result.password
+        self._host = result.netloc
+        self._port = result.port
+        self._path = result.path if result.path else '/'
+        self._url = result.geturl()
 
     def __str__(self):
         """Return the URL as string.
         """
-        return self.url
+        return self._url
 
     def __getstate__(self):
-        """Used by pickle when the class is serialized.
+        """Used by pickle when instances are serialized.
         """
         return {
-            'url': self.url,
+            'url': self._url,
         }
 
     def __setstate__(self, state):
-        """Used by pickle when the class is unserialized.
+        """Used by pickle when instances are unserialized.
         """
         self.__init__(state['url'])
+
+    def join(self, path):
+        """Join a path to the URL and return the new URL.
+        """
+        return URL('%s/%s' %(self._url, path.lstrip('/')))
+
+    def basename(self):
+        """Return last path component as string.
+
+        This method will return '/' for URL of the root directory.
+        """
+        # If the path ends with a / then it is the root directory and it is
+        # returned.  Otherwise, the basename will be the rest of the string
+        # after the last / found.
+        if self._path.endswith('/'):
+            return self._path
+        else:
+            i = self._path.rindex('/')
+            return self._path[i + 1:]
