@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import signal
 import logging
 import hashlib
@@ -62,10 +63,17 @@ class AracneDaemon(Daemon):
         for site in sites:
             site['siteid'] = hashlib.sha1(site['url']).hexdigest()
             site['url'] = URL(site['url'])
-        # Initialize components.
         logging.debug('Initializing components of the daemon.')
+        # Create required directories.
+        resultsdir = os.path.join(config['spooldir'], 'results')
+        if not os.path.isdir(resultsdir):
+            os.mkdir(resultsdir)
+        tasksdir = os.path.join(config['spooldir'], 'tasks')
+        if not os.path.isdir(tasksdir):
+            os.mkdir(tasksdir)
+        # Initialize components.
         self._tasks = TaskQueue(sites)
-        self._results = ResultQueue(sites)
+        self._results = ResultQueue(resultsdir, sites)
         self._crawlers = CrawlerManager(config['numcrawlers'], self._tasks,
                                         self._results)
         self._processor = ProcessorManager(self._tasks, self._results)
@@ -92,6 +100,7 @@ class AracneDaemon(Daemon):
         self._processor.stop()
         self._crawlers.join()
         self._processor.join()
+        self._results.close()
         logging.debug('Components of the daemon stopped.')
         logging.info('Daemon stopped.  Exiting.')
         logging.shutdown()
