@@ -65,7 +65,7 @@ class TestQueue(unittest.TestCase):
             self._queue.get()
             self.assertEquals(len(self._queue), len(self._items) - i - 1)
 
-    def test_putget(self):
+    def test_populating(self):
         self.assertRaises(QueueError, self._queue.get)
         for item in self._items:
             self._queue.put(item)
@@ -73,7 +73,7 @@ class TestQueue(unittest.TestCase):
             self.assertEquals(self._queue.get(), item)
         self.assertRaises(QueueError, self._queue.get)
 
-    def test_openclose(self):
+    def test_closing(self):
         for item in self._items:
             self._queue.put(item)
         self._queue.close()
