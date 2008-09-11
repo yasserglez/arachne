@@ -99,7 +99,7 @@ class CrawlerManager(object):
         value of the `numcrawlers` argument.
         """
         logging.debug('Initializing crawler manager.')
-        logging.info('Crawler manager using %d crawlers.' % numcrawlers)
+        logging.info('Crawler manager is using %d crawlers.' % numcrawlers)
         self._crawlers = [SiteCrawler(tasks, results)
                           for i in range(numcrawlers)]
         logging.debug('Crawler manager initialized.')

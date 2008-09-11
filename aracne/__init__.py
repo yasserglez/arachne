@@ -17,7 +17,9 @@
 
 import signal
 import logging
+import hashlib
 
+from aracne.util.url import URL
 from aracne.util.daemon import Daemon
 from aracne.task import TaskQueue
 from aracne.result import ResultQueue
@@ -27,7 +29,7 @@ from aracne.processor import ProcessorManager
 
 __author__ = 'Yasser González Fernández <yglez@uh.cu>'
 __copyright__ = 'Copyright (C) 2008 Yasser González Fernández'
-__version__ = '0.0.0'
+__version__ = '0.1.0'
 
 
 class AracneDaemon(Daemon):
@@ -54,7 +56,12 @@ class AracneDaemon(Daemon):
                             level=config['loglevel'],
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        logging.info('Starting daemon version %s.' % __version__)
+        logging.info('Starting aracned (Aracne) %s.' % __version__)
+        logging.info('Running with %d configured sites.' % len(sites))
+        # Create URL instances and site ids.
+        for site in sites:
+            site['siteid'] = hashlib.sha1(site['url']).hexdigest()
+            site['url'] = URL(site['url'])
         # Initialize components.
         logging.debug('Initializing components of the daemon.')
         self._tasks = TaskQueue(sites)
