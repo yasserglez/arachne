@@ -88,6 +88,7 @@ class TestResultQueue(unittest.TestCase):
 
     def tearDown(self):
         if os.path.isdir(self._dirname):
+            self._queue.close()
             shutil.rmtree(self._dirname)
 
 
