@@ -28,7 +28,7 @@ class CrawlResult(object):
     """Crawl result.
 
     It represents and contains the result of listing the files and directories
-    found inside of a given directory.  It is the result of executing a
+    found inside a given directory.  It is the result of executing a
     `CrawlTask`.
     """
 
@@ -39,7 +39,7 @@ class CrawlResult(object):
     found = property(lambda self: self._found)
 
     def __init__(self, siteid, url, found=True):
-        """Initialize a crawl result without entries.
+        """Initialize the crawl result without entries.
         """
         self._siteid = siteid
         self._url = url
@@ -177,7 +177,14 @@ class ResultQueue(object):
                     result = self._resultdb[siteid].head()
                 except KeyError:
                     # The head of the sites db is the id of an old site.
-                    # Remove it and try to get another.
+                    # Remove the id of the site from the database and try to
+                    # get another.
+                    self._sitesdb.get()
+                except QueueError:
+                    # The result database for a site can be empty if it is
+                    # removed from the configuration file and added again.
+                    # Remove the id of the site from the database and try to
+                    # get another.
                     self._sitesdb.get()
                 else:
                     return result
