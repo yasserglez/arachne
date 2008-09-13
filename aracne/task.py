@@ -23,10 +23,37 @@ from aracne.errors import EmptyQueueError
 class CrawlTask(object):
     """Crawl task.
 
-    Represents the action of retrieving the list of files and directories found
-    inside of a given directory in a site.  The result of executing this task
-    is a `CrawlResult`.
+    It represents the action of retrieving the list of files and directories
+    found inside a given directory.  The result of executing this task is a
+    `CrawlResult`.
     """
+
+    siteid = property(lambda self: self._siteid)
+
+    url = property(lambda self: self._url)
+
+    def __init__(self, siteid, url, updatefactor=1):
+        """Initialize a crawl task.
+        """
+        self._siteid = siteid
+        self._url = url
+        self.updatefactor = updatefactor
+
+    def __getstate__(self):
+        """Used by pickle when instances are serialized.
+        """
+        return {
+            'siteid': self._siteid,
+            'url': self._url,
+            'updatefactor': self.updatefactor,
+        }
+
+    def __setstate__(self, state):
+        """Use by pickle when instances are serialized.
+        """
+        self._siteid = state['siteid']
+        self._url = state['url']
+        self.updatefactor = state['updatefactor']
 
 
 class TaskQueue(object):

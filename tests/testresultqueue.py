@@ -28,6 +28,7 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from aracne.utils.url import URL
+from aracne.task import CrawlTask
 from aracne.errors import EmptyQueueError
 from aracne.result import CrawlResult, ResultQueue
 
@@ -46,9 +47,9 @@ class TestResultQueue(unittest.TestCase):
         self._results = []
         for site in self._sites:
             site['siteid'] = hashlib.sha1(str(site['url'])).hexdigest()
-            for name in 'abcdefghijklmnopqrstuvwxyz':
-                result = CrawlResult(site['siteid'], site['url'].join(name))
-                self._results.append(result)
+            for name in 'abcde':
+                task = CrawlTask(site['siteid'], site['url'].join(name))
+                self._results.append(CrawlResult(task))
         self._queue = ResultQueue(self._dirname, self._sites)
 
     def test_length(self):
@@ -67,7 +68,7 @@ class TestResultQueue(unittest.TestCase):
             self._queue.put(result)
         for result in self._results:
             returned_result = self._queue.get()
-            self.assertEquals(returned_result.siteid, result.siteid)
+            self.assertEquals(returned_result.task.siteid, result.task.siteid)
             self._queue.report_done(returned_result)
         self.assertRaises(EmptyQueueError, self._queue.get)
 
@@ -81,9 +82,9 @@ class TestResultQueue(unittest.TestCase):
         del self._sites[0]
         self._queue = ResultQueue(self._dirname, self._sites)
         for result in self._results:
-            if result.siteid in [site['siteid'] for site in self._sites]:
+            if result.task.siteid in [site['siteid'] for site in self._sites]:
                 returned_result = self._queue.get()
-                self.assertEquals(returned_result.siteid, result.siteid)
+                self.assertEquals(returned_result.task.siteid, result.task.siteid)
                 self._queue.report_done(returned_result)
 
     def tearDown(self):

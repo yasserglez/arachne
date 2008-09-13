@@ -19,7 +19,6 @@
 import os
 import sys
 import pickle
-import urlparse
 import optparse
 import unittest
 
@@ -28,39 +27,29 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from aracne.task import CrawlTask
-from aracne.result import CrawlResult
 
 
-class TestCrawlResult(unittest.TestCase):
+class TestCrawlTask(unittest.TestCase):
 
     def setUp(self):
-        self._found = True
-        self._task = CrawlTask('aa958756e769188be9f76fbdb291fe1b2ddd4777',
-                               'ftp://deltha.uh.cu/')
-        self._result = CrawlResult(self._task, self._found)
-        self._entries = (('a', {'isdir': True}), ('b', {'size': 1024}),
-                         ('c', {'size': 2049}), ('d', {'isdir': True}))
+        self._siteid = 'aa958756e769188be9f76fbdb291fe1b2ddd4777'
+        self._url = 'ftp://deltha.uh.cu/'
+        self._updatefactor_default = 1
+        self._updatefactor_modify = 2
+        self._task = CrawlTask(self._siteid, self._url)
 
     def test_properties(self):
-        self.assertEquals(self._result.task.siteid, self._task.siteid)
-        self.assertEquals(self._result.task.url, self._task.url)
-        self.assertEquals(self._result.found, self._found)
-
-    def test_entries(self):
-        for entry, metadata in self._entries:
-            self._result.append(entry, metadata)
-        entries = [(urlparse.urljoin(self._task.url, entry), metadata)
-                   for entry, metadata in self._entries]
-        self.assertEquals(list(self._result), entries)
+        self.assertEquals(self._task.siteid, self._siteid)
+        self.assertEquals(self._task.url, self._url)
+        self.assertEquals(self._task.updatefactor, self._updatefactor_default)
+        self._task.updatefactor = self._updatefactor_modify
+        self.assertEquals(self._task.updatefactor, self._updatefactor_modify)
 
     def test_pickling(self):
-        for entry, metadata in self._entries:
-            self._result.append(entry, metadata)
-        loaded_result = pickle.loads(pickle.dumps(self._result))
-        self.assertEquals(self._result.task.siteid, loaded_result.task.siteid)
-        self.assertEquals(self._result.task.url, loaded_result.task.url)
-        self.assertEquals(self._result.found, loaded_result.found)
-        self.assertEquals(list(self._result), list(loaded_result))
+        loaded_task = pickle.loads(pickle.dumps(self._task))
+        self.assertEquals(self._task.siteid, loaded_task.siteid)
+        self.assertEquals(self._task.url, loaded_task.url)
+        self.assertEquals(self._task.updatefactor, loaded_task.updatefactor)
 
 
 def main():

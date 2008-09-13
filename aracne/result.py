@@ -32,17 +32,14 @@ class CrawlResult(object):
     `CrawlTask`.
     """
 
-    siteid = property(lambda self: self._siteid)
-
-    url = property(lambda self: self._url)
+    task = property(lambda self: self._task)
 
     found = property(lambda self: self._found)
 
-    def __init__(self, siteid, url, found=True):
-        """Initialize the crawl result without entries.
+    def __init__(self, task, found=True):
+        """Initialize a crawl result without entries.
         """
-        self._siteid = siteid
-        self._url = url
+        self._task = task
         self._found = found
         self._entries = []
 
@@ -55,8 +52,7 @@ class CrawlResult(object):
         """Used by pickle when instances are serialized.
         """
         return {
-            'siteid': self._siteid,
-            'url': self._url,
+            'task': self._task,
             'found': self._found,
             'entries': self._entries,
         }
@@ -64,8 +60,7 @@ class CrawlResult(object):
     def __setstate__(self, state):
         """Used by pickle when instances are unserialized.
         """
-        self._siteid = state['siteid']
-        self._url = state['url']
+        self._task = state['task']
         self._found = state['found']
         self._entries = state['entries']
 
@@ -73,7 +68,7 @@ class CrawlResult(object):
         """Append a new entry to the crawl result of the directory.
         """
         # TODO: Appending entries to a not found result?
-        url = urlparse.urljoin(self._url, entry)
+        url = urlparse.urljoin(self._task.url, entry)
         self._entries.append((url, metadata))
 
 
@@ -161,8 +156,9 @@ class ResultQueue(object):
     def _put(self, result):
         """Enqueue a result.
         """
-        self._sitesdb.put(result.siteid)
-        self._resultdb[result.siteid].put(result)
+        siteid = result.task.siteid
+        self._sitesdb.put(siteid)
+        self._resultdb[siteid].put(result)
 
     def _get(self):
         """Return the result at the top of the queue.
