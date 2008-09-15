@@ -114,7 +114,7 @@ def _parse_sitesfile(sitesfile):
         'errorwait': 1800,
         'requestwait': 30,
         'minupdatewait': 86400,
-        'maxupdatewait': 2592000,
+        'defaultupdatewait': 604800,
     }
     ConfigParser.DEFAULTSECT = 'default'
     parser = ConfigParser.ConfigParser(defaults)
@@ -136,7 +136,7 @@ def _parse_sitesfile(sitesfile):
                 site['errorwait'] = int(site['errorwait'])
                 site['requestwait'] = int(site['requestwait'])
                 site['minupdatewait'] = int(site['minupdatewait'])
-                site['maxupdatewait'] = int(site['maxupdatewait'])
+                site['defaultupdatewait'] = int(site['defaultupdatewait'])
             return sites
 
 
