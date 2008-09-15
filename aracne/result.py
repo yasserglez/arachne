@@ -16,7 +16,6 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import logging
 import urlparse
 import threading
 
@@ -81,7 +80,6 @@ class ResultQueue(object):
     def __init__(self, dirname, sites):
         """Initialize the queue.
         """
-        self._mutex = threading.Lock()
         # Open or create the queues.
         sitedbname = 'sites.db'
         self._sitesdb = Queue(os.path.join(dirname, sitedbname))
@@ -98,6 +96,8 @@ class ResultQueue(object):
             oldqueues.remove(queuename)
         for filename in oldqueues:
             os.unlink(os.path.join(dirname, filename))
+        # Initialize other attributes.
+        self._mutex = threading.Lock()
 
     def __len__(self):
         """Return the number of crawl results in the queue.
