@@ -21,11 +21,11 @@
 import os
 import sys
 import bsddb
-import cPickle as pickle
+import cPickle
 
 
 class QueueError(Exception):
-    """Base class for exceptions related with the queues.
+    """Base class for all queue exceptions.
     """
 
 
@@ -36,28 +36,20 @@ class PriorityQueue(object):
     def __init__(self, filename):
         """Initialize the priority queue.
         """
-        isnewdb = not os.path.isfile(filename)
-        self._keyencoding = 'utf-8'
-        self._counterkey = 'counter'
-        self._keylength = len(str(sys.maxint))
-        self._db = bsddb.btopen(filename)
-        if isnewdb:
-            self._counter = 0
-            self._save(self._counter, self._counterkey)
-        else:
-            self._counter = self._load(self._counterkey)
-        self._db.sync()
+        self._db = bsddb.db.DB()
+        self._db.set_bt_compare(self._compare_keys)
+        self._db.open(filename, bsddb.db.DB_BTREE, bsddb.db.DB_CREATE)
 
     def __len__(self):
         """Return the number of items in the queue.
         """
-        return self._counter
+        return len(self._db)
 
     def put(self, item, priority):
         """Append a new item to the queue.
 
         Append a new item to the queue.  The item can be any pickable Python
-        object and the priority should be a positive integer.
+        object and the priority should be a positive integer (or long integer).
         """
         self._put(item, priority)
 
@@ -65,8 +57,8 @@ class PriorityQueue(object):
         """Return the item at the head of the queue.
 
         Return a (item, priority) tuple for the item at the head of the queue.
-        This item will be a copy of the item saved in the database and you
-        should not modify it.
+        This item will be a copy of the item saved in the database and if you
+        modify it the changes will not be reflected in the database.
         """
         return self._head()
 
@@ -74,15 +66,15 @@ class PriorityQueue(object):
         """Return the item at the tail of the queue.
 
         Return a (item, priority) tuple for the item at the tail of the queue.
-        This item will be a copy of the item saved in the database and you
-        should not modify it.
+        This item will be a copy of the item saved in the database and if you
+        modify it the changes will not be reflected in the database.
         """
         return self._tail()
 
     def isempty(self):
         """Return a boolean value indicating if the queue is empty.
         """
-        return (self._counter == 0)
+        return len(self._db) == 0
 
     def get(self):
         """Return the item at the head of the queue.
@@ -102,39 +94,25 @@ class PriorityQueue(object):
         """
         self._db.close()
 
-    def _save(self, obj, key):
-        """Save the object in the database.
+    def _compare_keys(self, key1, key2):
+        """Method used to compare the keys of the BTree.
         """
-        self._db[key.encode(self._keyencoding)] = pickle.dumps(obj, 2)
-
-    def _load(self, key):
-        """Load and return the object associated with the key.
-        """
-        return pickle.loads(self._db[key.encode(self._keyencoding)])
-
-    def _increase_counter(self):
-        """Increase items counter.
-
-        Increase by one the counter for the number of items in the queue and
-        update the value saved in the database.
-        """
-        self._counter += 1
-        self._save(self._counter, self._counterkey)
-
-    def _decrease_counter(self):
-        """Decrease the items counter.
-
-        Decrease by one the counter for the number of items in the queue and
-        updated the value saved in the database.
-        """
-        self._counter -= 1
-        self._save(self._counter, self._counterkey)
+        len1, len2 = len(key1), len(key2)
+        if len1 > len2:
+            return 1
+        elif len1 < len2:
+            return -1
+        else:
+            for c1, c2 in zip(key1, key2):
+                n = cmp(c1, c2)
+                if n != 0:
+                    return n
+            return 0
 
     def _put(self, item, priority):
         """Append a new item to the queue with the specified priority.
         """
-        self._save(item, str(priority).zfill(self._keylength))
-        self._increase_counter()
+        self._db.put(str(priority), cPickle.dumps(item, 2))
 
     def _head(self):
         """Return the item at the head of the queue.
@@ -142,9 +120,10 @@ class PriorityQueue(object):
         if self.isempty():
             raise QueueError()
         else:
-            key = self._db.first()[0]
-            item = self._load(key)
-            return (item, int(key))
+            cursor = self._db.cursor()
+            priority, item = cursor.first()
+            cursor.close()
+            return (cPickle.loads(item), long(priority))
 
     def _tail(self):
         """Return the item at the tail of the queue.
@@ -152,11 +131,10 @@ class PriorityQueue(object):
         if self.isempty():
             raise QueueError()
         else:
-            # The last key in the BTree is the counter.
-            self._db.last()
-            key = self._db.previous()[0]
-            item = self._load(key)
-            return (item, int(key))
+            cursor = self._db.cursor()
+            priority, item = cursor.last()
+            cursor.close()
+            return (cPickle.loads(item), long(priority))
 
     def _get(self):
         """Return and delete the item at the head of the queue.
@@ -164,14 +142,11 @@ class PriorityQueue(object):
         if self.isempty():
             raise QueueError()
         else:
-            key = self._db.first()[0]
-            # TODO: If I leave the cursor there I get a DBNotFoundError
-            # exception when _get() is invoked again.
-            self._db.last()
-            item = self._load(key)
-            del self._db[key]
-            self._decrease_counter()
-            return (item, int(key))
+            cursor = self._db.cursor()
+            priority, item = cursor.first()
+            cursor.delete()
+            cursor.close()
+            return (cPickle.loads(item), long(priority))
 
 
 class Queue(PriorityQueue):
@@ -181,7 +156,11 @@ class Queue(PriorityQueue):
     def __init__(self, filename):
         """Initialize the queue.
         """
-        PriorityQueue.__init__(self, filename)
+        self._priority = 0
+        self._db = bsddb.db.DB()
+        self._db.set_flags(bsddb.db.DB_DUP)
+        self._db.open(filename, bsddb.db.DB_BTREE, bsddb.db.DB_CREATE)
+        self._db.sync()
 
     def put(self, item):
         """Append a new item to the queue.
@@ -189,7 +168,7 @@ class Queue(PriorityQueue):
         Append a new item to tail the queue.  The item can be any pickable
         Python object.
         """
-        PriorityQueue._put(self, item, self._counter)
+        PriorityQueue._put(self, item, self._priority)
 
     def head(self):
         """Return the item at the head of the queue.
