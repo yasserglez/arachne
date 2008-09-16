@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Base class to create UNIX daemon processes.
+"""
+
 import os
 import sys
 import signal
@@ -30,7 +33,7 @@ import grp
 class Daemon(object):
     """Generic UNIX daemon.
 
-    Provides a simple way for creating daemon process in Python.
+    This class provides a simple way for creating daemon processes in Python.
 
     It's intended to be subclassed.  You should (at least) override the `run()`
     and (optionally) `terminate()` methods.  If the subclass overrides the
@@ -45,7 +48,7 @@ class Daemon(object):
     def __init__(self, pidfile=None, stdin='/dev/null', stdout='/dev/null',
                  stderr='/dev/null', user=None, group=None):
         """
-        Initializes attributes.
+        Initialize attributes.
 
         The `pidfile` argument must be the name of a file.  The `start()`
         method will write the PID of the newly forked daemon to this file.  If
@@ -69,9 +72,9 @@ class Daemon(object):
         self._group = group
 
     def start(self):
-        """Starts the daemon.
+        """Start the daemon.
 
-        This methods does all the steps to convert the current process to a
+        This method does all the steps to convert the current process to a
         daemon process and then invokes the `run()` method.
         """
         try:
@@ -98,24 +101,24 @@ class Daemon(object):
         self.run()
 
     def stop(self):
-        """Stops the daemon.
+        """Stop the daemon.
 
-        Removes the pidfile and then invokes the `terminate()` method.
+        Remove the pidfile and then invoke the `terminate()` method.
         """
         self._remove_pidfile()
         self.terminate()
 
     def run(self):
-        """Represents the daemon activity.
+        """This method represents the daemon activity.
 
         You should override this method in a subclass.  It's invoked by the
         `start()` method once the process is a daemon process.
         """
 
     def terminate(self):
-        """Terminates the process.
+        """Terminate the process.
 
-        This method is responsable of doing any required cleanup (e.g. closing
+        This method is responsible of doing any required cleanup (e.g. closing
         connections, file descriptors, etc) and exiting the process
         (e.g. invoke `sys.exit()`).  It gets invoked by the `stop()`
         method. The implementation provided by the `Daemon` class just invokes
@@ -124,10 +127,10 @@ class Daemon(object):
         sys.exit()
 
     def _switch_user(self):
-        """Switch currrent process user and group ids.
+        """Switch current process user and group ID.
 
         If `self._user` is `None` and `self._group` is `None` nothing is done.
-        `self._user` and `self._group` can be a user/group id (`int`) or a
+        `self._user` and `self._group` can be a user/group ID (`int`) or a
         user/group name (`str`).
         """
         # TODO: Check for errors.
@@ -185,6 +188,6 @@ class Daemon(object):
     def _sigterm_handler(self, signum, frame):
         """SIGTERM signal handler.
 
-        Invokes the `stop()` method.
+        Invoke the `stop()` method.
         """
         self.stop()

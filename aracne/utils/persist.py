@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Persistent data structures.
+"""Persistent queue implementations.
 """
 
 import os
@@ -56,23 +56,23 @@ class PriorityQueue(object):
     def head(self):
         """Return the item at the head of the queue.
 
-        Return a (item, priority) tuple for the item at the head of the queue.
-        This item will be a copy of the item saved in the database and if you
-        modify it the changes will not be reflected in the database.
+        Return a tuple with the item and its priority.  This item will be a
+        copy of the item saved in the database and if you modify it the changes
+        will not be reflected in the database.
         """
         return self._head()
 
     def tail(self):
         """Return the item at the tail of the queue.
 
-        Return a (item, priority) tuple for the item at the tail of the queue.
-        This item will be a copy of the item saved in the database and if you
-        modify it the changes will not be reflected in the database.
+        Return a tuple with the item and its priority.  This item will be a
+        copy of the item saved in the database and if you modify it the changes
+        will not be reflected in the database.
         """
         return self._tail()
 
     def isempty(self):
-        """Return a boolean value indicating if the queue is empty.
+        """Return a Boolean value indicating if the queue is empty.
         """
         return len(self._db) == 0
 
@@ -165,8 +165,7 @@ class Queue(PriorityQueue):
     def put(self, item):
         """Append a new item to the queue.
 
-        Append a new item to tail the queue.  The item can be any pickable
-        Python object.
+        The item can be any pickable Python object.
         """
         PriorityQueue._put(self, item, self._priority)
 
@@ -183,7 +182,7 @@ class Queue(PriorityQueue):
         """Return the item at the tail of the queue.
 
         The returned item will be a copy of the item saved in the database and
-        you should not modify it.
+        if you modify it the changes will not be reflected in the database.
         """
         item, priority = PriorityQueue._tail(self)
         return item
