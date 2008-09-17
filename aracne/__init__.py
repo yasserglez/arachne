@@ -42,12 +42,12 @@ class AracneDaemon(Daemon):
     stops the components.  It runs in the main thread of execution.
     """
 
-    def __init__(self, config, sites):
+    def __init__(self, config, sites_info):
         """Initialize components.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
         `ProcessorManager` instances.  The `config` parameter should be a
-        dictionary with the configuration and `sites` a list with the
+        dictionary with the configuration and `sites_info` a list with the
         information of each site.
         """
         Daemon.__init__(self, pidfile=config['pidfile'], user=config['user'],
@@ -58,11 +58,11 @@ class AracneDaemon(Daemon):
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logging.info('Starting aracned (Aracne) %s.' % __version__)
-        logging.info('Running with %d configured sites.' % len(sites))
+        logging.info('Running with %d configured sites.' % len(sites_info))
         # Create URL instances and site ids.
-        for site in sites:
-            site['siteid'] = hashlib.sha1(site['url']).hexdigest()
-            site['url'] = URL(site['url'])
+        for info in sites_info:
+            info['site_id'] = hashlib.sha1(info['url']).hexdigest()
+            info['url'] = URL(info['url'])
         logging.debug('Initializing components of the daemon.')
         # Create required directories.
         resultsdir = os.path.join(config['spooldir'], 'results')
@@ -72,8 +72,8 @@ class AracneDaemon(Daemon):
         if not os.path.isdir(tasksdir):
             os.mkdir(tasksdir)
         # Initialize components.
-        self._tasks = TaskQueue(sites)
-        self._results = ResultQueue(resultsdir, sites)
+        self._tasks = TaskQueue(tasksdir, sites_info)
+        self._results = ResultQueue(resultsdir, sites_info)
         self._crawlers = CrawlerManager(config['numcrawlers'], self._tasks,
                                         self._results)
         self._processor = ProcessorManager(self._tasks, self._results)

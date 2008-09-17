@@ -75,7 +75,7 @@ class SiteCrawler(threading.Thread):
         self._running = False
         self._running_lock.release()
 
-    def _execute(self, taks):
+    def _execute(self, task):
         """Execute a crawl task.
 
         Execute the crawl task (`CrawlTask`) received as argument.  Report

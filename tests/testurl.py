@@ -56,13 +56,13 @@ class TestURL(unittest.TestCase):
         self.assertEquals(str(joined_urlobj), self._joined_url)
 
     def test_pickling(self):
-        loaded_urlobj = pickle.loads(pickle.dumps(self._urlobj))
-        self.assertEquals(self._urlobj.protocol, loaded_urlobj.protocol)
-        self.assertEquals(self._urlobj.username, loaded_urlobj.username)
-        self.assertEquals(self._urlobj.password, loaded_urlobj.password)
-        self.assertEquals(self._urlobj.host, loaded_urlobj.host)
-        self.assertEquals(self._urlobj.port, loaded_urlobj.port)
-        self.assertEquals(self._urlobj.path, loaded_urlobj.path)
+        urlobj = pickle.loads(pickle.dumps(self._urlobj))
+        self.assertEquals(self._urlobj.protocol, urlobj.protocol)
+        self.assertEquals(self._urlobj.username, urlobj.username)
+        self.assertEquals(self._urlobj.password, urlobj.password)
+        self.assertEquals(self._urlobj.host, urlobj.host)
+        self.assertEquals(self._urlobj.port, urlobj.port)
+        self.assertEquals(self._urlobj.path, urlobj.path)
 
 
 def main():

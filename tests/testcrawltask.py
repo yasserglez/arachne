@@ -32,39 +32,37 @@ from aracne.task import CrawlTask
 class TestCrawlTask(unittest.TestCase):
 
     def setUp(self):
-        self._siteid = 'aa958756e769188be9f76fbdb291fe1b2ddd4777'
+        self._site_id = 'aa958756e769188be9f76fbdb291fe1b2ddd4777'
         self._url = 'ftp://deltha.uh.cu/'
-        self._task = CrawlTask(self._siteid, self._url)
+        self._task = CrawlTask(self._site_id, self._url)
 
     def test_properties(self):
-        self.assertEquals(self._task.siteid, self._siteid)
+        revisit_wait = 60
+        self.assertEquals(self._task.site_id, self._site_id)
         self.assertEquals(self._task.url, self._url)
-        self.assertEquals(self._task.update_wait, 0)
-        self.assertEquals(self._task.update_count, 0)
+        self.assertEquals(self._task.revisit_wait, 0)
+        self.assertEquals(self._task.revisit_count, 0)
         self.assertEquals(self._task.change_count, 0)
+        self._task.revisit_wait = revisit_wait
+        self.assertEquals(self._task.revisit_wait, revisit_wait)
 
     def test_pickling(self):
-        loaded_task = pickle.loads(pickle.dumps(self._task))
-        self.assertEquals(self._task.siteid, loaded_task.siteid)
-        self.assertEquals(self._task.url, loaded_task.url)
-        self.assertEquals(self._task.update_wait, loaded_task.update_wait)
-        self.assertEquals(self._task.update_count, loaded_task.update_count)
-        self.assertEquals(self._task.change_count, loaded_task.change_count)
+        task = pickle.loads(pickle.dumps(self._task))
+        self.assertEquals(self._task.site_id, task.site_id)
+        self.assertEquals(self._task.url, task.url)
+        self.assertEquals(self._task.revisit_wait, task.revisit_wait)
+        self.assertEquals(self._task.revisit_count, task.revisit_count)
+        self.assertEquals(self._task.change_count, task.change_count)
 
-    def test_report_update(self):
-        # Reporting an update without changes.
-        self._task.report_update(False)
-        self.assertEquals(self._task.update_count, 1)
+    def test_report_revisit(self):
+        # Reporting a visit without changes.
+        self._task.report_revisit(False)
+        self.assertEquals(self._task.revisit_count, 1)
         self.assertEquals(self._task.change_count, 0)
-        # Reporting an update with changes.
-        self._task.report_update(True)
-        self.assertEquals(self._task.update_count, 2)
+        # Reporting a visit with changes.
+        self._task.report_revisit(True)
+        self.assertEquals(self._task.revisit_count, 2)
         self.assertEquals(self._task.change_count, 1)
-
-    def test_set_update_wait(self):
-        new_update_wait = 60
-        self._task.set_update_wait(new_update_wait)
-        self.assertEquals(self._task.update_wait, new_update_wait)
 
 
 def main():

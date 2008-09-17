@@ -15,8 +15,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""`CrawlResult` and related classes.
+"""
+
 import os
-import urlparse
 import threading
 
 from aracne.errors import EmptyQueueError
@@ -26,14 +28,9 @@ from aracne.utils.persist import Queue, QueueError
 class CrawlResult(object):
     """Crawl result.
 
-    It represents and contains the result of listing the files and directories
-    found inside a given directory.  It is the result of executing a
-    `CrawlTask`.
+    This class represents the content of a directory.  It's the result of
+    executing a `CrawlTask`.
     """
-
-    task = property(lambda self: self._task)
-
-    found = property(lambda self: self._found)
 
     def __init__(self, task, found=True):
         """Initialize a crawl result without entries.
@@ -63,130 +60,133 @@ class CrawlResult(object):
         self._found = state['found']
         self._entries = state['entries']
 
-    def append(self, entry, metadata):
-        """Append a new entry to the crawl result of the directory.
+    def append(self, entry, data):
+        """Append a new entry.
         """
-        # TODO: Appending entries to a not found result?
-        url = urlparse.urljoin(self._task.url, entry)
-        self._entries.append((url, metadata))
+        entry_url = self._task.url.join(entry)
+        self._entries.append((entry_url, data))
+
+    def _get_task(self):
+        """Get method for the `task` property.
+        """
+        return self._task
+
+    def _get_found(self):
+        """Get method for the `found` property.
+        """
+        return self._found
+
+    task = property(_get_task)
+
+    found = property(_get_found)
 
 
 class ResultQueue(object):
     """Crawl result queue.
 
-    It collects the crawl results waiting to be processed.
+    This queue is used to collect the crawl results waiting to be processed.
     """
 
-    def __init__(self, dirname, sites):
+    def __init__(self, dirname, sites_info):
         """Initialize the queue.
         """
-        # Open or create the queues.
-        sitedbname = 'sites.db'
-        self._sitesdb = Queue(os.path.join(dirname, sitedbname))
-        self._resultdb = {}
-        for site in sites:
-            queuename = '%s.db' % site['siteid']
-            queue = Queue(os.path.join(dirname, queuename))
-            self._resultdb[site['siteid']] = queue
-        # Remove old queues.
-        oldqueues = os.listdir(dirname)
-        oldqueues.remove(sitedbname)
-        for site in sites:
-            queuename = '%s.db' % site['siteid']
-            oldqueues.remove(queuename)
-        for filename in oldqueues:
+        sites_filename = 'sites.db'
+        self._sites = Queue(os.path.join(dirname, sites_filename))
+        # Get the list files in the directory to purge old queues (sites
+        # removed from the configuration file).
+        old_queues = os.listdir(dirname)
+        old_queues.remove(sites_filename)
+        self._results = {}
+        for info in sites_info:
+            site_id = info['site_id']
+            filename = '%s.db' % site_id
+            queue = Queue(os.path.join(dirname, filename))
+            self._results[site_id] = queue
+            if filename in old_queues:
+                old_queues.remove(filename)
+        for filename in old_queues:
             os.unlink(os.path.join(dirname, filename))
-        # Initialize other attributes.
         self._mutex = threading.Lock()
 
     def __len__(self):
         """Return the number of crawl results in the queue.
         """
-        return sum(len(resultdb) for resultdb in self._resultdb.itervalues())
+        self._mutex.acquire()
+        try:
+            return sum(len(queue) for queue in self._results.itervalues())
+        finally:
+            self._mutex.release()
 
     def put(self, result):
-        """Enqueue a result.
-
-        Put the crawl result received as argument in the queue.
+        """Enqueue a crawl result.
         """
         self._mutex.acquire()
-        self._put(result)
-        self._mutex.release()
+        try:
+            site_id = result.task.site_id
+            self._sites.put(site_id)
+            self._results[site_id].put(result)
+        finally:
+            self._mutex.release()
 
     def get(self):
         """Return the crawl result at the head of the queue.
 
-        This does not remove the result from the head of the queue until it is
-        reported as processed using `report_done()`.  If there is not an
-        available result an `EmptyQueueError` exception is raised.
+        This method does not remove the result from the queue until it's
+        reported as processed using `report_done()`.  If there are not results
+        available an `EmptyQueueError` exception is raised.
         """
         self._mutex.acquire()
         try:
-            return self._get()
+            while True:
+                try:
+                    site_id = self._sites.head()
+                except QueueError:
+                    raise EmptyQueueError()
+                else:
+                    try:
+                        result = self._results[site_id].head()
+                    except KeyError:
+                        # The head of the sites queue is an old site.
+                        self._sites.get()
+                    except QueueError:
+                        # The result queue can be empty if a site is removed
+                        # from the configuration file and added again.
+                        self._sites.get()
+                    else:
+                        return result
         finally:
             self._mutex.release()
 
     def report_done(self, result):
         """Report a result as processed.
 
-        This removes the result at the head of the queue.
+        This method removes the result at the head of the queue.
         """
         self._mutex.acquire()
-        self._report_done(result)
-        self._mutex.release()
+        try:
+            site_id = self._sites.get()
+            self._results[site_id].get()
+        finally:
+            self._mutex.release()
 
     def sync(self):
-        """Synchronize the databases on disk.
+        """Synchronize the queue on disk.
         """
         self._mutex.acquire()
-        self._sitesdb.sync()
-        for resultdb in self._resultdb.itervalues():
-            resultdb.sync()
-        self._mutex.release()
+        try:
+            self._sites.sync()
+            for queue in self._results.itervalues():
+                queue.sync()
+        finally:
+            self._mutex.release()
 
     def close(self):
-        """Close the databases.
+        """Close the queue.
         """
         self._mutex.acquire()
-        self._sitesdb.close()
-        for resultdb in self._resultdb.itervalues():
-            resultdb.close()
-        self._mutex.release()
-
-    def _put(self, result):
-        """Enqueue a result.
-        """
-        siteid = result.task.siteid
-        self._sitesdb.put(siteid)
-        self._resultdb[siteid].put(result)
-
-    def _get(self):
-        """Return the result at the top of the queue.
-        """
-        while True:
-            try:
-                siteid = self._sitesdb.head()
-            except QueueError:
-                raise EmptyQueueError()
-            else:
-                try:
-                    result = self._resultdb[siteid].head()
-                except KeyError:
-                    # The head of the sites db is the id of an old site.
-                    # Remove the id of the site from the database and try to
-                    # get another.
-                    self._sitesdb.get()
-                except QueueError:
-                    # The result database for a site can be empty if it is
-                    # removed from the configuration file and added again.
-                    # Remove the id of the site from the database and try to
-                    # get another.
-                    self._sitesdb.get()
-                else:
-                    return result
-
-    def _report_done(self, result):
-        """Report a result as processed.
-        """
-        siteid = self._sitesdb.get()
-        self._resultdb[siteid].get()
+        try:
+            self._sites.close()
+            for queue in self._results.itervalues():
+                queue.close()
+        finally:
+            self._mutex.release()

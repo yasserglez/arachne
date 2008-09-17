@@ -19,7 +19,6 @@
 import os
 import sys
 import pickle
-import urlparse
 import optparse
 import unittest
 
@@ -42,25 +41,25 @@ class TestCrawlResult(unittest.TestCase):
                          ('c', {'size': 2049}), ('d', {'isdir': True}))
 
     def test_properties(self):
-        self.assertEquals(self._result.task.siteid, self._task.siteid)
+        self.assertEquals(self._result.task.site_id, self._task.site_id)
         self.assertEquals(self._result.task.url, self._task.url)
         self.assertEquals(self._result.found, self._found)
 
     def test_entries(self):
-        for entry, metadata in self._entries:
-            self._result.append(entry, metadata)
-        entries = [(urlparse.urljoin(self._task.url, entry), metadata)
-                   for entry, metadata in self._entries]
+        for entry, data in self._entries:
+            self._result.append(entry, data)
+        entries = [(self._task.url.join(entry), data)
+                   for entry, data in self._entries]
         self.assertEquals(list(self._result), entries)
 
     def test_pickling(self):
-        for entry, metadata in self._entries:
-            self._result.append(entry, metadata)
-        loaded_result = pickle.loads(pickle.dumps(self._result))
-        self.assertEquals(self._result.task.siteid, loaded_result.task.siteid)
-        self.assertEquals(self._result.task.url, loaded_result.task.url)
-        self.assertEquals(self._result.found, loaded_result.found)
-        self.assertEquals(list(self._result), list(loaded_result))
+        for entry, data in self._entries:
+            self._result.append(entry, data)
+        result = pickle.loads(pickle.dumps(self._result))
+        self.assertEquals(self._result.task.site_id, result.task.site_id)
+        self.assertEquals(self._result.task.url, result.task.url)
+        self.assertEquals(self._result.found, result.found)
+        self.assertEquals(list(self._result), list(result))
 
 
 def main():

@@ -106,38 +106,38 @@ def _parse_configfile(configfile):
 
 
 def _parse_sitesfile(sitesfile):
-    """Parse the file with the settings for the sites.
+    """Parse the file with the information of the sites.
     """
     # The format used by this file is based on the configuration file of
     # Planet <http://www.planetplanet.org/>.
     defaults = {
-        'errorwait': 1800,
-        'requestwait': 30,
-        'minupdatewait': 86400,
-        'defaultupdatewait': 604800,
+        'error_wait': 1800,
+        'request_wait': 30,
+        'min_revisit_wait': 86400,
+        'default_revisit_wait': 604800,
     }
     ConfigParser.DEFAULTSECT = 'default'
     parser = ConfigParser.ConfigParser(defaults)
     try:
-        sites = []
+        sites_info = []
         parser.read(sitesfile)
         for section in parser.sections():
-            site = {}
-            site['url'] = section
-            site.update(parser.items(section))
-            sites.append(site)
+            info = {}
+            info['url'] = section
+            info.update(parser.items(section))
+            sites_info.append(info)
     except ConfigParser.Error:
         _error('an error has occurred parsing the sites file.')
     else:
-        if not sites:
+        if not sites_info:
             _error('failed to read the sites file or no sites configured.')
         else:
-            for site in sites:
-                site['errorwait'] = int(site['errorwait'])
-                site['requestwait'] = int(site['requestwait'])
-                site['minupdatewait'] = int(site['minupdatewait'])
-                site['defaultupdatewait'] = int(site['defaultupdatewait'])
-            return sites
+            int_keys = ('error_wait', 'request_wait', 'min_revisit_wait',
+                        'default_revisit_wait')
+            for info in sites_info:
+                for key in int_keys:
+                    info[key] = int(info[key])
+            return sites_info
 
 
 def _error(message):
@@ -152,8 +152,8 @@ def main():
     """
     options = _parse_args()
     config = _parse_configfile(options['configfile'])
-    sites = _parse_sitesfile(config['sitesfile'])
-    daemon = AracneDaemon(config, sites)
+    sites_info = _parse_sitesfile(config['sitesfile'])
+    daemon = AracneDaemon(config, sites_info)
     daemon.start()
     sys.exit(0)
 
