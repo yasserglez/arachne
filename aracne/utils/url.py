@@ -25,18 +25,6 @@ class URL(object):
     """Uniform Resource Locator.
     """
 
-    protocol = property(lambda self: self._protocol)
-
-    username = property(lambda self: self._username)
-
-    password = property(lambda self: self._password)
-
-    host = property(lambda self: self._host)
-
-    port = property(lambda self: self._port)
-
-    path = property(lambda self: self._path)
-
     def __init__(self, url):
         """Initialize the URL from the string `url`.
         """
@@ -46,8 +34,13 @@ class URL(object):
         self._password = result.password
         self._host = result.netloc
         self._port = result.port
-        self._path = result.path if result.path else '/'
         self._url = result.geturl()
+        if result.path:
+            self._path = result.path
+        else:
+            # Include the / in the URL of the root directory.
+            self._path = '/'
+            self._url = '%s/' % self._url
 
     def __str__(self):
         """Return the URL as string.
@@ -84,3 +77,45 @@ class URL(object):
         else:
             i = self._path.rindex('/')
             return self._path[i + 1:]
+
+    def _get_protocol(self):
+        """Get method for the `protocol` property.
+        """
+        return self._protocol
+
+    def _get_username(self):
+        """Get method for the `username` property.
+        """
+        return self._username
+
+    def _get_password(self):
+        """Get method for the `password` property.
+        """
+        return self._password
+
+    def _get_host(self):
+        """Get method for the `host` property.
+        """
+        return self._host
+
+    def _get_port(self):
+        """Get method for the `port` property.
+        """
+        return self._port
+
+    def _get_path(self):
+        """Get method for the `path` property.
+        """
+        return self._path
+
+    protocol = property(_get_protocol)
+
+    username = property(_get_username)
+
+    password = property(_get_password)
+
+    host = property(_get_host)
+
+    port = property(_get_port)
+
+    path = property(_get_path)
