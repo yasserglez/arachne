@@ -37,6 +37,7 @@ class PriorityQueue(object):
         """Initialize the priority queue.
         """
         self._db = bsddb.db.DB()
+        self._db.set_flags(bsddb.db.DB_DUP)
         self._db.set_bt_compare(self._compare_keys)
         self._db.open(filename, bsddb.db.DB_BTREE, bsddb.db.DB_CREATE)
 
@@ -103,8 +104,8 @@ class PriorityQueue(object):
         elif len1 < len2:
             return -1
         else:
-            for c1, c2 in zip(key1, key2):
-                n = cmp(c1, c2)
+            for char1, char2 in zip(key1, key2):
+                n = cmp(char1, char2)
                 if n != 0:
                     return n
             return 0
@@ -157,10 +158,7 @@ class Queue(PriorityQueue):
         """Initialize the queue.
         """
         self._priority = 0
-        self._db = bsddb.db.DB()
-        self._db.set_flags(bsddb.db.DB_DUP)
-        self._db.open(filename, bsddb.db.DB_BTREE, bsddb.db.DB_CREATE)
-        self._db.sync()
+        PriorityQueue.__init__(self, filename)
 
     def put(self, item):
         """Append a new item to the queue.
