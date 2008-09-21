@@ -133,8 +133,7 @@ class TaskQueue(object):
         old_queues = os.listdir(dirname)
         old_queues.remove(sites_filename)
         self._tasks = {}
-        for info in sites_info:
-            site_id = info['site_id']
+        for site_id, info in sites_info.iteritems():
             filename = '%s.db' % site_id
             queue = PriorityQueue(os.path.join(dirname, filename))
             self._tasks[site_id] = queue
@@ -149,7 +148,7 @@ class TaskQueue(object):
         for filename in old_queues:
             os.unlink(os.path.join(dirname, filename))
         self._mutex = threading.Lock()
-        self._info = sites_info
+        self._sites_info = sites_info
         self._revisits = 5
 
     def __len__(self):
@@ -182,7 +181,8 @@ class TaskQueue(object):
         self._mutex.acquire()
         try:
             site_id = task.site_id
-            task.revisit_wait = self._info[site_id]['default_revisit_wait']
+            revisit_wait = self._sites_info[site_id]['default_revisit_wait']
+            task.revisit_wait =  revisit_wait
             self._put(task, self._get_priority(task.revisit_wait))
         finally:
             self._mutex.release()
@@ -201,7 +201,7 @@ class TaskQueue(object):
             site_id = task.site_id
             task.report_revisit(changed)
             if task.revisit_count >= self._revisits:
-                minimum = self._info[site_id]['min_revisit_wait']
+                minimum = self._sites_info[site_id]['min_revisit_wait']
                 estimated = self._estimate_revisit_wait(task)
                 task.revisit_wait = max(minimum, estimated)
             self._put(task, self._get_priority(task.revisit_wait))
@@ -266,7 +266,7 @@ class TaskQueue(object):
         try:
             site_id = task.site_id
             self._tasks[site_id].get()
-            request_wait = self._info[site_id]['request_wait']
+            request_wait = self._sites_info[site_id]['request_wait']
             self._sites.put(site_id, self._get_priority(request_wait))
         finally:
             self._mutex.release()
@@ -283,7 +283,7 @@ class TaskQueue(object):
         try:
             # Do not remove the task from the queue!
             site_id = task.site_id
-            error_wait = self._info[site_id]['error_wait']
+            error_wait = self._sites_info[site_id]['error_wait']
             self._sites.put(site_id, self._get_priority(error_wait))
         finally:
             self._mutex.release()
