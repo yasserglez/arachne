@@ -42,12 +42,12 @@ class AracneDaemon(Daemon):
     stops the components.  It runs in the main thread of execution.
     """
 
-    def __init__(self, config, sites_info):
+    def __init__(self, config, sites):
         """Initialize components.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
         `ProcessorManager` instances.  The `config` parameter should be a
-        dictionary with the configuration and `sites_info` a list with the
+        dictionary with the configuration and `sites` a list with the
         information of each site.
         """
         Daemon.__init__(self, pidfile=config['pidfile'], user=config['user'],
@@ -59,10 +59,11 @@ class AracneDaemon(Daemon):
                             datefmt='%Y-%m-%d %H:%M:%S')
         logging.info('Starting aracned (Aracne) %s.' % __version__)
         logging.info('Running with %d configured sites.' % len(sites_info))
-        # Create URL instances and site ids.
-        for info in sites_info:
-            info['site_id'] = hashlib.sha1(info['url']).hexdigest()
+        # Create URL instances and site IDs.
+        site_info = {}
+        for site in sites.iteritems():
             info['url'] = URL(info['url'])
+            sites_info[hashlib.sha1(str(info['url'])).hexdigest()] = site
         logging.debug('Initializing components of the daemon.')
         # Create required directories.
         resultsdir = os.path.join(config['spooldir'], 'results')

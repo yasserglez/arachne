@@ -19,7 +19,6 @@
 import os
 import sys
 import shutil
-import hashlib
 import optparse
 import unittest
 
@@ -38,16 +37,18 @@ class TestResultQueue(unittest.TestCase):
     def setUp(self):
         self._dirname = os.path.join(TESTDIR, 'testresultqueue')
         os.mkdir(self._dirname)
-        self._sites_info = [
-            {'url': URL('ftp://atlantis.uh.cu/')},
-            {'url': URL('ftp://andromeda.uh.cu/')},
-            {'url': URL('ftp://deltha.uh.cu/')},
-        ]
+        self._sites_info = {
+            'a78e6853355ad5cdc751ad678d15339382f9ed21':
+                {'url': URL('ftp://atlantis.uh.cu/')},
+            '7e019d6f671d336a0cc31f137ba034efb13fc327':
+                {'url': URL('ftp://andromeda.uh.cu/')},
+            'aa958756e769188be9f76fbdb291fe1b2ddd4777':
+                {'url': URL('ftp://deltha.uh.cu/')},
+        }
         self._results = []
-        for info in self._sites_info:
-            info['site_id'] = hashlib.sha1(str(info['url'])).hexdigest()
+        for site_id, info in self._sites_info.iteritems():
             for name in (str(n) for n in xrange(10)):
-                task = CrawlTask(info['site_id'], info['url'].join(name))
+                task = CrawlTask(site_id, info['url'].join(name))
                 self._results.append(CrawlResult(task))
         self._queue = ResultQueue(self._dirname, self._sites_info)
 
@@ -56,10 +57,11 @@ class TestResultQueue(unittest.TestCase):
         for i, result in enumerate(self._results):
             self._queue.put(result)
             self.assertEquals(len(self._queue), i + 1)
+        num_results = len(self._results)
         for i in xrange(len(self._results)):
             result = self._queue.get()
             self._queue.report_done(result)
-            self.assertEquals(len(self._queue), len(self._results) - i - 1)
+            self.assertEquals(len(self._queue), num_results - i - 1)
 
     def test_populate(self):
         self.assertRaises(EmptyQueueError, self._queue.get)
@@ -78,11 +80,10 @@ class TestResultQueue(unittest.TestCase):
         self._queue.close()
         # Remove a site from the list and open the queue again.  It should not
         # return results from this site but keep the order of the others.
-        del self._sites_info[0]
+        del self._sites_info[self._sites_info.keys()[0]]
         self._queue = ResultQueue(self._dirname, self._sites_info)
-        sites_ids = [info['site_id'] for info in self._sites_info]
         for result in self._results:
-            if result.task.site_id in sites_ids:
+            if self._sites_info.has_key(result.task.site_id):
                 returned = self._queue.get()
                 self.assertEquals(returned.task.site_id, result.task.site_id)
                 self.assertEquals(str(returned.task.url), str(result.task.url))

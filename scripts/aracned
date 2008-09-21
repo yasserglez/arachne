@@ -119,25 +119,25 @@ def _parse_sitesfile(sitesfile):
     ConfigParser.DEFAULTSECT = 'default'
     parser = ConfigParser.ConfigParser(defaults)
     try:
-        sites_info = []
+        sites = []
         parser.read(sitesfile)
         for section in parser.sections():
             info = {}
             info['url'] = section
             info.update(parser.items(section))
-            sites_info.append(info)
+            sites.append(info)
     except ConfigParser.Error:
         _error('an error has occurred parsing the sites file.')
     else:
-        if not sites_info:
+        if not sites:
             _error('failed to read the sites file or no sites configured.')
         else:
             int_keys = ('error_wait', 'request_wait', 'min_revisit_wait',
                         'default_revisit_wait')
-            for info in sites_info:
+            for info in sites:
                 for key in int_keys:
                     info[key] = int(info[key])
-            return sites_info
+            return sites
 
 
 def _error(message):
@@ -152,8 +152,8 @@ def main():
     """
     options = _parse_args()
     config = _parse_configfile(options['configfile'])
-    sites_info = _parse_sitesfile(config['sitesfile'])
-    daemon = AracneDaemon(config, sites_info)
+    sites = _parse_sitesfile(config['sitesfile'])
+    daemon = AracneDaemon(config, sites)
     daemon.start()
     sys.exit(0)
 

@@ -97,8 +97,7 @@ class ResultQueue(object):
         old_queues = os.listdir(dirname)
         old_queues.remove(sites_filename)
         self._results = {}
-        for info in sites_info:
-            site_id = info['site_id']
+        for site_id, info in sites_info.iteritems():
             filename = '%s.db' % site_id
             queue = Queue(os.path.join(dirname, filename))
             self._results[site_id] = queue
