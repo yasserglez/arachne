@@ -39,8 +39,8 @@ class URL(object):
             self._path = result.path
         else:
             # Include the / in the URL of the root directory.
-            self._path = '/'
             self._url = '%s/' % self._url
+            self._path = '/'
 
     def __str__(self):
         """Return the URL as string.
@@ -62,7 +62,7 @@ class URL(object):
     def join(self, path):
         """Join a path to the URL and return the new URL.
         """
-        return URL('%s/%s' %(self._url, path.lstrip('/')))
+        return URL('%s/%s' % (self._url.rstrip('/'), path.lstrip('/')))
 
     def basename(self):
         """Return last path component as string.
