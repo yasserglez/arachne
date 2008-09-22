@@ -17,7 +17,7 @@
 
 from distutils.core import setup
 
-from aracne import __version__
+from aracne import __author__, __version__
 
 
 setup(name='Aracne',
@@ -27,18 +27,19 @@ setup(name='Aracne',
       long_description='',
       url='',
       download_url='',
-      author='Yasser González Fernández',
-      author_email='yglez@uh.cu',
+      author=' '.join(__author__.split()[:-1]),
+      author_email=__author__.split()[-1].strip('<>'),
       platforms=[],
-      packages=['aracne', 'aracne.utils'],
+      packages=['aracne', 'aracne.index', 'aracne.query', 'aracne.utils'],
       package_dir={'aracne': 'aracne'},
       data_files=[
-        ('/etc/init.d/', ['data/aracned']),
-        ('/etc/aracne/', ['data/aracned.conf', 'data/sites.conf']),
+        ('/etc/init.d/', ['data/aracne']),
+        ('/etc/aracne/', ['data/indexd.conf', 'data/queryd.conf',
+                          'data/sites.conf']),
         ('share/doc/aracne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
                                'THANKS']),
-        # The aracned script is currently installed as a data file.
-        ('/usr/sbin/', ['scripts/aracned']),
+        # The scripts to start the daemons are installed as data files.
+        ('/usr/sbin/', ['scripts/aracneindexd', 'scripts/aracnequeryd']),
         # Empty directories required by the default configuration.
         ('/var/run/aracne/', []),
         ('/var/lib/spool/aracne', []),

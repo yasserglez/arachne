@@ -1,0 +1,163 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2008 Yasser González Fernández <yglez@uh.cu>
+#
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+
+import sys
+import logging
+import optparse
+import ConfigParser
+
+from aracne import __author__, __version__
+from aracne.index import IndexDaemon
+
+
+def _parse_args():
+    """Parse the command line arguments.
+    """
+    usage = '%prog [options]'
+    version = 'aracneindexd (Aracne) %s\nCopyright 2008 %s.\nYou may' \
+        ' redistribute copies of Aracne under the terms of the GNU General\n' \
+        'Public License version 3 or later.  For more information about' \
+        ' these matters,\nsee the file named LICENSE found in the source' \
+        ' distribution.' % (__version__, ' '.join(__author__.split()[:-1]))
+    description = 'Aracne index daemon.'
+    parser = optparse.OptionParser(usage=usage, version=version,
+                                   description=description)
+    parser.add_option('-f', '--file', metavar='FILE', dest='config_file',
+                      help='specify config file (default %default)')
+    parser.set_defaults(config_file='/etc/aracne/indexd.conf')
+    (options, args) = parser.parse_args()
+    return options.__dict__
+
+
+def _parse_config_file(configfile):
+    """Parse the configuration file.
+    """
+    config = {
+        'number_crawlers': 3,
+        'user': None,
+        'group': None,
+        'sites_file': '/etc/aracne/sites.conf',
+        'pid_file': '/var/run/aracne/indexd.pid',
+        'spool_dir': '/var/lib/spool/aracne/',
+        'database_dir': '/var/lib/aracne/',
+        'log_file': '/var/log/aracne/indexd.log',
+        'log_level': logging.INFO,
+    }
+    parser = ConfigParser.ConfigParser()
+    try:
+        parser.read(configfile)
+        for option in config.iterkeys():
+            try:
+                value = parser.get('indexd', option)
+            except ConfigParser.NoOptionError:
+                # Ignore missing options, use the default values.
+                pass
+            else:
+                # Use the value from the configuration file.
+                config[option] = value
+    except ConfigParser.NoSectionError:
+        _error('failed to read config file or indexd section is missing.')
+    except ConfigParser.ParsingError:
+        _error('invalid syntax in the config file.')
+    except ConfigParser.Error:
+        _error('an error has occurred parsing the config file.')
+    else:
+        try:
+            config['number_crawlers'] = int(config['number_crawlers'])
+            if config['number_crawlers'] <= 0:
+                raise ValueError()
+        except ValueError:
+            _error('invalid value for number_crawlers in the config file.')
+        if config['user'] is not None:
+            try:
+                config['user'] = int(config['user'])
+            except ValueError:
+                pass
+        if config['group'] is not None:
+            try:
+                config['group'] = int(config['group'])
+            except ValueError:
+                pass
+        if isinstance(config['loglevel'], basestring):
+            values = {
+                'DEBUG': logging.DEBUG,
+                'INFO': logging.INFO,
+                'ERROR': logging.ERROR,
+            }
+            try:
+                config['log_level'] = values[config['log_level'].upper()]
+            except KeyError:
+                _error('invalid value for log_level in the config file.')
+        return config
+
+
+def _parse_sites_file(sites_file):
+    """Parse the file with the information of the sites.
+    """
+    # The format used by this file is based on the configuration file of
+    # Planet <http://www.planetplanet.org/>.
+    defaults = {
+        'error_wait': 1800,
+        'request_wait': 30,
+        'min_revisit_wait': 86400,
+        'default_revisit_wait': 604800,
+    }
+    ConfigParser.DEFAULTSECT = 'default'
+    parser = ConfigParser.ConfigParser(defaults)
+    try:
+        sites = []
+        parser.read(sites_file)
+        for section in parser.sections():
+            site = {}
+            site['url'] = section
+            site.update(parser.items(section))
+            sites.append(site)
+    except ConfigParser.Error:
+        _error('an error has occurred parsing the sites file.')
+    else:
+        if not sites:
+            _error('failed to read the sites file or no sites configured.')
+        else:
+            int_keys = ('error_wait', 'request_wait', 'min_revisit_wait',
+                        'default_revisit_wait')
+            for info in sites:
+                for key in int_keys:
+                    info[key] = int(info[key])
+            return sites
+
+
+def _error(message):
+    """Print `message` and exit.
+    """
+    sys.stderr.write('Error: %s\n' % message)
+    sys.exit(1)
+
+
+def main():
+    """Start the daemon.
+    """
+    options = _parse_args()
+    config = _parse_config_file(options['config_file'])
+    sites = _parse_sites_file(config['sites_file'])
+    daemon = IndexDaemon(config, sites)
+    daemon.start()
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

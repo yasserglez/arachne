@@ -19,7 +19,7 @@ import time
 import logging
 import threading
 
-from aracne.errors import EmptyQueueError
+from aracne.index.error import EmptyQueueError
 
 
 class ResultProcessor(object):
@@ -33,10 +33,8 @@ class ResultProcessor(object):
     def __init__(self, tasks, results):
         """Initialize attributes.
         """
-        logging.debug('Initializing the result processor.')
         self._tasks = tasks
         self._results = results
-        logging.debug('Result processor initialized.')
 
     def process(self, result):
         """Process a crawl result.
@@ -46,29 +44,26 @@ class ResultProcessor(object):
 class ProcessorManager(threading.Thread):
     """Processor manager.
 
-    Create, manage and feed a `ResultProcessor` with crawl results
-    (`CrawlResult`) received from the `ResultQueue`.  It runs in an independent
-    thread of execution.
+    Create, manage and feed a `ResultProcessor` with crawl results received
+    from the `ResultQueue`.  It runs in an independent thread of execution.
     """
 
     def __init__(self, tasks, results):
         """Initialize the result processor.
         """
         threading.Thread.__init__(self)
-        logging.debug('Initializing processor manager.')
         self._tasks = tasks
         self._results = results
         self._sleep = 3
         self._processor = ResultProcessor(tasks, results)
         self._running = False
         self._running_lock = threading.Lock()
-        logging.debug('Processor manager initialized.')
 
     def run(self):
         """Run the main loop.
 
         Set the running flag and then enter in a loop processing crawl results
-        (`CrawlResult`) until the flag is cleared.
+        until the flag is cleared.
         """
         self._running_lock.acquire()
         self._running = True

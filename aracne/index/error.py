@@ -15,5 +15,15 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Misc utilities.
-"""
+
+class IndexError(Exception):
+    """Base class for all exceptions raised in the index daemon.
+    """
+
+
+class EmptyQueueError(IndexError):
+    """Empty queue error.
+
+    Exception raised by the `get()` methods of the `TaskQueue` and
+    `ResultQueue` if no item is available right now.
+    """

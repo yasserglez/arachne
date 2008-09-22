@@ -16,13 +16,6 @@
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-class AracneError(Exception):
-    """Base class for all Aracne exceptions.
-    """
-
-class EmptyQueueError(AracneError):
-    """Empty queue error.
-
-    Exception raised by the `get()` methods of the `TaskQueue` and
-    `ResultQueue` if no item was available within the specified time.
+class QueryError(Exception):
+    """Base class for all exceptions raised in the query daemon.
     """

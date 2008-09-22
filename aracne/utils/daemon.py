@@ -94,7 +94,7 @@ class Daemon(object):
         os.umask(0)
         self._switch_user()
         self._redirect_streams()
-        # The pidfile will belong to the new user.
+        # The PID file will belong to the new user.
         self._write_pidfile()
         signal.signal(signal.SIGTERM, self._sigterm_handler)
         # Now it's a daemon process.  Invoke run().
@@ -103,7 +103,7 @@ class Daemon(object):
     def stop(self):
         """Stop the daemon.
 
-        Remove the pidfile and then invoke the `terminate()` method.
+        Remove the PID file and then invoke the `terminate()` method.
         """
         self._remove_pidfile()
         self.terminate()
@@ -166,7 +166,7 @@ class Daemon(object):
         os.dup2(stderr.fileno(), sys.stderr.fileno())
 
     def _write_pidfile(self):
-        """Create the pidfile.
+        """Create the PID file.
 
         If `self._pidfile` is `None` nothing is created.
         """
@@ -177,7 +177,7 @@ class Daemon(object):
             pidfile.close()
 
     def _remove_pidfile(self):
-        """Remove the pidfile.
+        """Remove the PID file.
 
         If `self._pidfile` is `None` nothing is removed.
         """

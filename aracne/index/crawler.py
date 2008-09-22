@@ -19,16 +19,16 @@ import time
 import logging
 import threading
 
-from aracne.errors import EmptyQueueError
+from aracne.index.error import EmptyQueueError
 
 
 class SiteCrawler(threading.Thread):
     """Site crawler.
 
     When the `start()` method is invoked it enters in a loop getting crawl
-    tasks (`CrawlTask`) from the `TaskQueue`, executing the tasks and reporting
-    results to the `ResultQueue` until the `stop()` method is invoked.  It runs
-    in an independent thread of execution.
+    tasks from the `TaskQueue`, executing the tasks and reporting results to
+    the `ResultQueue` until the `stop()` method is invoked.  It runs in an
+    independent thread of execution.
     """
 
     def __init__(self, tasks, results):
@@ -46,10 +46,9 @@ class SiteCrawler(threading.Thread):
     def run(self):
         """Run the main loop.
 
-        Set the running flag and then enters a loop getting crawl tasks
-        (`CrawlTask`) from the `TaskQueue`, executing the tasks and reporting
-        results (`CrawlResults`) to the `ResultQueue` until the flag is
-        cleared.
+        Set the running flag and then enters a loop getting crawl tasks from
+        the `TaskQueue`, executing the tasks and reporting results to the
+        `ResultQueue` until the flag is cleared.
         """
         self._running_lock.acquire()
         self._running = True
@@ -78,9 +77,8 @@ class SiteCrawler(threading.Thread):
     def _execute(self, task):
         """Execute a crawl task.
 
-        Execute the crawl task (`CrawlTask`) received as argument.  Report
-        error or success to the `TaskQueue` and the crawl result
-        (`CrawlResult`) to the `ResultQueue`.
+        Execute the crawl task received as argument.  Report error or success
+        to the `TaskQueue` and the crawl result to the `ResultQueue`.
         """
         # TODO: Execute the crawl task.
 
@@ -88,30 +86,28 @@ class SiteCrawler(threading.Thread):
 class CrawlerManager(object):
     """Crawler manager.
 
-    Create and manage a number of site crawlers (`SiteCrawler`).  It is just a
-    way to represent the group of crawlers as a single component.
+    Create and manage a number of site crawlers.  It is just a way to represent
+    the group of crawlers as a single component.
     """
 
-    def __init__(self, numcrawlers, tasks, results):
+    def __init__(self, num_crawlers, tasks, results):
         """Initialize the site crawlers.
 
-        Create the group of site crawlers (`SiteCrawler`) according the the
-        value of the `numcrawlers` argument.
+        Create the group of site crawlers according the the value of the
+        `num_crawlers` argument.
         """
-        logging.debug('Initializing crawler manager.')
-        logging.info('Crawler manager is using %d crawlers.' % numcrawlers)
+        logging.info('Crawler manager is using %d crawlers.' % num_crawlers)
         self._crawlers = [SiteCrawler(tasks, results)
-                          for i in range(numcrawlers)]
-        logging.debug('Crawler manager initialized.')
+                          for i in range(num_crawlers)]
 
     def start(self):
-        """Start the site crawlers (`SiteCrawler`).
+        """Start the site crawlers.
         """
         for crawler in self._crawlers:
             crawler.start()
 
     def stop(self):
-        """Stop the site crawlers (`SiteCrawler`).
+        """Stop the site crawlers.
         """
         for crawler in self._crawlers:
             crawler.stop()
@@ -119,8 +115,7 @@ class CrawlerManager(object):
     def join(self):
         """Wait until the site crawlers terminates.
 
-        Invoke the `join()` method of each one of the site crawlers
-        (`SiteCrawler`).
+        Invoke the `join()` method of each one of the site crawlers.
         """
         for crawler in self._crawlers:
             crawler.join()

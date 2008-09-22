@@ -23,7 +23,7 @@ import time
 import math
 import threading
 
-from aracne.errors import EmptyQueueError
+from aracne.index.error import EmptyQueueError
 from aracne.utils.persist import PriorityQueue, QueueError
 
 
