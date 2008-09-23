@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Subpackage with classes related with the query daemon.
+"""
+
 import logging
 
 from aracne import __version__

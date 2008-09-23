@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Module with exceptions raised in the index daemon.
+"""
+
 
 class IndexError(Exception):
     """Base class for all exceptions raised in the index daemon.
