@@ -202,9 +202,10 @@ class TaskQueue(object):
             site_id = task.site_id
             task.report_revisit(changed)
             if task.revisit_count >= self._revisits:
-                minimum = self._sites_info[site_id]['min_revisit_wait']
                 estimated = self._estimate_revisit_wait(task)
-                task.revisit_wait = max(minimum, estimated)
+                minimum = self._sites_info[site_id]['min_revisit_wait']
+                maximum = self._sites_info[sites_id]['max_revisit_wait']
+                task.revisit_wait = min(maximum, max(minimum, estimated))
             self._put(task, self._get_priority(task.revisit_wait))
         finally:
             self._mutex.release()
