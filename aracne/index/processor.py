@@ -15,9 +15,8 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`ResultProcessor` and `ProcessorManager` definitions.
+"""`ResultProcessor` definition.
 """
-
 
 import time
 import logging
@@ -26,30 +25,13 @@ import threading
 from aracne.index.error import EmptyQueueError
 
 
-class ResultProcessor(object):
+class ResultProcessor(threading.Thread):
     """Result processor.
 
-    An instance of this class is created by the `ProcessorManager` and then it
-    invokes the `process()` method for each `CrawlResult` that it gets from the
-    `ResultQueue`.
-    """
-
-    def __init__(self, tasks, results):
-        """Initialize attributes.
-        """
-        self._tasks = tasks
-        self._results = results
-
-    def process(self, result):
-        """Process a crawl result.
-        """
-
-
-class ProcessorManager(threading.Thread):
-    """Processor manager.
-
-    Create, manage and feed a `ResultProcessor` with crawl results received
-    from the `ResultQueue`.  It runs in an independent thread of execution.
+    When the `start()` method is invoked it enters in a loop processing crawl
+    results from the `ResultQueue` until the `stop()` method is invoked.  Here
+    is where the index is created.  It runs in an independent thread of
+    execution.
     """
 
     def __init__(self, tasks, results):
@@ -59,7 +41,7 @@ class ProcessorManager(threading.Thread):
         self._tasks = tasks
         self._results = results
         self._sleep = 3
-        self._processor = ResultProcessor(tasks, results)
+        # Flag used to stop the loop started by the run() method.
         self._running = False
         self._running_lock = threading.Lock()
 
@@ -70,20 +52,22 @@ class ProcessorManager(threading.Thread):
         until the flag is cleared.
         """
         self._running_lock.acquire()
-        self._running = True
-        while self._running:
+        try:
+            self._running = True
+            while self._running:
+                self._running_lock.release()
+                try:
+                    # Try to get a crawl result to process.  If there is not
+                    # result available the thread should sleep.
+                    result = self._results.get()
+                except EmptyQueueError:
+                    time.sleep(self._sleep)
+                else:
+                    self._process(result)
+                    self._results.report_done(result)
+                self._running_lock.acquire()
+        finally:
             self._running_lock.release()
-            try:
-                # Try to get a crawl result to process.  If there is not result
-                # available the thread should sleep.
-                result = self._results.get()
-            except EmptyQueueError:
-                time.sleep(self._sleep)
-            else:
-                self._processor.process(result)
-                # TODO: Release the result from the queue.
-            self._running_lock.acquire()
-        self._running_lock.release()
 
     def stop(self):
         """Order the main loop to end.
@@ -91,5 +75,11 @@ class ProcessorManager(threading.Thread):
         Clear the running flag and the main loop exits.
         """
         self._running_lock.acquire()
-        self._running = False
-        self._running_lock.release()
+        try:
+            self._running = False
+        finally:
+            self._running_lock.release()
+
+    def _process(self, result):
+        """Process a crawl result.
+        """
