@@ -18,7 +18,6 @@
 """`SiteCrawler` and `CrawlerManager` definitions.
 """
 
-
 import time
 import logging
 import threading
@@ -64,7 +63,10 @@ class SiteCrawler(threading.Thread):
                 except EmptyQueueError:
                     time.sleep(self._sleep)
                 else:
-                    self._execute(task)
+                    if self._execute(task):
+                        self._tasks.report_done(task)
+                    else:
+                        self._tasks.report_error(task)
                 self._running_lock.acquire()
         except:
             logging.exception('Exception raised.  Printing traceback.')
@@ -83,10 +85,11 @@ class SiteCrawler(threading.Thread):
     def _execute(self, task):
         """Execute a crawl task.
 
-        Execute the crawl task received as argument.  Report error or success
-        to the `TaskQueue` and the crawl result to the `ResultQueue`.
+        If the task is successfully executed `True` is returned, `False`
+        otherwise.
         """
         # TODO: Execute the crawl task.
+        return False
 
 
 class CrawlerManager(object):

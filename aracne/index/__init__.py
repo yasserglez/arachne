@@ -56,7 +56,7 @@ class IndexDaemon(Daemon):
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logging.info('Starting Aracne index daemon %s.' % __version__)
-        logging.info('Running with %d configured sites.' % len(sites))
+        logging.info('Running for %d sites.' % len(sites))
         # Create URL instances and site IDs.
         sites_info = {}
         for site in sites:

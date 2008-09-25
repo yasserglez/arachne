@@ -61,8 +61,8 @@ class ResultProcessor(threading.Thread):
                 except EmptyQueueError:
                     time.sleep(self._sleep)
                 else:
-                    self._process(result)
-                    self._results.report_done(result)
+                    if self._process(result):
+                        self._results.report_done(result)
                 self._running_lock.acquire()
         except:
             logging.exception('Exception raised.  Printing traceback.')
@@ -82,4 +82,9 @@ class ResultProcessor(threading.Thread):
 
     def _process(self, result):
         """Process a crawl result.
+
+        If the result is successfully processed `True` is returned, `False`
+        otherwise.
         """
+        # TODO: Process the result.
+        return True
