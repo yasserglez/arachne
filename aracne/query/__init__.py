@@ -28,7 +28,7 @@ from aracne.utils.daemon import Daemon
 class QueryDaemon(Daemon):
     """Aracne query daemon.
 
-    This class implements the UNIX daemon used to process the querys to the
+    This class implements the UNIX daemon used to process the queries to the
     database.
     """
 
@@ -52,11 +52,15 @@ class QueryDaemon(Daemon):
 
         Override the `run()` method from the `Daemon` class.
         """
-        self._running = True
-        while self._running:
-            signal.pause()
-        logging.info('Daemon stopped.  Exiting.')
-        logging.shutdown()
+        try:
+            self._running = True
+            while self._running:
+                signal.pause()
+            logging.info('Daemon stopped.  Exiting.')
+        except:
+            logging.exception('Exception raised.  Printing traceback.')
+        finally:
+            logging.shutdown()
 
     def terminate(self):
         """Order the main loop to end.

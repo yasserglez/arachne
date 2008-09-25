@@ -57,8 +57,6 @@ class ResultProcessor(threading.Thread):
             while self._running:
                 self._running_lock.release()
                 try:
-                    # Try to get a crawl result to process.  If there is not
-                    # result available the thread should sleep.
                     result = self._results.get()
                 except EmptyQueueError:
                     time.sleep(self._sleep)
@@ -66,6 +64,8 @@ class ResultProcessor(threading.Thread):
                     self._process(result)
                     self._results.report_done(result)
                 self._running_lock.acquire()
+        except:
+            logging.exception('Exception raised.  Printing traceback.')
         finally:
             self._running_lock.release()
 

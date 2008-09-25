@@ -85,19 +85,23 @@ class IndexDaemon(Daemon):
         flag, start the components and then sleep until a SIGTERM signal is
         received to stop the components.
         """
-        self._running = True
-        self._crawlers.start()
-        self._processor.start()
-        while self._running:
-            signal.pause()
-        self._crawlers.stop()
-        self._processor.stop()
-        self._crawlers.join()
-        self._processor.join()
-        self._results.close()
-        self._tasks.close()
-        logging.info('Daemon stopped.  Exiting.')
-        logging.shutdown()
+        try:
+            self._running = True
+            self._crawlers.start()
+            self._processor.start()
+            while self._running:
+                signal.pause()
+            self._crawlers.stop()
+            self._processor.stop()
+            self._crawlers.join()
+            self._processor.join()
+            self._results.close()
+            self._tasks.close()
+            logging.info('Daemon stopped.  Exiting.')
+        except:
+            logging.exception('Exception raised.  Printing traceback.')
+        finally:
+            logging.shutdown()
 
     def terminate(self):
         """Order the main loop to end.

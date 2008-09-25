@@ -55,19 +55,21 @@ class SiteCrawler(threading.Thread):
         `ResultQueue` until the flag is cleared.
         """
         self._running_lock.acquire()
-        self._running = True
-        while self._running:
+        try:
+            self._running = True
+            while self._running:
+                self._running_lock.release()
+                try:
+                    task = self._tasks.get()
+                except EmptyQueueError:
+                    time.sleep(self._sleep)
+                else:
+                    self._execute(task)
+                self._running_lock.acquire()
+        except:
+            logging.exception('Exception raised.  Printing traceback.')
+        finally:
             self._running_lock.release()
-            try:
-                # Try to get a crawl task to execute.  If there is not task
-                # available the thread should sleep.
-                task = self._tasks.get()
-            except EmptyQueueError:
-                time.sleep(self._sleep)
-            else:
-                self._execute(task)
-            self._running_lock.acquire()
-        self._running_lock.release()
 
     def stop(self):
         """Order the main loop to end.
