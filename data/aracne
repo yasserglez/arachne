@@ -1,37 +1,56 @@
 #!/bin/sh
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="file search engine"
-NAME=aracned
-DAEMON=/usr/sbin/aracned
-PIDFILE=/var/run/aracne/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
+DESC="networked file search engine"
+SCRIPT=/etc/init.d/aracne
 
-[ -x "$DAEMON" ] || exit 0
+INDEX_NAME=aracneindexd
+INDEX_DAEMON=/usr/sbin/aracneindexd
+INDEX_PIDFILE=/var/run/aracne/$INDEX_NAME.pid
+QUERY_NAME=aracnequeryd
+QUERY_DAEMON=/usr/sbin/aracnequeryd
+QUERY_PIDFILE=/var/run/aracne/$QUERY_NAME.pid
+
+[ -x "$INDEX_DAEMON" ] || exit 0
+[ -x "$QUERY_DAEMON" ] || exit 0
 
 case "$1" in
 	start)
-		echo -n "Starting $DESC: "
-		start-stop-daemon --start --quiet --pidfile $PIDFILE \
-			--exec $DAEMON
-		echo "$NAME."
+		echo -n "Starting $DESC:"
+		echo -n " $INDEX_NAME"
+		start-stop-daemon --start --quiet --pidfile $INDEX_PIDFILE  \
+			--exec $INDEX_DAEMON
+		echo -n " $QUERY_NAME"
+		start-stop-daemon --start --quiet --pidfile $QUERY_PIDFILE  \
+			--exec $QUERY_DAEMON
+		echo "."
 		;;
 	stop)
 		echo -n "Stopping $DESC: "
-		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+		echo -n " $INDEX_NAME"
+		start-stop-daemon --stop --quiet --pidfile $INDEX_PIDFILE \
 			--retry=TERM/30/KILL/forever
-		echo "$NAME."
+		echo -n " $QUERY_NAME"
+		start-stop-daemon --stop --quiet --pidfile $QUERY_PIDFILE \
+			--retry=TERM/30/KILL/forever
+		echo "."
 		;;
 	restart|force-reload)
 		echo -n "Restarting $DESC: "
-		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+		echo -n " $INDEX_NAME"
+		start-stop-daemon --stop --quiet --pidfile $INDEX_PIDFILE \
 			--retry=TERM/30/KILL/forever
-		start-stop-daemon --start --quiet --pidfile $PIDFILE \
-			--exec $DAEMON
-		echo "$NAME."
+		start-stop-daemon --start --quiet --pidfile $INDEX_PIDFILE \
+			--exec $INDEX_DAEMON
+		echo -n " $QUERY_NAME"
+		start-stop-daemon --stop --quiet --pidfile $QUERY_PIDFILE \
+			--retry=TERM/30/KILL/forever
+		start-stop-daemon --start --quiet --pidfile $QUERY_PIDFILE \
+			--exec $QUERY_DAEMON
+		echo "."
 		;;
 	*)
-		echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+		echo "Usage: $SCRIPT {start|stop|restart|force-reload}" >&2
 		exit 1
 		;;
 esac
