@@ -18,6 +18,7 @@
 """Subpackage with classes related with the query daemon.
 """
 
+import signal
 import logging
 
 from aracne import __version__

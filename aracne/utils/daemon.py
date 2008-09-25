@@ -45,14 +45,14 @@ class Daemon(object):
     `terminate()` method is invoked.
     """
 
-    def __init__(self, pidfile=None, stdin='/dev/null', stdout='/dev/null',
+    def __init__(self, pid_file=None, stdin='/dev/null', stdout='/dev/null',
                  stderr='/dev/null', user=None, group=None):
         """
         Initialize attributes.
 
-        The `pidfile` argument must be the name of a file.  The `start()`
+        The `pid_file` argument must be the name of a file.  The `start()`
         method will write the PID of the newly forked daemon to this file.  If
-        `pidfile` is `None` no PID is written.
+        `pid_file` is `None` no PID is written.
 
         The `stdin`, `stdout`, and `stderr` arguments are file names that will
         be opened and be used to replace the standard file descriptors in
@@ -64,7 +64,7 @@ class Daemon(object):
         `None` no user switching will be done (default).  In the same way
         `group` can be the name or GID of a group.
         """
-        self._pidfile = pidfile
+        self._pid_file = pid_file
         self._stdin = stdin
         self._stdout = stdout
         self._stderr = stderr
@@ -95,7 +95,7 @@ class Daemon(object):
         self._switch_user()
         self._redirect_streams()
         # The PID file will belong to the new user.
-        self._write_pidfile()
+        self._write_pid_file()
         signal.signal(signal.SIGTERM, self._sigterm_handler)
         # Now it's a daemon process.  Invoke run().
         self.run()
@@ -105,7 +105,7 @@ class Daemon(object):
 
         Remove the PID file and then invoke the `terminate()` method.
         """
-        self._remove_pidfile()
+        self._remove_pid_file()
         self.terminate()
 
     def run(self):
@@ -165,25 +165,25 @@ class Daemon(object):
         os.dup2(stdout.fileno(), sys.stdout.fileno())
         os.dup2(stderr.fileno(), sys.stderr.fileno())
 
-    def _write_pidfile(self):
+    def _write_pid_file(self):
         """Create the PID file.
 
-        If `self._pidfile` is `None` nothing is created.
+        If `self._pid_file` is `None` nothing is created.
         """
         # TODO: Check for errors.
-        if self._pidfile is not None:
-            pidfile = open(self._pidfile, 'wb')
-            pidfile.write('%d\n' % os.getpid())
-            pidfile.close()
+        if self._pid_file is not None:
+            pid_file = open(self._pid_file, 'wb')
+            pid_file.write('%d\n' % os.getpid())
+            pid_file.close()
 
-    def _remove_pidfile(self):
+    def _remove_pid_file(self):
         """Remove the PID file.
 
-        If `self._pidfile` is `None` nothing is removed.
+        If `self._pid_file` is `None` nothing is removed.
         """
         # TODO: Check for errors.
-        if self._pidfile is not None:
-            os.remove(self._pidfile)
+        if self._pid_file is not None:
+            os.remove(self._pid_file)
 
     def _sigterm_handler(self, signum, frame):
         """SIGTERM signal handler.

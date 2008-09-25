@@ -93,7 +93,7 @@ def _parse_config_file(configfile):
                 config['group'] = int(config['group'])
             except ValueError:
                 pass
-        if isinstance(config['loglevel'], basestring):
+        if isinstance(config['log_level'], basestring):
             values = {
                 'DEBUG': logging.DEBUG,
                 'INFO': logging.INFO,

@@ -60,8 +60,8 @@ class IndexDaemon(Daemon):
         # Create URL instances and site IDs.
         sites_info = {}
         for site in sites:
-            site['url'] = URL(info['url'])
-            sites_info[hashlib.sha1(str(info['url'])).hexdigest()] = site
+            site['url'] = URL(site['url'])
+            sites_info[hashlib.sha1(str(site['url'])).hexdigest()] = site
         # Create required directories.
         results_dir = os.path.join(config['spool_dir'], 'results')
         if not os.path.isdir(results_dir):
