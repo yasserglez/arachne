@@ -33,7 +33,7 @@ from aracne.index.error import EmptyQueueError
 from aracne.index.task import CrawlTask, TaskQueue
 
 
-class TestResultQueue(unittest.TestCase):
+class TestTaskQueue(unittest.TestCase):
 
     def setUp(self):
         self._dirname = os.path.join(TESTDIR, 'testtaskqueue')
