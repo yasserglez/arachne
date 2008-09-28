@@ -41,7 +41,7 @@ class TestURL(unittest.TestCase):
 
     def test_properties(self):
         result = urlparse.urlsplit(self._url)
-        self.assertEquals(self._urlobj.protocol, result.scheme)
+        self.assertEquals(self._urlobj.scheme, result.scheme)
         self.assertEquals(self._urlobj.username, result.username)
         self.assertEquals(self._urlobj.password, result.password)
         self.assertEquals(self._urlobj.host, result.netloc)
@@ -57,7 +57,7 @@ class TestURL(unittest.TestCase):
 
     def test_pickling(self):
         urlobj = pickle.loads(pickle.dumps(self._urlobj))
-        self.assertEquals(self._urlobj.protocol, urlobj.protocol)
+        self.assertEquals(self._urlobj.scheme, urlobj.scheme)
         self.assertEquals(self._urlobj.username, urlobj.username)
         self.assertEquals(self._urlobj.password, urlobj.password)
         self.assertEquals(self._urlobj.host, urlobj.host)

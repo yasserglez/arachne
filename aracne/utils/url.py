@@ -29,7 +29,7 @@ class URL(object):
         """Initialize the URL from the string `url`.
         """
         result = urlparse.urlsplit(url.rstrip('/'))
-        self._protocol = result.scheme
+        self._scheme = result.scheme
         self._username = result.username
         self._password = result.password
         self._host = result.netloc
@@ -78,10 +78,10 @@ class URL(object):
             i = self._path.rindex('/')
             return self._path[i + 1:]
 
-    def _get_protocol(self):
-        """Get method for the `protocol` property.
+    def _get_scheme(self):
+        """Get method for the `scheme` property.
         """
-        return self._protocol
+        return self._scheme
 
     def _get_username(self):
         """Get method for the `username` property.
@@ -108,7 +108,7 @@ class URL(object):
         """
         return self._path
 
-    protocol = property(_get_protocol)
+    scheme = property(_get_scheme)
 
     username = property(_get_username)
 
