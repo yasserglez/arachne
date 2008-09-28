@@ -18,6 +18,11 @@
 """Protocol handlers.
 """
 
+import os
+
+from aracne.index.result import CrawlResult
+
+
 class ProtocolHandler(object):
     """Protocol handler.
 
@@ -36,14 +41,46 @@ class ProtocolHandler(object):
 
         The `sites_info` argument will be a dictionary mapping site IDs to the
         information for the sites.  This can be usefull to support advanced
-        configurations for a site (e.g. proxy server).
+        settings for a site (e.g. proxy server).
         """
         raise NotImplementedError()
 
     def execute(self, task):
-        """Execute a task and return the result.
+        """Execute the task and return the result.
 
         If the task is successfully executed the `CrawlResult` instance should
         be returned, `None` otherwise.
         """
         raise NotImplementedError()
+
+
+class FileHandler(ProtocolHandler):
+    """Handler local files.
+    """
+
+    scheme = 'file'
+
+    def __init__(self, sites_info):
+        """Initialize handler.
+        """
+
+    def execute(self, task):
+        """Execute the task and return the result.
+        """
+        try:
+            dir_path = task.url.path
+            if os.path.isdir(dir_path):
+                result = CrawlResult(task)
+                for entry in os.listdir(dir_path):
+                    data = {}
+                    entry_path = os.path.join(dir_path, entry)
+                    data['isdir'] = os.path.isdir(entry_path)
+                    if not data['isdir']:
+                        data['size'] = os.path.getsize(entry_path)
+                    result.append(entry, data)
+            else:
+                result = CrawlResult(task, False)
+        except OSError:
+            return None
+        else:
+            return result

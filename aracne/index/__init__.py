@@ -72,8 +72,8 @@ class IndexDaemon(Daemon):
         # Initialize components.
         self._tasks = TaskQueue(tasks_dir, sites_info)
         self._results = ResultQueue(results_dir, sites_info)
-        self._crawlers = CrawlerManager(config['number_crawlers'], self._tasks,
-                                        self._results)
+        self._crawlers = CrawlerManager(sites_info, self._tasks, self._results,
+                                        config['number_crawlers'])
         self._processor = ResultProcessor(self._tasks, self._results)
         # Flag used to stop the loop started by the run() method.
         self._running = False

@@ -23,6 +23,7 @@ import logging
 import threading
 
 from aracne.index.error import EmptyQueue
+from aracne.index.handler import ProtocolHandler
 
 
 class SiteCrawler(threading.Thread):
@@ -34,17 +35,19 @@ class SiteCrawler(threading.Thread):
     independent thread of execution.
     """
 
-    def __init__(self, tasks, results):
+    def __init__(self, sites_info, tasks, results):
         """Initialize attributes.
         """
         threading.Thread.__init__(self)
         self._tasks = tasks
         self._results = results
         self._sleep = 5
+        self._handlers = {}
+        for handler in ProtocolHandler.__subclasses__():
+            self._handlers[handler.scheme] = handler(sites_info)
         # Flag used to stop the loop started by the run() method.
         self._running = False
         self._running_lock = threading.Lock()
-        # TODO: Create the protocol handlers.
 
     def run(self):
         """Run the main loop.
@@ -63,10 +66,20 @@ class SiteCrawler(threading.Thread):
                 except EmptyQueue:
                     time.sleep(self._sleep)
                 else:
-                    if self._execute(task):
-                        self._tasks.report_done(task)
-                    else:
+                    scheme = task.url.scheme
+                    try:
+                        handler = self._handlers[scheme]
+                    except KeyError:
+                        # Scheme it not supported.  Keep the task in the queue.
                         self._tasks.report_error(task)
+                        logging.error('%s scheme is not supported.' % scheme)
+                    else:
+                        result = handler.execute(task)
+                        if result:
+                            self._results.put(result)
+                            self._tasks.report_done(task)
+                        else:
+                            self._tasks.report_error(task)
                 self._running_lock.acquire()
         except:
             logging.exception('Exception raised.  Printing traceback.')
@@ -82,31 +95,22 @@ class SiteCrawler(threading.Thread):
         self._running = False
         self._running_lock.release()
 
-    def _execute(self, task):
-        """Execute a crawl task.
-
-        If the task is successfully executed `True` is returned, `False`
-        otherwise.
-        """
-        # TODO: Execute the crawl task.
-        return False
-
 
 class CrawlerManager(object):
     """Crawler manager.
 
-    Create and manage a number of site crawlers.  It is just a way to represent
-    the group of crawlers as a single component.
+    Create and manage the site crawlers.  It is just a way to represent the
+    group of crawlers as a single component.
     """
 
-    def __init__(self, num_crawlers, tasks, results):
+    def __init__(self, sites_info, tasks, results, num_crawlers):
         """Initialize the site crawlers.
 
         Create the group of site crawlers according the the value of the
         `num_crawlers` argument.
         """
         logging.info('Crawler manager is using %d crawlers.' % num_crawlers)
-        self._crawlers = [SiteCrawler(tasks, results)
+        self._crawlers = [SiteCrawler(sites_info, tasks, results)
                           for i in range(num_crawlers)]
 
     def start(self):
