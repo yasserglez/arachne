@@ -19,12 +19,12 @@
 """
 
 
-class IndexError(Exception):
+class IndexException(Exception):
     """Base class for all exceptions raised in the index daemon.
     """
 
 
-class EmptyQueueError(IndexError):
+class EmptyQueue(IndexException):
     """Empty queue error.
 
     Exception raised by the `get()` methods of the `TaskQueue` and

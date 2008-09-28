@@ -27,7 +27,7 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from aracne.utils.url import URL
-from aracne.index.error import EmptyQueueError
+from aracne.index.error import EmptyQueue
 from aracne.index.task import CrawlTask
 from aracne.index.result import CrawlResult, ResultQueue
 
@@ -79,7 +79,7 @@ class TestResultQueue(unittest.TestCase):
             self.assertEquals(len(self._queue), num_results - i - 1)
 
     def test_populate(self):
-        self.assertRaises(EmptyQueueError, self._queue.get)
+        self.assertRaises(EmptyQueue, self._queue.get)
         for result in self._results:
             self._queue.put(result)
         for result in self._results:
@@ -87,7 +87,7 @@ class TestResultQueue(unittest.TestCase):
             self.assertEquals(returned.task.site_id, result.task.site_id)
             self.assertEquals(str(returned.task.url), str(result.task.url))
             self._queue.report_done(result)
-        self.assertRaises(EmptyQueueError, self._queue.get)
+        self.assertRaises(EmptyQueue, self._queue.get)
 
     def test_persist(self):
         for result in self._results:

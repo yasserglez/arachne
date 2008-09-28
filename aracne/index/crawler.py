@@ -22,7 +22,7 @@ import time
 import logging
 import threading
 
-from aracne.index.error import EmptyQueueError
+from aracne.index.error import EmptyQueue
 
 
 class SiteCrawler(threading.Thread):
@@ -60,7 +60,7 @@ class SiteCrawler(threading.Thread):
                 self._running_lock.release()
                 try:
                     task = self._tasks.get()
-                except EmptyQueueError:
+                except EmptyQueue:
                     time.sleep(self._sleep)
                 else:
                     if self._execute(task):

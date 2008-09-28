@@ -18,8 +18,6 @@
 """Persistent queue implementations.
 """
 
-import os
-import sys
 import bsddb
 import cPickle
 
@@ -95,7 +93,8 @@ class PriorityQueue(object):
         """
         self._db.close()
 
-    def _compare_keys(self, key1, key2):
+    @staticmethod
+    def _compare_keys(key1, key2):
         """Method used to compare the keys of the BTree.
         """
         len1, len2 = len(key1), len(key2)
@@ -173,8 +172,7 @@ class Queue(PriorityQueue):
         This returned item will be a copy of the item saved in the database and
         you should not modify it.
         """
-        item, priority = PriorityQueue._head(self)
-        return item
+        return PriorityQueue._head(self)[0]
 
     def tail(self):
         """Return the item at the tail of the queue.
@@ -182,8 +180,7 @@ class Queue(PriorityQueue):
         The returned item will be a copy of the item saved in the database and
         if you modify it the changes will not be reflected in the database.
         """
-        item, priority = PriorityQueue._tail(self)
-        return item
+        return PriorityQueue._tail(self)[0]
 
     def get(self):
         """Return the item at the head of the queue.
@@ -191,5 +188,4 @@ class Queue(PriorityQueue):
         Return and delete the item at the head of the queue.  If the queue is
         empty a `QueueError` exception is raised.
         """
-        item, priority = PriorityQueue._get(self)
-        return item
+        return PriorityQueue._get(self)[0]

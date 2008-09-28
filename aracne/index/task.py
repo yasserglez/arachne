@@ -23,7 +23,7 @@ import time
 import math
 import threading
 
-from aracne.index.error import EmptyQueueError
+from aracne.index.error import EmptyQueue
 from aracne.utils.persist import PriorityQueue, QueueError
 
 
@@ -204,7 +204,7 @@ class TaskQueue(object):
             if task.revisit_count >= self._revisits:
                 estimated = self._estimate_revisit_wait(task)
                 minimum = self._sites_info[site_id]['min_revisit_wait']
-                maximum = self._sites_info[sites_id]['max_revisit_wait']
+                maximum = self._sites_info[site_id]['max_revisit_wait']
                 task.revisit_wait = min(maximum, max(minimum, estimated))
             self._put(task, self._get_priority(task.revisit_wait))
         finally:
@@ -215,7 +215,7 @@ class TaskQueue(object):
 
         Return a task executable right now.  The task should be reported later
         as done or error using `report_done()` and `report_error()`.  If there
-        is not executable task an `EmptyQueueError` exception is raised.
+        is not executable task an `EmptyQueue` exception is raised.
         """
         self._mutex.acquire()
         try:
@@ -228,12 +228,12 @@ class TaskQueue(object):
                     site_id, site_priority = self._sites.head()
                 except QueueError:
                     # Empty queue.  Running without sites?
-                    raise EmptyQueueError()
+                    raise EmptyQueue()
                 else:
                     if site_priority > self._get_priority():
                         # The site at the head of the queue cannot be visited
                         # right now.  Then, the queue is empty.
-                        raise EmptyQueueError()
+                        raise EmptyQueue()
                     else:
                         try:
                             task, task_priority = self._tasks[site_id].head()
@@ -325,7 +325,7 @@ class TaskQueue(object):
     def _get_priority(seconds=0):
         """Return a priority value.
 
-        Return an integer value (seconds since UNIX epoch) that can be used as
+        Return an integer (seconds since UNIX epoch) that can be used as
         priority for a task that needs to be executed after `seconds` seconds.
         The default value for the `seconds` argument is 0, meaning right now.
         """

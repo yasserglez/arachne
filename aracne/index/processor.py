@@ -22,7 +22,7 @@ import time
 import logging
 import threading
 
-from aracne.index.error import EmptyQueueError
+from aracne.index.error import EmptyQueue
 
 
 class ResultProcessor(threading.Thread):
@@ -58,7 +58,7 @@ class ResultProcessor(threading.Thread):
                 self._running_lock.release()
                 try:
                     result = self._results.get()
-                except EmptyQueueError:
+                except EmptyQueue:
                     time.sleep(self._sleep)
                 else:
                     if self._process(result):

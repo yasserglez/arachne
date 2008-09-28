@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""Script used to start the query daemon.
+"""
+
 import sys
 import logging
 import optparse
@@ -40,8 +43,7 @@ def _parse_args():
     parser.add_option('-f', '--file', metavar='FILE', dest='config_file',
                       help='specify config file (default %default)')
     parser.set_defaults(config_file='/etc/aracne/queryd.conf')
-    (options, args) = parser.parse_args()
-    return options.__dict__
+    return parser.parse_args()[0].__dict__
 
 
 def _parse_config_file(config_file):

@@ -29,7 +29,7 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from aracne.utils.url import URL
-from aracne.index.error import EmptyQueueError
+from aracne.index.error import EmptyQueue
 from aracne.index.task import CrawlTask, TaskQueue
 
 
@@ -105,7 +105,7 @@ class TestTaskQueue(unittest.TestCase):
         for i in xrange(num_sites):
             self._queue.report_done(self._queue.get())
         time.sleep(self._request_wait)
-        self.assertRaises(EmptyQueueError, self._queue.get)
+        self.assertRaises(EmptyQueue, self._queue.get)
         # Insert tasks in the queue.
         for task in itertools.chain(*self._tasks.values()):
             self._queue.put_new(task)
@@ -149,7 +149,7 @@ class TestTaskQueue(unittest.TestCase):
         self._queue.report_done(task)
         time.sleep(self._default_revisit_wait / 2)
         # The task should not be returned yet.
-        self.assertRaises(EmptyQueueError, self._queue.get)
+        self.assertRaises(EmptyQueue, self._queue.get)
         time.sleep(self._default_revisit_wait / 2)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
@@ -160,7 +160,7 @@ class TestTaskQueue(unittest.TestCase):
         self._queue.report_done(task)
         time.sleep(self._min_revisit_wait / 2)
         # The task should not be returned yet.
-        self.assertRaises(EmptyQueueError, self._queue.get)
+        self.assertRaises(EmptyQueue, self._queue.get)
         time.sleep(self._min_revisit_wait / 2)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
@@ -171,7 +171,7 @@ class TestTaskQueue(unittest.TestCase):
         self._queue.report_done(task)
         time.sleep(self._request_wait / 2)
         # The task should not be returned yet.
-        self.assertRaises(EmptyQueueError, self._queue.get)
+        self.assertRaises(EmptyQueue, self._queue.get)
         time.sleep(self._request_wait / 2)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
@@ -182,7 +182,7 @@ class TestTaskQueue(unittest.TestCase):
         self._queue.report_error(task)
         time.sleep(self._error_wait / 2)
         # The task should not be returned yet.
-        self.assertRaises(EmptyQueueError, self._queue.get)
+        self.assertRaises(EmptyQueue, self._queue.get)
         time.sleep(self._error_wait / 2)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 

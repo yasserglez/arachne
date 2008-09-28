@@ -19,6 +19,6 @@
 """
 
 
-class QueryError(Exception):
+class QueryException(Exception):
     """Base class for all exceptions raised in the query daemon.
     """

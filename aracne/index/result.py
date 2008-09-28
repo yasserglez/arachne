@@ -21,7 +21,7 @@
 import os
 import threading
 
-from aracne.index.error import EmptyQueueError
+from aracne.index.error import EmptyQueue
 from aracne.utils.persist import Queue, QueueError
 
 
@@ -132,7 +132,7 @@ class ResultQueue(object):
 
         This method does not remove the result from the queue until it's
         reported as processed using `report_done()`.  If there are not results
-        available an `EmptyQueueError` exception is raised.
+        available an `EmptyQueue` exception is raised.
         """
         self._mutex.acquire()
         try:
@@ -140,7 +140,7 @@ class ResultQueue(object):
                 try:
                     site_id = self._sites.head()
                 except QueueError:
-                    raise EmptyQueueError()
+                    raise EmptyQueue()
                 else:
                     try:
                         result = self._results[site_id].head()
