@@ -18,12 +18,32 @@
 """Protocol handlers.
 """
 
-
 class ProtocolHandler(object):
     """Protocol handler.
 
-    Abstract base class that should be subclassed by all the supported
-    protocols by the crawler.  This provides a way for extending the crawler to
-    support new protocols.  Instances of subclasses of this class are used by
-    the `SiteCrawler`.
+    Abstract class that should be subclassed by all supported protocols in the
+    crawler.  This provides a way to extend the crawler to support new
+    protocols.  Instances of this class are used by the `SiteCrawler`.
+
+    The subclasses should set the `scheme` class attribute to the URL scheme
+    specifier for the protocol.
     """
+
+    scheme = ''
+
+    def __init__(self, sites_info):
+        """Initialize the protocol handler.
+
+        The `sites_info` argument will be a dictionary mapping site IDs to the
+        information for the sites.  This can be usefull to support advanced
+        configurations for a site (e.g. proxy server).
+        """
+        raise NotImplementedError()
+
+    def execute(self, task):
+        """Execute a task and return the result.
+
+        If the task is successfully executed the `CrawlResult` instance should
+        be returned, `None` otherwise.
+        """
+        raise NotImplementedError()
