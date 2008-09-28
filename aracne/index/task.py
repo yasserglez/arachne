@@ -338,9 +338,12 @@ class TaskQueue(object):
         # This algorithm uses the estimator proposed by Junghoo Cho (University
         # of California, LA) and Hector Garcia-Molina (Stanford University) in
         # "Estimating Frequency of Change".
-        c = task.change_count if task.change_count else 1
-        w = task.revisit_wait
-        v = task.revisit_count
-        nw = w / (- math.log((v - c + 0.5) / (v + 0.5)))
-        return int(math.ceil(nw) if nw >= (math.floor(nw) + 0.5)
-                   else math.floor(nw))
+        if task.change_count:
+            changes = task.change_count
+            visits = task.revisit_count
+            wait = task.revisit_wait
+            new_wait  = wait / - math.log((visits - changes + 0.5) / (visits + 0.5))
+            new_wait = int(round(new_wait))
+        else:
+            new_wait = task.revisit_wait
+        return new_wait
