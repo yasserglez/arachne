@@ -32,12 +32,12 @@ def _parse_args():
     """Parse the command line arguments.
     """
     usage = '%prog [options]'
-    version = 'aracne-indexer (Aracne) %s\nCopyright 2008 %s.\nYou may' \
+    version = 'aracne-indexer (Aracne) %s\nCopyright (C) 2008 %s.\nYou may' \
         ' redistribute copies of Aracne under the terms of the GNU General\n' \
         'Public License version 3 or later.  For more information about' \
         ' these matters,\nsee the file named LICENSE found in the source' \
         ' distribution.' % (__version__, ' '.join(__author__.split()[:-1]))
-    description = 'Aracne indexer daemon.'
+    description = 'Indexer daemon of the Aracne file search engine.'
     parser = optparse.OptionParser(usage=usage, version=version,
                                    description=description)
     parser.add_option('-f', '--file', metavar='FILE', dest='config_file',

@@ -22,8 +22,8 @@ from aracne import __author__, __version__
 
 setup(name='Aracne',
       version=__version__,
-      license='GNU General Public License version 3 or later',
-      description='Networked file search engine.',
+      license='GNU General Public License version 3 or any later version',
+      description='File search engine.',
       long_description='',
       url='',
       download_url='',

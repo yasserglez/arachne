@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Script used to start the searcher daemon.
+"""Script to start the searcher daemon.
 """
 
 import sys
@@ -32,12 +32,12 @@ def _parse_args():
     """Parse the command line arguments.
     """
     usage = '%prog [options]'
-    version = 'aracne-searcher (Aracne) %s\nCopyright 2008 %s.\nYou may' \
+    version = 'aracne-searcher (Aracne) %s\nCopyright (C) 2008 %s.\nYou may' \
         ' redistribute copies of Aracne under the terms of the GNU General\n' \
         'Public License version 3 or later.  For more information about' \
         ' these matters,\nsee the file named LICENSE found in the source' \
         ' distribution.' % (__version__, ' '.join(__author__.split()[:-1]))
-    description = 'Aracne searcher daemon.'
+    description = 'Searcher daemon of the Aracne file search engine.'
     parser = optparse.OptionParser(usage=usage, version=version,
                                    description=description)
     parser.add_option('-f', '--file', metavar='FILE', dest='config_file',
