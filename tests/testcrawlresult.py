@@ -37,8 +37,7 @@ class TestCrawlResult(unittest.TestCase):
         self._task = CrawlTask('aa958756e769188be9f76fbdb291fe1b2ddd4777',
                                'ftp://deltha.uh.cu/')
         self._result = CrawlResult(self._task, self._found)
-        self._entries = (('a', {'isdir': True}), ('b', {'size': 1024}),
-                         ('c', {'size': 2049}), ('d', {'isdir': True}))
+        self._entries = (('a', {'is_dir': True}), ('b', {'is_dir': False}))
 
     def test_properties(self):
         self.assertEquals(self._result.task.site_id, self._task.site_id)

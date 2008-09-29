@@ -74,9 +74,7 @@ class FileHandler(ProtocolHandler):
                 for entry in os.listdir(dir_path):
                     data = {}
                     entry_path = os.path.join(dir_path, entry)
-                    data['isdir'] = os.path.isdir(entry_path)
-                    if not data['isdir']:
-                        data['size'] = os.path.getsize(entry_path)
+                    data['is_dir'] = os.path.isdir(entry_path)
                     result.append(entry, data)
             else:
                 result = CrawlResult(task, False)

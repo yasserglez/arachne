@@ -41,7 +41,7 @@ class SiteCrawler(threading.Thread):
         threading.Thread.__init__(self)
         self._tasks = tasks
         self._results = results
-        self._sleep = 5
+        self._sleep = 1
         self._handlers = {}
         for handler in ProtocolHandler.__subclasses__():
             self._handlers[handler.scheme] = handler(sites_info)
@@ -75,10 +75,12 @@ class SiteCrawler(threading.Thread):
                         logging.error('%s scheme is not supported.' % scheme)
                     else:
                         result = handler.execute(task)
-                        if result:
+                        if result is not None:
+                            logging.info('sucess %s' % task.url)
                             self._results.put(result)
                             self._tasks.report_done(task)
                         else:
+                            logging.info('error %s' % task.url)
                             self._tasks.report_error(task)
                 self._running_lock.acquire()
         except:

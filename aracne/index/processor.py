@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`ResultProcessor` definition.
+"""`ProcessorManager` and related classes definition.
 """
 
 import time
@@ -23,24 +23,87 @@ import logging
 import threading
 
 from aracne.index.error import EmptyQueue
+from aracne.index.task import CrawlTask
 
 
-class ResultProcessor(threading.Thread):
+class ResultProcessor(object):
     """Result processor.
 
-    When the `start()` method is invoked it enters in a loop processing crawl
-    results from the `ResultQueue` until the `stop()` method is invoked.  Here
-    is where the index is created.  It runs in an independent thread of
-    execution.
+    Abstract class that should be subclassed by the result processors.
+    Instances of subclasses are used by the `ProcessorManager`.
     """
 
-    def __init__(self, tasks, results):
-        """Initialize the result processor.
+    def __init__(self, sites_info, tasks, results, index_dir):
+        """Initialize the processor.
+        """
+        raise NotImplementedError()
+
+    def process(self, result):
+        """Process a crawl result.
+
+        If the result is successfully processed `True` should be returned,
+        `False` otherwise.
+        """
+        raise NotImplementedError()
+
+
+class NaiveProcessor(ResultProcessor):
+    """Naive processor.
+
+    This processor only will add a new task to `TaskQueue` for each directory
+    entry found in the result.  This can be used to walk the directory tree of
+    all the configured sites.
+    """
+
+    def __init__(self, sites_info, tasks, results, index_dir):
+        """Initialize the processor.
+        """
+        self._tasks = tasks
+
+    def process(self, result):
+        """Process a crawl result.
+        """
+        for entry_url, data in result:
+            if data['is_dir']:
+                task = CrawlTask(result.task.site_id, entry_url)
+                self._tasks.put_new(task)
+        return True
+
+
+class IndexProcessor(ResultProcessor):
+    """Xapian index processor.
+    """
+
+    def __init__(self, sites_info, tasks, results, index_dir):
+        """Initialize the processor.
+        """
+        raise NotImplementedError()
+
+    def process(self, result):
+        """Process a crawl result.
+        """
+        raise NotImplementedError()
+
+
+class ProcessorManager(threading.Thread):
+    """Processor manager.
+
+    Create and feed the processor.  The processor that will be used is
+    currently set in the `__init__()` method but it should be configurable in
+    future versions.
+
+    When the `start()` method is invoked it enters in a loop feeding the
+    processor with results from the `ResultQueue` until the `stop()` method is
+    invoked.  It runs in an independent thread of execution.
+    """
+
+    def __init__(self, sites_info, tasks, results, index_dir):
+        """Initialize the processor manager.
         """
         threading.Thread.__init__(self)
-        self._tasks = tasks
+        self._sleep = 1
         self._results = results
-        self._sleep = 3
+        self._processor = NaiveProcessor(sites_info, tasks, results, index_dir)
         # Flag used to stop the loop started by the run() method.
         self._running = False
         self._running_lock = threading.Lock()
@@ -48,7 +111,7 @@ class ResultProcessor(threading.Thread):
     def run(self):
         """Run the main loop.
 
-        Set the running flag and then enter in a loop processing crawl results
+        Set the running flag and then enter in a loop feeding the processor
         until the flag is cleared.
         """
         self._running_lock.acquire()
@@ -61,7 +124,7 @@ class ResultProcessor(threading.Thread):
                 except EmptyQueue:
                     time.sleep(self._sleep)
                 else:
-                    if self._process(result):
+                    if self._processor.process(result):
                         self._results.report_done(result)
                 self._running_lock.acquire()
         except:
@@ -79,12 +142,3 @@ class ResultProcessor(threading.Thread):
             self._running = False
         finally:
             self._running_lock.release()
-
-    def _process(self, result):
-        """Process a crawl result.
-
-        If the result is successfully processed `True` is returned, `False`
-        otherwise.
-        """
-        # TODO: Process the result.
-        return True

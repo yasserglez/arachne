@@ -29,7 +29,7 @@ from aracne.utils.daemon import Daemon
 from aracne.index.task import TaskQueue
 from aracne.index.result import ResultQueue
 from aracne.index.crawler import CrawlerManager
-from aracne.index.processor import ResultProcessor
+from aracne.index.processor import ProcessorManager
 
 
 class IndexDaemon(Daemon):
@@ -44,7 +44,7 @@ class IndexDaemon(Daemon):
         """Initialize query daemon.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
-        `ResultProcessor` instances.  The `config` parameter should be a
+        `ProcessorManager` instances.  The `config` parameter should be a
         dictionary with the configuration and `sites` a list with the
         information of each site.
         """
@@ -69,12 +69,16 @@ class IndexDaemon(Daemon):
         tasks_dir = os.path.join(config['spool_dir'], 'tasks')
         if not os.path.isdir(tasks_dir):
             os.mkdir(tasks_dir)
+        index_dir = os.path.join(config['database_dir'], 'index')
+        if not os.path.isdir(index_dir):
+            os.mkdir(index_dir)
         # Initialize components.
         self._tasks = TaskQueue(tasks_dir, sites_info)
         self._results = ResultQueue(results_dir, sites_info)
         self._crawlers = CrawlerManager(sites_info, self._tasks, self._results,
                                         config['number_crawlers'])
-        self._processor = ResultProcessor(self._tasks, self._results)
+        self._processor = ProcessorManager(sites_info, self._tasks,
+                                           self._results, index_dir)
         # Flag used to stop the loop started by the run() method.
         self._running = False
 
