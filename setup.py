@@ -22,7 +22,7 @@ from aracne import __author__, __version__
 
 setup(name='Aracne',
       version=__version__,
-      license='GNU General Public License version 3 or any later version',
+      license='GNU General Public License version 3 or later',
       description='Networked file search engine.',
       long_description='',
       url='',
@@ -30,16 +30,17 @@ setup(name='Aracne',
       author=' '.join(__author__.split()[:-1]),
       author_email=__author__.split()[-1].strip('<>'),
       platforms=[],
-      packages=['aracne', 'aracne.index', 'aracne.query', 'aracne.utils'],
+      packages=['aracne', 'aracne.indexer', 'aracne.searcher', 'aracne.utils'],
       package_dir={'aracne': 'aracne'},
       data_files=[
         ('/etc/init.d/', ['data/aracne']),
-        ('/etc/aracne/', ['data/indexd.conf', 'data/queryd.conf',
+        ('/etc/aracne/', ['data/indexer.conf', 'data/searcher.conf',
                           'data/sites.conf']),
         ('share/doc/aracne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
                                'THANKS']),
-        # The scripts to start the daemons are installed as data files.
-        ('/usr/sbin/', ['scripts/aracneindexd', 'scripts/aracnequeryd']),
+        # Daemon scripts are installed as data files because they should be
+        # copied to the /usr/sbin/ directory.
+        ('/usr/sbin/', ['scripts/aracne-indexer', 'scripts/aracne-searcher']),
         # Empty directories required by the default configuration.
         ('/var/run/aracne/', []),
         ('/var/lib/spool/aracne', []),

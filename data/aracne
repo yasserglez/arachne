@@ -4,49 +4,49 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="networked file search engine"
 SCRIPT=/etc/init.d/aracne
 
-INDEX_NAME=aracneindexd
-INDEX_DAEMON=/usr/sbin/aracneindexd
-INDEX_PIDFILE=/var/run/aracne/$INDEX_NAME.pid
-QUERY_NAME=aracnequeryd
-QUERY_DAEMON=/usr/sbin/aracnequeryd
-QUERY_PIDFILE=/var/run/aracne/$QUERY_NAME.pid
+INDEXER_NAME=aracne-indexer
+INDEXER_DAEMON=/usr/sbin/$INDEXER_NAME
+INDEXER_PIDFILE=/var/run/aracne/indexer.pid
+SEARCHER_NAME=aracne-searcher
+SEARCHER_DAEMON=/usr/sbin/$SEARCHER_NAME
+SEARCHER_PIDFILE=/var/run/aracne/searcher.pid
 
-[ -x "$INDEX_DAEMON" ] || exit 0
-[ -x "$QUERY_DAEMON" ] || exit 0
+[ -x "$INDEXER_DAEMON" ] || exit 0
+[ -x "$SEARCHER_DAEMON" ] || exit 0
 
 case "$1" in
 	start)
 		echo -n "Starting $DESC:"
-		echo -n " $INDEX_NAME"
-		start-stop-daemon --start --quiet --pidfile $INDEX_PIDFILE  \
-			--exec $INDEX_DAEMON
-		echo -n " $QUERY_NAME"
-		start-stop-daemon --start --quiet --pidfile $QUERY_PIDFILE  \
-			--exec $QUERY_DAEMON
+		echo -n " $INDEXER_NAME"
+		start-stop-daemon --start --quiet --pidfile $INDEXER_PIDFILE  \
+			--exec $INDEXER_DAEMON
+		echo -n " $SEARCHER_NAME"
+		start-stop-daemon --start --quiet --pidfile $SEARCHER_PIDFILE  \
+			--exec $SEARCHER_DAEMON
 		echo "."
 		;;
 	stop)
 		echo -n "Stopping $DESC: "
-		echo -n " $INDEX_NAME"
-		start-stop-daemon --stop --quiet --pidfile $INDEX_PIDFILE \
+		echo -n " $INDEXER_NAME"
+		start-stop-daemon --stop --quiet --pidfile $INDEXER_PIDFILE \
 			--retry=TERM/30/KILL/forever
-		echo -n " $QUERY_NAME"
-		start-stop-daemon --stop --quiet --pidfile $QUERY_PIDFILE \
+		echo -n " $SEARCHER_NAME"
+		start-stop-daemon --stop --quiet --pidfile $SEARCHER_PIDFILE \
 			--retry=TERM/30/KILL/forever
 		echo "."
 		;;
 	restart|force-reload)
 		echo -n "Restarting $DESC: "
-		echo -n " $INDEX_NAME"
-		start-stop-daemon --stop --quiet --pidfile $INDEX_PIDFILE \
+		echo -n " $INDEXER_NAME"
+		start-stop-daemon --stop --quiet --pidfile $INDEXER_PIDFILE \
 			--retry=TERM/30/KILL/forever
-		start-stop-daemon --start --quiet --pidfile $INDEX_PIDFILE \
-			--exec $INDEX_DAEMON
-		echo -n " $QUERY_NAME"
-		start-stop-daemon --stop --quiet --pidfile $QUERY_PIDFILE \
+		start-stop-daemon --start --quiet --pidfile $INDEXER_PIDFILE \
+			--exec $INDEXER_DAEMON
+		echo -n " $SEARCHER_NAME"
+		start-stop-daemon --stop --quiet --pidfile $SEARCHER_PIDFILE \
 			--retry=TERM/30/KILL/forever
-		start-stop-daemon --start --quiet --pidfile $QUERY_PIDFILE \
-			--exec $QUERY_DAEMON
+		start-stop-daemon --start --quiet --pidfile $SEARCHER_PIDFILE \
+			--exec $SEARCHER_DAEMON
 		echo "."
 		;;
 	*)

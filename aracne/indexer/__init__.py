@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Subpackage with classes related with the index daemon.
+"""Subpackage with classes related with the indexer daemon.
 """
 
 import os
@@ -26,14 +26,14 @@ import hashlib
 from aracne import __version__
 from aracne.utils.url import URL
 from aracne.utils.daemon import Daemon
-from aracne.index.task import TaskQueue
-from aracne.index.result import ResultQueue
-from aracne.index.crawler import CrawlerManager
-from aracne.index.processor import ProcessorManager
+from aracne.indexer.task import TaskQueue
+from aracne.indexer.result import ResultQueue
+from aracne.indexer.crawler import CrawlerManager
+from aracne.indexer.processor import ProcessorManager
 
 
-class IndexDaemon(Daemon):
-    """Aracne index daemon.
+class IndexerDaemon(Daemon):
+    """Aracne indexer daemon.
 
     This class implements the UNIX daemon used to crawl the sites and generate
     the index.  When the `start()` method is invoked it starts the components
@@ -41,7 +41,7 @@ class IndexDaemon(Daemon):
     """
 
     def __init__(self, config, sites):
-        """Initialize query daemon.
+        """Initialize the indexer daemon.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
         `ProcessorManager` instances.  The `config` parameter should be a
@@ -55,7 +55,7 @@ class IndexDaemon(Daemon):
                             level=config['log_level'],
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        logging.info('Starting Aracne index daemon %s.' % __version__)
+        logging.info('Starting Aracne indexer daemon %s.' % __version__)
         logging.info('Running for %d sites.' % len(sites))
         # Create URL instances and site IDs.
         sites_info = {}

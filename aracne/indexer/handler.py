@@ -20,7 +20,7 @@
 
 import os
 
-from aracne.index.result import CrawlResult
+from aracne.indexer.result import CrawlResult
 
 
 class ProtocolHandler(object):

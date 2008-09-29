@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Subpackage with classes related with the query daemon.
+"""Subpackage with classes related with the searcher daemon.
 """
 
 import signal
@@ -25,15 +25,15 @@ from aracne import __version__
 from aracne.utils.daemon import Daemon
 
 
-class QueryDaemon(Daemon):
-    """Aracne query daemon.
+class SearcherDaemon(Daemon):
+    """Aracne searcher daemon.
 
     This class implements the UNIX daemon used to process the queries to the
     database.
     """
 
     def __init__(self, config, sites):
-        """Initialize query daemon.
+        """Initialize the searcher daemon.
         """
         Daemon.__init__(self, pid_file=config['pid_file'], user=config['user'],
                         group=config['group'])
@@ -42,7 +42,7 @@ class QueryDaemon(Daemon):
                             level=config['log_level'],
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        logging.info('Starting Aracne query daemon %s.' % __version__)
+        logging.info('Starting Aracne searcher daemon %s.' % __version__)
         logging.info('Running with %d configured sites.' % len(sites))
         # Flag used to stop the loop started by the run() method.
         self._running = False

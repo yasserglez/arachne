@@ -21,7 +21,7 @@
 import os
 import threading
 
-from aracne.index.error import EmptyQueue
+from aracne.indexer.error import EmptyQueue
 from aracne.utils.persist import Queue, QueueError
 
 

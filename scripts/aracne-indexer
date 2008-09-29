@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Script used to start the query daemon.
+"""Script to start the indexer daemon.
 """
 
 import sys
@@ -25,45 +25,48 @@ import optparse
 import ConfigParser
 
 from aracne import __author__, __version__
-from aracne.query import QueryDaemon
+from aracne.indexer import IndexerDaemon
 
 
 def _parse_args():
     """Parse the command line arguments.
     """
     usage = '%prog [options]'
-    version = 'aracnequeryd (Aracne) %s\nCopyright 2008 %s.\nYou may' \
+    version = 'aracne-indexer (Aracne) %s\nCopyright 2008 %s.\nYou may' \
         ' redistribute copies of Aracne under the terms of the GNU General\n' \
         'Public License version 3 or later.  For more information about' \
         ' these matters,\nsee the file named LICENSE found in the source' \
         ' distribution.' % (__version__, ' '.join(__author__.split()[:-1]))
-    description = 'Aracne query daemon.'
+    description = 'Aracne indexer daemon.'
     parser = optparse.OptionParser(usage=usage, version=version,
                                    description=description)
     parser.add_option('-f', '--file', metavar='FILE', dest='config_file',
                       help='specify config file (default %default)')
-    parser.set_defaults(config_file='/etc/aracne/queryd.conf')
+    parser.set_defaults(config_file='/etc/aracne/indexer.conf')
     return parser.parse_args()[0].__dict__
 
 
-def _parse_config_file(config_file):
+def _parse_config_file(configfile):
     """Parse the configuration file.
     """
     config = {
+        'maintainer_email': 'user@host.com',
+        'number_crawlers': 3,
         'user': None,
         'group': None,
         'sites_file': '/etc/aracne/sites.conf',
-        'pid_file': '/var/run/aracne/queryd.pid',
+        'pid_file': '/var/run/aracne/indexer.pid',
+        'spool_dir': '/var/lib/spool/aracne/',
         'database_dir': '/var/lib/aracne/',
-        'log_file': '/var/log/aracne/queryd.log',
+        'log_file': '/var/log/aracne/indexer.log',
         'log_level': logging.INFO,
     }
     parser = ConfigParser.ConfigParser()
     try:
-        parser.read(config_file)
+        parser.read(configfile)
         for option in config.iterkeys():
             try:
-                value = parser.get('queryd', option)
+                value = parser.get('indexer', option)
             except ConfigParser.NoOptionError:
                 # Ignore missing options, use the default values.
                 pass
@@ -71,12 +74,18 @@ def _parse_config_file(config_file):
                 # Use the value from the configuration file.
                 config[option] = value
     except ConfigParser.NoSectionError:
-        _error('failed to read config file or queryd section is missing.')
+        _error('failed to read config file or indexer section is missing.')
     except ConfigParser.ParsingError:
         _error('invalid syntax in the config file.')
     except ConfigParser.Error:
         _error('an error has occurred parsing the config file.')
     else:
+        try:
+            config['number_crawlers'] = int(config['number_crawlers'])
+            if config['number_crawlers'] <= 0:
+                raise ValueError()
+        except ValueError:
+            _error('invalid value for number_crawlers in the config file.')
         if config['user'] is not None:
             try:
                 config['user'] = int(config['user'])
@@ -144,12 +153,12 @@ def _error(message):
 
 
 def main():
-    """Start the query daemon.
+    """Start the indexer daemon.
     """
     options = _parse_args()
     config = _parse_config_file(options['config_file'])
     sites = _parse_sites_file(config['sites_file'])
-    daemon = QueryDaemon(config, sites)
+    daemon = IndexerDaemon(config, sites)
     daemon.start()
     sys.exit(0)
 

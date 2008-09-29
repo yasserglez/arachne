@@ -15,16 +15,16 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Module with exceptions raised in the index daemon.
+"""Module with exceptions raised in the indexer daemon.
 """
 
 
-class IndexException(Exception):
-    """Base class for all exceptions raised in the index daemon.
+class IndexerException(Exception):
+    """Base class for all exceptions raised in the indexer daemon.
     """
 
 
-class EmptyQueue(IndexException):
+class EmptyQueue(IndexerException):
     """Empty queue error.
 
     Exception raised by the `get()` methods of the `TaskQueue` and

@@ -27,9 +27,9 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from aracne.utils.url import URL
-from aracne.index.error import EmptyQueue
-from aracne.index.task import CrawlTask
-from aracne.index.result import CrawlResult, ResultQueue
+from aracne.indexer.error import EmptyQueue
+from aracne.indexer.task import CrawlTask
+from aracne.indexer.result import CrawlResult, ResultQueue
 
 
 class TestResultQueue(unittest.TestCase):

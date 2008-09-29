@@ -26,8 +26,8 @@ TESTDIR = os.path.dirname(os.path.abspath(__file__))
 SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
-from aracne.index.task import CrawlTask
-from aracne.index.result import CrawlResult
+from aracne.indexer.task import CrawlTask
+from aracne.indexer.result import CrawlResult
 
 
 class TestCrawlResult(unittest.TestCase):
