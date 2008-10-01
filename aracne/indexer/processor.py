@@ -33,7 +33,7 @@ class ResultProcessor(object):
     Instances of subclasses are used by the `ProcessorManager`.
     """
 
-    def __init__(self, sites_info, tasks, results, index_dir):
+    def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
         raise NotImplementedError()
@@ -55,7 +55,7 @@ class NaiveProcessor(ResultProcessor):
     all the configured sites.
     """
 
-    def __init__(self, sites_info, tasks, results, index_dir):
+    def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
         self._tasks = tasks
@@ -74,7 +74,7 @@ class IndexProcessor(ResultProcessor):
     """Xapian index processor.
     """
 
-    def __init__(self, sites_info, tasks, results, index_dir):
+    def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
         raise NotImplementedError()
@@ -97,13 +97,13 @@ class ProcessorManager(threading.Thread):
     invoked.  It runs in an independent thread of execution.
     """
 
-    def __init__(self, sites_info, tasks, results, index_dir):
+    def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor manager.
         """
         threading.Thread.__init__(self)
         self._sleep = 1
         self._results = results
-        self._processor = NaiveProcessor(sites_info, tasks, results, index_dir)
+        self._processor = NaiveProcessor(sites_info, index_dir, tasks, results)
         # Flag used to stop the loop started by the run() method.
         self._running = False
         self._running_lock = threading.Lock()
@@ -124,8 +124,7 @@ class ProcessorManager(threading.Thread):
                 except EmptyQueue:
                     time.sleep(self._sleep)
                 else:
-                    if self._processor.process(result):
-                        self._results.report_done(result)
+                    self._process(result)
                 self._running_lock.acquire()
         except:
             logging.exception('Exception raised.  Printing traceback.')
@@ -142,3 +141,14 @@ class ProcessorManager(threading.Thread):
             self._running = False
         finally:
             self._running_lock.release()
+
+    def _process(self, result):
+        """Process a crawl result.
+        """
+        if self._processor.process(result):
+            self._results.report_done(result)
+            logging.info('Sucessfully processed result for %s'
+                         % result.task.url)
+        else:
+            logging.error('Error processing result for %s'
+                          % result.task.url)

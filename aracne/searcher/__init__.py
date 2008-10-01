@@ -32,18 +32,16 @@ class SearcherDaemon(Daemon):
     database.
     """
 
-    def __init__(self, config, sites):
+    def __init__(self, sites, database_dir, log_file, log_level, pid_file,
+                 user, group):
         """Initialize the searcher daemon.
         """
-        Daemon.__init__(self, pid_file=config['pid_file'], user=config['user'],
-                        group=config['group'])
-        # Initialize logs.
-        logging.basicConfig(filename=config['log_file'],
-                            level=config['log_level'],
+        Daemon.__init__(self, pid_file=pid_file, user=user, group=group)
+        logging.basicConfig(filename=log_file, level=log_level,
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logging.info('Starting Aracne searcher daemon %s.' % __version__)
-        logging.info('Running with %d configured sites.' % len(sites))
+        logging.info('%d sites configured.' % len(sites))
         # Flag used to stop the loop started by the run() method.
         self._running = False
 

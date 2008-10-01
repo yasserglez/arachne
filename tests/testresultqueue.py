@@ -35,8 +35,8 @@ from aracne.indexer.result import CrawlResult, ResultQueue
 class TestResultQueue(unittest.TestCase):
 
     def setUp(self):
-        self._dirname = os.path.join(TESTDIR, 'testresultqueue')
-        os.mkdir(self._dirname)
+        self._dir_path = os.path.join(TESTDIR, 'testresultqueue')
+        os.mkdir(self._dir_path)
         self._sites_info = {
             'a78e6853355ad5cdc751ad678d15339382f9ed21':
                 {'url': URL('ftp://atlantis.uh.cu/')},
@@ -64,8 +64,8 @@ class TestResultQueue(unittest.TestCase):
         for site_id, info in self._sites_info.iteritems():
             for name in (str(n) for n in xrange(results_per_site)):
                 task = CrawlTask(site_id, info['url'].join(name))
-                self._results.append(CrawlResult(task))
-        self._queue = ResultQueue(self._dirname, self._sites_info)
+                self._results.append(CrawlResult(task, True))
+        self._queue = ResultQueue(self._sites_info, self._dir_path)
 
     def test_length(self):
         self.assertEquals(len(self._queue), 0)
@@ -95,16 +95,16 @@ class TestResultQueue(unittest.TestCase):
         self._queue.close()
         # It should not return results from the removed site.
         del self._sites_info[self._sites_info.keys()[0]]
-        self._queue = ResultQueue(self._dirname, self._sites_info)
+        self._queue = ResultQueue(self._sites_info, self._dir_path)
         while self._queue:
             returned = self._queue.get()
             self.assertTrue(returned.task.site_id in self._sites_info)
             self._queue.report_done(returned)
 
     def tearDown(self):
-        if os.path.isdir(self._dirname):
+        if os.path.isdir(self._dir_path):
             self._queue.close()
-            shutil.rmtree(self._dirname)
+            shutil.rmtree(self._dir_path)
 
 
 def main():

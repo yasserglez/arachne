@@ -32,7 +32,7 @@ class CrawlResult(object):
     executing a `CrawlTask`.
     """
 
-    def __init__(self, task, found=True):
+    def __init__(self, task, found):
         """Initialize a crawl result without entries.
         """
         self._task = task
@@ -87,24 +87,24 @@ class ResultQueue(object):
     This queue is used to collect the crawl results waiting to be processed.
     """
 
-    def __init__(self, dirname, sites_info):
+    def __init__(self, sites_info, dir_path):
         """Initialize the queue.
         """
         sites_filename = 'sites.db'
-        self._sites = Queue(os.path.join(dirname, sites_filename))
+        self._sites = Queue(os.path.join(dir_path, sites_filename))
         # Get the list files in the directory to purge old queues (sites
         # removed from the configuration file).
-        old_queues = os.listdir(dirname)
+        old_queues = os.listdir(dir_path)
         old_queues.remove(sites_filename)
         self._results = {}
         for site_id, info in sites_info.iteritems():
             filename = '%s.db' % site_id
-            queue = Queue(os.path.join(dirname, filename))
+            queue = Queue(os.path.join(dir_path, filename))
             self._results[site_id] = queue
             if filename in old_queues:
                 old_queues.remove(filename)
         for filename in old_queues:
-            os.unlink(os.path.join(dirname, filename))
+            os.unlink(os.path.join(dir_path, filename))
         self._mutex = threading.Lock()
 
     def __len__(self):

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Subpackage with classes related with the indexer daemon.
+"""`IndexerDaemon` definition.
 """
 
 import os
@@ -40,45 +40,46 @@ class IndexerDaemon(Daemon):
     and sleeps until a SIGTERM signal is received to stop the components.
     """
 
-    def __init__(self, config, sites):
+    def __init__(self, sites, admin_email, num_crawlers, spool_dir,
+                 database_dir, log_file, log_level, pid_file, user, group):
         """Initialize the indexer daemon.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
-        `ProcessorManager` instances.  The `config` parameter should be a
-        dictionary with the configuration and `sites` a list with the
-        information of each site.
+        `ProcessorManager` instances.  The `sites` argument should be a list
+        with the information for each site.
         """
-        Daemon.__init__(self, pid_file=config['pid_file'], user=config['user'],
-                        group=config['group'])
-        # Initialize logs.
-        logging.basicConfig(filename=config['log_file'],
-                            level=config['log_level'],
+        Daemon.__init__(self, pid_file=pid_file, user=user, group=group)
+        logging.basicConfig(filename=log_file, level=log_level,
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logging.info('Starting Aracne indexer daemon %s.' % __version__)
-        logging.info('Running for %d sites.' % len(sites))
-        # Create URL instances and site IDs.
+        logging.info('Running with %d sites configured.' % len(sites))
+        # Create URL instances and assign an id to each site.
         sites_info = {}
         for site in sites:
             site['url'] = URL(site['url'])
             sites_info[hashlib.sha1(str(site['url'])).hexdigest()] = site
-        # Create required directories.
-        results_dir = os.path.join(config['spool_dir'], 'results')
+        # Create or check required directories.
+        results_dir = os.path.join(spool_dir, 'results')
         if not os.path.isdir(results_dir):
             os.mkdir(results_dir)
-        tasks_dir = os.path.join(config['spool_dir'], 'tasks')
+        tasks_dir = os.path.join(spool_dir, 'tasks')
         if not os.path.isdir(tasks_dir):
             os.mkdir(tasks_dir)
-        index_dir = os.path.join(config['database_dir'], 'index')
+        index_dir = os.path.join(database_dir, 'index')
         if not os.path.isdir(index_dir):
             os.mkdir(index_dir)
         # Initialize components.
-        self._tasks = TaskQueue(tasks_dir, sites_info)
-        self._results = ResultQueue(results_dir, sites_info)
-        self._crawlers = CrawlerManager(sites_info, self._tasks, self._results,
-                                        config['number_crawlers'])
-        self._processor = ProcessorManager(sites_info, self._tasks,
-                                           self._results, index_dir)
+        self._tasks = TaskQueue(sites_info, tasks_dir)
+        logging.info('There are %d tasks waiting for execution.'
+                     % len(self._tasks))
+        self._results = ResultQueue(sites_info, results_dir)
+        logging.info('There are %d results waiting for processing.'
+                     % len(self._results))
+        self._crawlers = CrawlerManager(sites_info, admin_email, num_crawlers,
+                                        self._tasks, self._results)
+        self._processor = ProcessorManager(sites_info, index_dir, self._tasks,
+                                           self._results)
         # Flag used to stop the loop started by the run() method.
         self._running = False
 

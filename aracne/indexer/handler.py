@@ -36,7 +36,7 @@ class ProtocolHandler(object):
 
     scheme = ''
 
-    def __init__(self, sites_info):
+    def __init__(self, sites_info, admin_email):
         """Initialize the protocol handler.
 
         The `sites_info` argument will be a dictionary mapping site IDs to the
@@ -55,14 +55,15 @@ class ProtocolHandler(object):
 
 
 class FileHandler(ProtocolHandler):
-    """Handler local files.
+    """Handler for local files.
     """
 
     scheme = 'file'
 
-    def __init__(self, sites_info):
+    def __init__(self, sites_info, admin_email):
         """Initialize handler.
         """
+        # This handler does not require initialization.
 
     def execute(self, task):
         """Execute the task and return the result.
@@ -70,7 +71,7 @@ class FileHandler(ProtocolHandler):
         try:
             dir_path = task.url.path
             if os.path.isdir(dir_path):
-                result = CrawlResult(task)
+                result = CrawlResult(task, True)
                 for entry in os.listdir(dir_path):
                     data = {}
                     entry_path = os.path.join(dir_path, entry)

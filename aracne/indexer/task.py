@@ -121,22 +121,23 @@ class CrawlTask(object):
 class TaskQueue(object):
     """Task queue.
 
-    This queue is used to collect the crawl tasks waiting to be executed.
+    Queue used to collect the crawl tasks (`CrawlTask`) that are going to be
+    executed in the future.
     """
 
-    def __init__(self, dirname, sites_info):
+    def __init__(self, sites_info, dir_path):
         """Initializes the queue.
         """
         sites_filename = 'sites.db'
-        self._sites = PriorityQueue(os.path.join(dirname, sites_filename))
+        self._sites = PriorityQueue(os.path.join(dir_path, sites_filename))
         # Get the list files in the directory to purge old queues (sites
         # removed from the configuration file).
-        old_queues = os.listdir(dirname)
+        old_queues = os.listdir(dir_path)
         old_queues.remove(sites_filename)
         self._tasks = {}
         for site_id, info in sites_info.iteritems():
             filename = '%s.db' % site_id
-            queue = PriorityQueue(os.path.join(dirname, filename))
+            queue = PriorityQueue(os.path.join(dir_path, filename))
             self._tasks[site_id] = queue
             if filename in old_queues:
                 old_queues.remove(filename)
@@ -147,7 +148,7 @@ class TaskQueue(object):
                 task = CrawlTask(site_id, info['url'])
                 self._tasks[site_id].put(task, self._get_priority())
         for filename in old_queues:
-            os.unlink(os.path.join(dirname, filename))
+            os.unlink(os.path.join(dir_path, filename))
         self._mutex = threading.Lock()
         self._sites_info = sites_info
         self._revisits = 5

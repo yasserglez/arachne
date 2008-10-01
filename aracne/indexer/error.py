@@ -28,5 +28,5 @@ class EmptyQueue(IndexerException):
     """Empty queue error.
 
     Exception raised by the `get()` methods of the `TaskQueue` and
-    `ResultQueue` if no item is available right now.
+    `ResultQueue` if no item is available.
     """

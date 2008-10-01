@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Script to start the indexer daemon.
+"""Script that starts the Aracne indexer daemon.
 """
 
 import sys
@@ -50,8 +50,8 @@ def _parse_config_file(configfile):
     """Parse the configuration file.
     """
     config = {
-        'maintainer_email': 'user@host.com',
-        'number_crawlers': 3,
+        'admin_email': 'user@host.com',
+        'num_crawlers': 3,
         'user': None,
         'group': None,
         'sites_file': '/etc/aracne/sites.conf',
@@ -68,7 +68,7 @@ def _parse_config_file(configfile):
             try:
                 value = parser.get('indexer', option)
             except ConfigParser.NoOptionError:
-                # Ignore missing options, use the default values.
+                # Ignore missing options, use default values.
                 pass
             else:
                 # Use the value from the configuration file.
@@ -81,11 +81,11 @@ def _parse_config_file(configfile):
         _error('an error has occurred parsing the config file.')
     else:
         try:
-            config['number_crawlers'] = int(config['number_crawlers'])
-            if config['number_crawlers'] <= 0:
+            config['num_crawlers'] = int(config['num_crawlers'])
+            if config['num_crawlers'] <= 0:
                 raise ValueError()
         except ValueError:
-            _error('invalid value for number_crawlers in the config file.')
+            _error('invalid value for num_crawlers in the config file.')
         if config['user'] is not None:
             try:
                 config['user'] = int(config['user'])
@@ -158,7 +158,11 @@ def main():
     options = _parse_args()
     config = _parse_config_file(options['config_file'])
     sites = _parse_sites_file(config['sites_file'])
-    daemon = IndexerDaemon(config, sites)
+    daemon = IndexerDaemon(sites, config['admin_email'],
+                           config['num_crawlers'], config['spool_dir'],
+                           config['database_dir'], config['log_file'],
+                           config['log_level'], config['pid_file'],
+                           config['user'], config['group'])
     daemon.start()
     sys.exit(0)
 

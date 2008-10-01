@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Script to start the searcher daemon.
+"""Script that starts the Aracne searcher daemon.
 """
 
 import sys
@@ -65,7 +65,7 @@ def _parse_config_file(config_file):
             try:
                 value = parser.get('searcher', option)
             except ConfigParser.NoOptionError:
-                # Ignore missing options, use the default values.
+                # Ignore missing options, use default values.
                 pass
             else:
                 # Use the value from the configuration file.
@@ -149,7 +149,9 @@ def main():
     options = _parse_args()
     config = _parse_config_file(options['config_file'])
     sites = _parse_sites_file(config['sites_file'])
-    daemon = SearcherDaemon(config, sites)
+    daemon = SearcherDaemon(sites, config['database_dir'], config['log_file'],
+                            config['log_level'], config['pid_file'],
+                            config['user'], config['group'])
     daemon.start()
     sys.exit(0)
 
