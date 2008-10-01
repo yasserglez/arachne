@@ -106,7 +106,6 @@ class ProcessorManager(threading.Thread):
         self._processor = NaiveProcessor(sites_info, index_dir, tasks, results)
         # Flag used to stop the loop started by the run() method.
         self._running = False
-        self._running_lock = threading.Lock()
 
     def run(self):
         """Run the main loop.
@@ -114,33 +113,24 @@ class ProcessorManager(threading.Thread):
         Set the running flag and then enter in a loop feeding the processor
         until the flag is cleared.
         """
-        self._running_lock.acquire()
         try:
             self._running = True
             while self._running:
-                self._running_lock.release()
                 try:
                     result = self._results.get()
                 except EmptyQueue:
                     time.sleep(self._sleep)
                 else:
                     self._process(result)
-                self._running_lock.acquire()
         except:
             logging.exception('Exception raised.  Printing traceback.')
-        finally:
-            self._running_lock.release()
 
     def stop(self):
         """Order the main loop to end.
 
         Clear the running flag and the main loop exits.
         """
-        self._running_lock.acquire()
-        try:
-            self._running = False
-        finally:
-            self._running_lock.release()
+        self._running = False
 
     def _process(self, result):
         """Process a crawl result.

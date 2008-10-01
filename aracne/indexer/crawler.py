@@ -47,7 +47,6 @@ class SiteCrawler(threading.Thread):
             self._handlers[handler.scheme] = handler(sites_info, admin_email)
         # Flag used to stop the loop started by the run() method.
         self._running = False
-        self._running_lock = threading.Lock()
 
     def run(self):
         """Run the main loop.
@@ -56,31 +55,24 @@ class SiteCrawler(threading.Thread):
         the task queue (`TaskQueue`), executing the tasks and reporting results
         to the result queue (`ResultQueue`) until the flag is cleared.
         """
-        self._running_lock.acquire()
         try:
             self._running = True
             while self._running:
-                self._running_lock.release()
                 try:
                     task = self._tasks.get()
                 except EmptyQueue:
                     time.sleep(self._sleep)
                 else:
                     self._execute(task)
-                self._running_lock.acquire()
         except:
             logging.exception('Exception raised.  Printing traceback.')
-        finally:
-            self._running_lock.release()
 
     def stop(self):
         """Order the main loop to end.
 
         Clear the running flag and the main loop exits.
         """
-        self._running_lock.acquire()
         self._running = False
-        self._running_lock.release()
 
     def _execute(self, task):
         """Execute a task.
