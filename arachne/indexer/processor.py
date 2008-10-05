@@ -22,8 +22,8 @@ import time
 import logging
 import threading
 
-from aracne.indexer.error import EmptyQueue
-from aracne.indexer.task import CrawlTask
+from arachne.indexer.error import EmptyQueue
+from arachne.indexer.task import CrawlTask
 
 
 class ResultProcessor(object):

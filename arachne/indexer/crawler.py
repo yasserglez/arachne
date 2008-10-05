@@ -22,8 +22,8 @@ import time
 import logging
 import threading
 
-from aracne.indexer.error import EmptyQueue
-from aracne.indexer.handler import ProtocolHandler
+from arachne.indexer.error import EmptyQueue
+from arachne.indexer.handler import ProtocolHandler
 
 
 class SiteCrawler(threading.Thread):

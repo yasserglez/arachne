@@ -2,14 +2,14 @@
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="networked file search engine"
-SCRIPT=/etc/init.d/aracne
+SCRIPT=/etc/init.d/arachne
 
-INDEXER_NAME=aracne-indexer
+INDEXER_NAME=arachne-indexer
 INDEXER_DAEMON=/usr/sbin/$INDEXER_NAME
-INDEXER_PIDFILE=/var/run/aracne/indexer.pid
-SEARCHER_NAME=aracne-searcher
+INDEXER_PIDFILE=/var/run/arachne/indexer.pid
+SEARCHER_NAME=arachne-searcher
 SEARCHER_DAEMON=/usr/sbin/$SEARCHER_NAME
-SEARCHER_PIDFILE=/var/run/aracne/searcher.pid
+SEARCHER_PIDFILE=/var/run/arachne/searcher.pid
 
 [ -x "$INDEXER_DAEMON" ] || exit 0
 [ -x "$SEARCHER_DAEMON" ] || exit 0

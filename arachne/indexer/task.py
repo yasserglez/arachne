@@ -23,8 +23,8 @@ import time
 import math
 import threading
 
-from aracne.indexer.error import EmptyQueue
-from aracne.utils.persist import PriorityQueue, QueueError
+from arachne.indexer.error import EmptyQueue
+from arachne.utils.persist import PriorityQueue, QueueError
 
 
 class CrawlTask(object):

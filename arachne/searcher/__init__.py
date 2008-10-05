@@ -21,8 +21,8 @@
 import signal
 import logging
 
-from aracne import __version__
-from aracne.utils.daemon import Daemon
+from arachne import __version__
+from arachne.utils.daemon import Daemon
 
 
 class SearcherDaemon(Daemon):
@@ -40,7 +40,7 @@ class SearcherDaemon(Daemon):
         logging.basicConfig(filename=log_file, level=log_level,
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        logging.info('Starting Aracne searcher daemon %s.' % __version__)
+        logging.info('Starting Arachne searcher daemon %s.' % __version__)
         logging.info('%d sites configured.' % len(sites))
         # Flag used to stop the loop started by the run() method.
         self._running = False

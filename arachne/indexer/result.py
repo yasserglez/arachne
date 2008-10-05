@@ -21,8 +21,8 @@
 import os
 import threading
 
-from aracne.indexer.error import EmptyQueue
-from aracne.utils.persist import Queue, QueueError
+from arachne.indexer.error import EmptyQueue
+from arachne.utils.persist import Queue, QueueError
 
 
 class CrawlResult(object):

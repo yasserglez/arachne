@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Script that starts the Aracne searcher daemon.
+"""Script that starts the Arachne searcher daemon.
 """
 
 import sys
@@ -24,25 +24,25 @@ import logging
 import optparse
 import ConfigParser
 
-from aracne import __author__, __version__
-from aracne.searcher import SearcherDaemon
+from arachne import __author__, __version__
+from arachne.searcher import SearcherDaemon
 
 
 def _parse_args():
     """Parse the command line arguments.
     """
     usage = '%prog [options]'
-    version = 'aracne-searcher (Aracne) %s\nCopyright (C) 2008 %s.\nYou may' \
-        ' redistribute copies of Aracne under the terms of the GNU General\n' \
+    version = 'arachne-searcher (Arachne) %s\nCopyright (C) 2008 %s.\nYou may' \
+        ' redistribute copies of Arachne under the terms of the GNU General\n' \
         'Public License version 3 or later.  For more information about' \
         ' these matters,\nsee the file named LICENSE found in the source' \
         ' distribution.' % (__version__, ' '.join(__author__.split()[:-1]))
-    description = 'Searcher daemon of the Aracne file search engine.'
+    description = 'Searcher daemon of the Arachne file search engine.'
     parser = optparse.OptionParser(usage=usage, version=version,
                                    description=description)
     parser.add_option('-f', '--file', metavar='FILE', dest='config_file',
                       help='specify config file (default %default)')
-    parser.set_defaults(config_file='/etc/aracne/searcher.conf')
+    parser.set_defaults(config_file='/etc/arachne/searcher.conf')
     return parser.parse_args()[0].__dict__
 
 
@@ -52,10 +52,10 @@ def _parse_config_file(config_file):
     config = {
         'user': None,
         'group': None,
-        'sites_file': '/etc/aracne/sites.conf',
-        'pid_file': '/var/run/aracne/searcher.pid',
-        'database_dir': '/var/lib/aracne/',
-        'log_file': '/var/log/aracne/searcher.log',
+        'sites_file': '/etc/arachne/sites.conf',
+        'pid_file': '/var/run/arachne/searcher.pid',
+        'database_dir': '/var/lib/arachne/',
+        'log_file': '/var/log/arachne/searcher.log',
         'log_level': logging.INFO,
     }
     parser = ConfigParser.ConfigParser()

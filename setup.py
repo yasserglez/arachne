@@ -17,10 +17,10 @@
 
 from distutils.core import setup
 
-from aracne import __author__, __version__
+from arachne import __author__, __version__
 
 
-setup(name='Aracne',
+setup(name='Arachne',
       version=__version__,
       license='GNU General Public License version 3 or any later version',
       description='File search engine.',
@@ -30,21 +30,22 @@ setup(name='Aracne',
       author=' '.join(__author__.split()[:-1]),
       author_email=__author__.split()[-1].strip('<>'),
       platforms=[],
-      packages=['aracne', 'aracne.indexer', 'aracne.searcher', 'aracne.utils'],
-      package_dir={'aracne': 'aracne'},
+      packages=['arachne', 'arachne.indexer', 'arachne.searcher',
+                'arachne.utils'],
+      package_dir={'arachne': 'arachne'},
       data_files=[
-        ('/etc/init.d/', ['data/aracne']),
-        ('/etc/aracne/', ['data/indexer.conf', 'data/searcher.conf',
+        ('/etc/init.d/', ['data/arachne']),
+        ('/etc/arachne/', ['data/indexer.conf', 'data/searcher.conf',
                           'data/sites.conf']),
-        ('share/doc/aracne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
+        ('share/doc/arachne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
                                'THANKS']),
         # Daemon scripts are installed as data files because they should be
         # copied to the /usr/sbin/ directory.
-        ('/usr/sbin/', ['scripts/aracne-indexer', 'scripts/aracne-searcher']),
+        ('/usr/sbin/', ['scripts/arachne-indexer', 'scripts/arachne-searcher']),
         # Empty directories required by the default configuration.
-        ('/var/run/aracne/', []),
-        ('/var/lib/spool/aracne', []),
-        ('/var/lib/aracne/', []),
-        ('/var/log/aracne/', []),
+        ('/var/run/arachne/', []),
+        ('/var/lib/spool/arachne', []),
+        ('/var/lib/arachne/', []),
+        ('/var/log/arachne/', []),
       ],
 )

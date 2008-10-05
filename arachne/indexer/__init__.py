@@ -23,13 +23,13 @@ import signal
 import logging
 import hashlib
 
-from aracne import __version__
-from aracne.utils.url import URL
-from aracne.utils.daemon import Daemon
-from aracne.indexer.task import TaskQueue
-from aracne.indexer.result import ResultQueue
-from aracne.indexer.crawler import CrawlerManager
-from aracne.indexer.processor import ProcessorManager
+from arachne import __version__
+from arachne.utils.url import URL
+from arachne.utils.daemon import Daemon
+from arachne.indexer.task import TaskQueue
+from arachne.indexer.result import ResultQueue
+from arachne.indexer.crawler import CrawlerManager
+from arachne.indexer.processor import ProcessorManager
 
 
 class IndexerDaemon(Daemon):
@@ -52,7 +52,7 @@ class IndexerDaemon(Daemon):
         logging.basicConfig(filename=log_file, level=log_level,
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        logging.info('Starting Aracne indexer daemon %s.' % __version__)
+        logging.info('Starting Arachne indexer daemon %s.' % __version__)
         logging.info('Running with %d sites configured.' % len(sites))
         # Create URL instances and assign an id to each site.
         sites_info = {}
