@@ -26,10 +26,10 @@ from aracne.utils.daemon import Daemon
 
 
 class SearcherDaemon(Daemon):
-    """Aracne searcher daemon.
+    """Searcher daemon.
 
-    This class implements the UNIX daemon used to process the queries to the
-    database.
+    This class implements the UNIX daemon used to process and return the
+    responses of the queries to the database.
     """
 
     def __init__(self, sites, database_dir, log_file, log_level, pid_file,
@@ -47,8 +47,6 @@ class SearcherDaemon(Daemon):
 
     def run(self):
         """Run the main loop.
-
-        Override the `run()` method from the `Daemon` class.
         """
         try:
             self._running = True
@@ -62,8 +60,5 @@ class SearcherDaemon(Daemon):
 
     def terminate(self):
         """Order the main loop to end.
-
-        Override the `terminate()` method from the `Daemon` class.  Clear the
-        running flag and the main loop should exit.
         """
         self._running = False

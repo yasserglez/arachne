@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`ProcessorManager` and related classes definition.
+"""`ProcessorManager` and related classes.
 """
 
 import time
@@ -109,9 +109,6 @@ class ProcessorManager(threading.Thread):
 
     def run(self):
         """Run the main loop.
-
-        Set the running flag and then enter in a loop feeding the processor
-        until the flag is cleared.
         """
         try:
             self._running = True
@@ -127,8 +124,6 @@ class ProcessorManager(threading.Thread):
 
     def stop(self):
         """Order the main loop to end.
-
-        Clear the running flag and the main loop exits.
         """
         self._running = False
 

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`IndexerDaemon` definition.
+"""Subpackage with classes related with the indexer daemon.
 """
 
 import os
@@ -33,7 +33,7 @@ from aracne.indexer.processor import ProcessorManager
 
 
 class IndexerDaemon(Daemon):
-    """Aracne indexer daemon.
+    """Indexer daemon.
 
     This class implements the UNIX daemon used to crawl the sites and generate
     the index.  When the `start()` method is invoked it starts the components
@@ -85,10 +85,6 @@ class IndexerDaemon(Daemon):
 
     def run(self):
         """Run the main loop.
-
-        Override the `run()` method from the `Daemon` class.  Set the running
-        flag, start the components and then sleep until a SIGTERM signal is
-        received to stop the components.
         """
         try:
             self._running = True
@@ -110,8 +106,5 @@ class IndexerDaemon(Daemon):
 
     def terminate(self):
         """Order the main loop to end.
-
-        Override the `terminate()` method from the `Daemon` class.  Clear the
-        running flag and the main loop should exit.
         """
         self._running = False

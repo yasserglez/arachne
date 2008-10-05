@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`SiteCrawler` and `CrawlerManager` definition.
+"""`SiteCrawler` and `CrawlerManager`.
 """
 
 import time
@@ -30,9 +30,9 @@ class SiteCrawler(threading.Thread):
     """Site crawler.
 
     When the `start()` method is invoked it enters in a loop getting crawl
-    tasks from the task queue (`TaskQueue`), executing the tasks and reporting
-    results to the result queue (`ResultQueue`) until the `stop()` method is
-    invoked.  It runs in an independent thread of execution.
+    tasks from the task queue, executing the tasks and reporting results to the
+    result queue until the `stop()` method is invoked.  It runs in an
+    independent thread of execution.
     """
 
     def __init__(self, sites_info, admin_email, tasks, results):
@@ -50,10 +50,6 @@ class SiteCrawler(threading.Thread):
 
     def run(self):
         """Run the main loop.
-
-        Set the running flag and then enters a loop getting crawl tasks from
-        the task queue (`TaskQueue`), executing the tasks and reporting results
-        to the result queue (`ResultQueue`) until the flag is cleared.
         """
         try:
             self._running = True
@@ -69,15 +65,13 @@ class SiteCrawler(threading.Thread):
 
     def stop(self):
         """Order the main loop to end.
-
-        Clear the running flag and the main loop exits.
         """
         self._running = False
 
     def _execute(self, task):
-        """Execute a task.
+        """Execute a crawl task.
 
-        Call the handler to execute the task and report the result to the
+        Call the handler to execute the crawl task and report the result to the
         result queue.
         """
         scheme = task.url.scheme

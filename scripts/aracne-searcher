@@ -137,7 +137,7 @@ def _parse_sites_file(sites_file):
 
 
 def _error(message):
-    """Print `message` and exit.
+    """Print a message and exit.
     """
     sys.stderr.write('Error: %s\n' % message)
     sys.exit(1)
