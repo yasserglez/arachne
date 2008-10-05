@@ -35,7 +35,7 @@ class SiteCrawler(threading.Thread):
     independent thread of execution.
     """
 
-    def __init__(self, sites_info, admin_email, tasks, results):
+    def __init__(self, sites_info, tasks, results):
         """Initialize attributes.
         """
         threading.Thread.__init__(self)
@@ -44,7 +44,7 @@ class SiteCrawler(threading.Thread):
         self._results = results
         self._handlers = {}
         for handler in ProtocolHandler.__subclasses__():
-            self._handlers[handler.scheme] = handler(sites_info, admin_email)
+            self._handlers[handler.scheme] = handler(sites_info)
         # Flag used to stop the loop started by the run() method.
         self._running = False
 
@@ -98,7 +98,7 @@ class CrawlerManager(object):
     group of crawlers as a single component.
     """
 
-    def __init__(self, sites_info, admin_email, num_crawlers, tasks, results):
+    def __init__(self, sites_info, num_crawlers, tasks, results):
         """Initialize the site crawlers.
 
         Create a group of site crawlers according the the value of the
@@ -106,7 +106,7 @@ class CrawlerManager(object):
         """
         self._crawlers = []
         for i in xrange(num_crawlers):
-            crawler = SiteCrawler(sites_info, admin_email, tasks, results)
+            crawler = SiteCrawler(sites_info, tasks, results)
             self._crawlers.append(crawler)
         logging.info('Using %d site crawlers.' % num_crawlers)
 

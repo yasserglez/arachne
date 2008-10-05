@@ -50,7 +50,6 @@ def _parse_config_file(configfile):
     """Parse the configuration file.
     """
     config = {
-        'admin_email': 'user@host.com',
         'num_crawlers': 3,
         'user': None,
         'group': None,
@@ -158,8 +157,7 @@ def main():
     options = _parse_args()
     config = _parse_config_file(options['config_file'])
     sites = _parse_sites_file(config['sites_file'])
-    daemon = IndexerDaemon(sites, config['admin_email'],
-                           config['num_crawlers'], config['spool_dir'],
+    daemon = IndexerDaemon(sites, config['num_crawlers'], config['spool_dir'],
                            config['database_dir'], config['log_file'],
                            config['log_level'], config['pid_file'],
                            config['user'], config['group'])

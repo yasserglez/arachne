@@ -40,8 +40,8 @@ class IndexerDaemon(Daemon):
     and sleeps until a SIGTERM signal is received to stop the components.
     """
 
-    def __init__(self, sites, admin_email, num_crawlers, spool_dir,
-                 database_dir, log_file, log_level, pid_file, user, group):
+    def __init__(self, sites, num_crawlers, spool_dir, database_dir, log_file,
+                 log_level, pid_file, user, group):
         """Initialize the indexer daemon.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
@@ -76,8 +76,8 @@ class IndexerDaemon(Daemon):
         self._results = ResultQueue(sites_info, results_dir)
         logging.info('There are %d results waiting for processing.'
                      % len(self._results))
-        self._crawlers = CrawlerManager(sites_info, admin_email, num_crawlers,
-                                        self._tasks, self._results)
+        self._crawlers = CrawlerManager(sites_info, num_crawlers, self._tasks,
+                                        self._results)
         self._processor = ProcessorManager(sites_info, index_dir, self._tasks,
                                            self._results)
         # Flag used to stop the loop started by the run() method.

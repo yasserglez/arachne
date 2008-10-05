@@ -36,7 +36,7 @@ class ProtocolHandler(object):
 
     scheme = ''
 
-    def __init__(self, sites_info, admin_email):
+    def __init__(self, sites_info):
         """Initialize the protocol handler.
 
         The `sites_info` argument will be a dictionary mapping site IDs to the
@@ -60,7 +60,7 @@ class FileHandler(ProtocolHandler):
 
     scheme = 'file'
 
-    def __init__(self, sites_info, admin_email):
+    def __init__(self, sites_info):
         """Initialize handler.
         """
         # This handler does not require initialization.
