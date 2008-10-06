@@ -107,9 +107,9 @@ class FTPHandler(ProtocolHandler):
         try:
             ftp = ftplib.FTP()
             if url.port:
-                ftp.connect(url.host, url.port)
+                ftp.connect(url.hostname, url.port)
             else:
-                ftp.connect(url.host)
+                ftp.connect(url.hostname)
             if url.username:
                 ftp.login(url.username, url.password)
             else:

@@ -28,19 +28,22 @@ class URL(object):
     def __init__(self, url):
         """Initialize the URL from the string `url`.
         """
-        result = urlparse.urlsplit(url.rstrip('/'))
-        self._scheme = result.scheme
-        self._username = result.username
-        self._password = result.password
-        self._host = result.netloc
-        self._port = result.port
-        self._url = result.geturl()
-        if result.path:
-            self._path = result.path
-        else:
+        url = url.rstrip('/')
+        splitted_url = urlparse.urlsplit(url)
+        root_url = '%s://%s' % (splitted_url.scheme, splitted_url.netloc)
+        self._url = url
+        self._scheme = splitted_url.scheme
+        self._username = splitted_url.username
+        self._password = splitted_url.password
+        self._hostname = splitted_url.hostname
+        self._port = splitted_url.port
+        path = url[len(root_url):]
+        if not path:
             # Include the / in the URL of the root directory.
             self._url = '%s/' % self._url
             self._path = '/'
+        else:
+            self._path = path
 
     def __str__(self):
         """Return the URL as string.
@@ -64,20 +67,6 @@ class URL(object):
         """
         return URL('%s/%s' % (self._url.rstrip('/'), path.lstrip('/')))
 
-    def basename(self):
-        """Return last path component as string.
-
-        This method will return '/' for URL of the root directory.
-        """
-        # If the path ends with a / then it is the root directory and it is
-        # returned.  Otherwise, the basename will be the rest of the string
-        # after the last / found.
-        if self._path.endswith('/'):
-            return self._path
-        else:
-            i = self._path.rindex('/')
-            return self._path[i + 1:]
-
     def _get_scheme(self):
         """Get method for the `scheme` property.
         """
@@ -93,10 +82,10 @@ class URL(object):
         """
         return self._password
 
-    def _get_host(self):
-        """Get method for the `host` property.
+    def _get_hostname(self):
+        """Get method for the `hostname` property.
         """
-        return self._host
+        return self._hostname
 
     def _get_port(self):
         """Get method for the `port` property.
@@ -108,14 +97,29 @@ class URL(object):
         """
         return self._path
 
+    def _get_basename(self):
+        """Get method for the `basename` property.
+
+        This method will return '/' for URL of the root directory.
+        """
+        # If the path ends with a / then it is the root directory and it is
+        # returned.  Otherwise, the basename will be the rest of the string
+        # after the last / found.
+        if self._path.endswith('/'):
+            return self._path
+        else:
+            return self._path[self._path.rindex('/') + 1:]
+
     scheme = property(_get_scheme)
 
     username = property(_get_username)
 
     password = property(_get_password)
 
-    host = property(_get_host)
+    hostname = property(_get_hostname)
 
     port = property(_get_port)
 
     path = property(_get_path)
+
+    basename = property(_get_basename)

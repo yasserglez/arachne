@@ -18,7 +18,6 @@
 import os
 import sys
 import pickle
-import urlparse
 import optparse
 import unittest
 
@@ -32,36 +31,44 @@ from arachne.util.url import URL
 class TestURL(unittest.TestCase):
 
     def setUp(self):
-        self._url = 'http://deltha.uh.cu:21/debian'
-        self._basename = 'debian'
-        self._join_path = 'pool'
-        self._joined_url = 'http://deltha.uh.cu:21/debian/pool'
-        self._urlobj = URL(self._url)
+        self._urls = (
+            ('file:///home/yglez',
+             ('file', None, None, None, None, '/home/yglez', 'yglez'),
+             ('tmp', 'file:///home/yglez/tmp')),
+            ('ftp://deltha.uh.cu:21/debian',
+             ('ftp', None, None, 'deltha.uh.cu', 21, '/debian', 'debian'),
+             ('pool', 'ftp://deltha.uh.cu:21/debian/pool')),
+            ('ftp://user:passwd@host:21/',
+             ('ftp', 'user', 'passwd', 'host', 21, '/', '/'),
+             ('foo.txt', 'ftp://user:passwd@host:21/foo.txt')),
+        )
 
     def test_properties(self):
-        result = urlparse.urlsplit(self._url)
-        self.assertEquals(self._urlobj.scheme, result.scheme)
-        self.assertEquals(self._urlobj.username, result.username)
-        self.assertEquals(self._urlobj.password, result.password)
-        self.assertEquals(self._urlobj.host, result.netloc)
-        self.assertEquals(self._urlobj.port, result.port)
-        self.assertEquals(self._urlobj.path, result.path)
-
-    def test_basename(self):
-        self.assertEquals(self._urlobj.basename(), self._basename)
+        for url_str, attrs, join_info in self._urls:
+            url = URL(url_str)
+            self.assertEquals(url.scheme, attrs[0])
+            self.assertEquals(url.username, attrs[1])
+            self.assertEquals(url.password, attrs[2])
+            self.assertEquals(url.hostname, attrs[3])
+            self.assertEquals(url.port, attrs[4])
+            self.assertEquals(url.path, attrs[5])
+            self.assertEquals(url.basename, attrs[6])
 
     def test_join(self):
-        joined_urlobj = self._urlobj.join(self._join_path)
-        self.assertEquals(str(joined_urlobj), self._joined_url)
+        for url_str, attrs, join_info in self._urls:
+            url = URL(url_str)
+            self.assertEquals(str(url.join(join_info[0])), join_info[1])
 
     def test_pickling(self):
-        urlobj = pickle.loads(pickle.dumps(self._urlobj))
-        self.assertEquals(self._urlobj.scheme, urlobj.scheme)
-        self.assertEquals(self._urlobj.username, urlobj.username)
-        self.assertEquals(self._urlobj.password, urlobj.password)
-        self.assertEquals(self._urlobj.host, urlobj.host)
-        self.assertEquals(self._urlobj.port, urlobj.port)
-        self.assertEquals(self._urlobj.path, urlobj.path)
+        for url_str, attrs, join_info in self._urls:
+            url = pickle.loads(pickle.dumps(URL(url_str)))
+            self.assertEquals(url.scheme, attrs[0])
+            self.assertEquals(url.username, attrs[1])
+            self.assertEquals(url.password, attrs[2])
+            self.assertEquals(url.hostname, attrs[3])
+            self.assertEquals(url.port, attrs[4])
+            self.assertEquals(url.path, attrs[5])
+            self.assertEquals(url.basename, attrs[6])
 
 
 def main():
