@@ -22,7 +22,7 @@ import os
 import threading
 
 from arachne.indexer.error import EmptyQueue
-from arachne.utils.persist import Queue, QueueError
+from arachne.util.persist import Queue, QueueError
 
 
 class CrawlResult(object):

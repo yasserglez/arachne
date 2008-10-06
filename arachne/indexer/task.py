@@ -24,7 +24,7 @@ import math
 import threading
 
 from arachne.indexer.error import EmptyQueue
-from arachne.utils.persist import PriorityQueue, QueueError
+from arachne.util.persist import PriorityQueue, QueueError
 
 
 class CrawlTask(object):

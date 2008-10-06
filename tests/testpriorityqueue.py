@@ -25,7 +25,7 @@ TESTDIR = os.path.dirname(os.path.abspath(__file__))
 SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
-from arachne.utils.persist import PriorityQueue, QueueError
+from arachne.util.persist import PriorityQueue, QueueError
 
 
 class TestPriorityQueue(unittest.TestCase):

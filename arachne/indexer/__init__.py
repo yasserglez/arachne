@@ -24,8 +24,8 @@ import logging
 import hashlib
 
 from arachne import __version__
-from arachne.utils.url import URL
-from arachne.utils.daemon import Daemon
+from arachne.util.url import URL
+from arachne.util.daemon import Daemon
 from arachne.indexer.task import TaskQueue
 from arachne.indexer.result import ResultQueue
 from arachne.indexer.crawler import CrawlerManager

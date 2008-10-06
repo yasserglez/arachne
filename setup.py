@@ -31,7 +31,7 @@ setup(name='Arachne',
       author_email=__author__.split()[-1].strip('<>'),
       platforms=[],
       packages=['arachne', 'arachne.indexer', 'arachne.searcher',
-                'arachne.utils'],
+                'arachne.util'],
       package_dir={'arachne': 'arachne'},
       data_files=[
         ('/etc/init.d/', ['data/arachne']),

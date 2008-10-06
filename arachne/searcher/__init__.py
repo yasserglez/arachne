@@ -22,7 +22,7 @@ import signal
 import logging
 
 from arachne import __version__
-from arachne.utils.daemon import Daemon
+from arachne.util.daemon import Daemon
 
 
 class SearcherDaemon(Daemon):
