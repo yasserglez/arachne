@@ -21,6 +21,7 @@
 import os
 import socket
 import ftplib
+import logging
 
 from arachne.indexer.result import CrawlResult
 
@@ -50,7 +51,8 @@ class ProtocolHandler(object):
         """Execute the task and return the result.
 
         If the task is successfully executed the `CrawlResult` instance should
-        be returned, `None` otherwise.
+        be returned, `None` otherwise.  If an error occurs the handler should
+        print a message usign `logging.error`.
         """
         raise NotImplementedError('A subclass must override this method.')
 
@@ -69,8 +71,8 @@ class FileHandler(ProtocolHandler):
     def execute(self, task):
         """Execute the task and return the result.
         """
+        url = task.url
         try:
-            url = task.url
             if os.path.isdir(url.path):
                 result = CrawlResult(task, True)
                 for entry_name in os.listdir(url.path):
@@ -80,7 +82,8 @@ class FileHandler(ProtocolHandler):
                     result.append(entry_name, data)
             else:
                 result = CrawlResult(task, False)
-        except OSError:
+        except OSError, error:
+            logging.error('Error visiting %s (%s)' % (url, error.strerror))
             return None
         else:
             return result
@@ -140,12 +143,14 @@ class FTPHandler(ProtocolHandler):
                             data['is_dir'] = True
                     result.append(entry_name, data)
             ftp.quit()
-        except socket.error:
-            # TODO: Log the error message.
+        except socket.error, error:
+            if not isinstance(error, basestring):
+                error = error[1]
+            logging.error('Error visiting "%s" (%s)' % (url, error))
             return None
-        except ftplib.Error:
-            # TODO: Log the error message.
+        except ftplib.Error, error:
             ftp.quit()
+            logging.error('Error visiting "%s" (%s)' % (url, error))
             return None
         else:
             return result

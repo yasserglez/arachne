@@ -61,7 +61,7 @@ class SiteCrawler(threading.Thread):
                 else:
                     self._execute(task)
         except:
-            logging.exception('Exception raised.  Printing traceback.')
+            logging.exception('Unhandled exception, printing traceback')
 
     def stop(self):
         """Order the main loop to end.
@@ -79,16 +79,15 @@ class SiteCrawler(threading.Thread):
             handler = self._handlers[scheme]
         except KeyError:
             self._tasks.report_error(task)
-            logging.error('The %s scheme is not supported.' % scheme)
+            logging.error('Scheme of "%s" is not supported' % task.url)
         else:
+            logging.info('Visiting "%s"' % task.url)
             result = handler.execute(task)
             if result is not None:
                 self._results.put(result)
                 self._tasks.report_done(task)
-                logging.info('Successfully visited %s.' % task.url)
             else:
                 self._tasks.report_error(task)
-                logging.error('An error occurred visiting %s.' % task.url)
 
 
 class CrawlerManager(object):
@@ -108,7 +107,7 @@ class CrawlerManager(object):
         for i in xrange(num_crawlers):
             crawler = SiteCrawler(sites_info, tasks, results)
             self._crawlers.append(crawler)
-        logging.info('Using %d site crawlers.' % num_crawlers)
+        logging.info('Using %d site crawlers' % num_crawlers)
 
     def start(self):
         """Start the site crawlers.

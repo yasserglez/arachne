@@ -120,7 +120,7 @@ class ProcessorManager(threading.Thread):
                 else:
                     self._process(result)
         except:
-            logging.exception('Exception raised.  Printing traceback.')
+            logging.exception('Unhandled exception, printing traceback')
 
     def stop(self):
         """Order the main loop to end.
@@ -130,10 +130,6 @@ class ProcessorManager(threading.Thread):
     def _process(self, result):
         """Process a crawl result.
         """
+        logging.info('Processing "%s"' % result.task.url)
         if self._processor.process(result):
             self._results.report_done(result)
-            logging.info('Successfully processed result for %s'
-                         % result.task.url)
-        else:
-            logging.error('Error processing result for %s'
-                          % result.task.url)

@@ -52,8 +52,8 @@ class IndexerDaemon(Daemon):
         logging.basicConfig(filename=log_file, level=log_level,
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        logging.info('Starting Arachne indexer daemon %s.' % __version__)
-        logging.info('Running with %d sites configured.' % len(sites))
+        logging.info('Starting Arachne indexer daemon %s' % __version__)
+        logging.info('Running with %d sites configured' % len(sites))
         # Create URL instances and assign an id to each site.
         sites_info = {}
         for site in sites:
@@ -71,10 +71,10 @@ class IndexerDaemon(Daemon):
             os.mkdir(index_dir)
         # Initialize components.
         self._tasks = TaskQueue(sites_info, tasks_dir)
-        logging.info('There are %d tasks waiting for execution.'
+        logging.info('There are %d tasks waiting for execution'
                      % len(self._tasks))
         self._results = ResultQueue(sites_info, results_dir)
-        logging.info('There are %d results waiting for processing.'
+        logging.info('There are %d results waiting for processing'
                      % len(self._results))
         self._crawlers = CrawlerManager(sites_info, num_crawlers, self._tasks,
                                         self._results)
@@ -98,9 +98,9 @@ class IndexerDaemon(Daemon):
             self._processor.join()
             self._results.close()
             self._tasks.close()
-            logging.info('Daemon stopped.  Exiting.')
+            logging.info('Daemon stopped, exiting')
         except:
-            logging.exception('Exception raised.  Printing traceback.')
+            logging.exception('Unhandled exception, printing traceback')
         finally:
             logging.shutdown()
 

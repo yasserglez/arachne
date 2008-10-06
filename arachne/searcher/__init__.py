@@ -40,8 +40,8 @@ class SearcherDaemon(Daemon):
         logging.basicConfig(filename=log_file, level=log_level,
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        logging.info('Starting Arachne searcher daemon %s.' % __version__)
-        logging.info('%d sites configured.' % len(sites))
+        logging.info('Starting Arachne searcher daemon %s' % __version__)
+        logging.info('Running with %d sites configured' % len(sites))
         # Flag used to stop the loop started by the run() method.
         self._running = False
 
@@ -52,9 +52,9 @@ class SearcherDaemon(Daemon):
             self._running = True
             while self._running:
                 signal.pause()
-            logging.info('Daemon stopped.  Exiting.')
+            logging.info('Daemon stopped, exiting')
         except:
-            logging.exception('Exception raised.  Printing traceback.')
+            logging.exception('Unhandled exception, printing traceback')
         finally:
             logging.shutdown()
 
