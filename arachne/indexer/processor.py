@@ -36,7 +36,7 @@ class ResultProcessor(object):
     def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
-        raise NotImplementedError()
+        raise NotImplementedError('A subclass must override this method.')
 
     def process(self, result):
         """Process a crawl result.
@@ -44,7 +44,7 @@ class ResultProcessor(object):
         If the result is successfully processed `True` should be returned,
         `False` otherwise.
         """
-        raise NotImplementedError()
+        raise NotImplementedError('A subclass must override this method.')
 
 
 class NaiveProcessor(ResultProcessor):
@@ -77,12 +77,12 @@ class IndexProcessor(ResultProcessor):
     def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
-        raise NotImplementedError()
+        raise NotImplementedError('A subclass must override this method.')
 
     def process(self, result):
         """Process a crawl result.
         """
-        raise NotImplementedError()
+        raise NotImplementedError('A subclass must override this method.')
 
 
 class ProcessorManager(threading.Thread):

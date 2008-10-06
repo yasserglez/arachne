@@ -52,7 +52,7 @@ class ProtocolHandler(object):
         If the task is successfully executed the `CrawlResult` instance should
         be returned, `None` otherwise.
         """
-        raise NotImplementedError()
+        raise NotImplementedError('A subclass must override this method.')
 
 
 class FileHandler(ProtocolHandler):
@@ -176,7 +176,7 @@ class FTPHandler(ProtocolHandler):
                     else:
                         name = data[-1]
                 else:
-                    raise ValueError()
+                    raise ValueError('Invalid line format.')
             except ValueError:
                 return None
             else:

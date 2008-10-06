@@ -118,7 +118,7 @@ class PriorityQueue(object):
         """Return the item at the head of the queue.
         """
         if self.isempty():
-            raise QueueError()
+            raise QueueError('Empty queue.')
         else:
             cursor = self._db.cursor()
             priority, item = cursor.first()
@@ -129,7 +129,7 @@ class PriorityQueue(object):
         """Return the item at the tail of the queue.
         """
         if self.isempty():
-            raise QueueError()
+            raise QueueError('Empty queue.')
         else:
             cursor = self._db.cursor()
             priority, item = cursor.last()
@@ -140,7 +140,7 @@ class PriorityQueue(object):
         """Return and delete the item at the head of the queue.
         """
         if self.isempty():
-            raise QueueError()
+            raise QueueError('Empty queue.')
         else:
             cursor = self._db.cursor()
             priority, item = cursor.first()

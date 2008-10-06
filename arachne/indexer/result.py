@@ -140,7 +140,7 @@ class ResultQueue(object):
                 try:
                     site_id = self._sites.head()
                 except QueueError:
-                    raise EmptyQueue()
+                    raise EmptyQueue('Queue without results.')
                 else:
                     try:
                         result = self._results[site_id].head()

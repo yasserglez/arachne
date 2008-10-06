@@ -82,7 +82,7 @@ def _parse_config_file(configfile):
         try:
             config['num_crawlers'] = int(config['num_crawlers'])
             if config['num_crawlers'] <= 0:
-                raise ValueError()
+                raise ValueError('Invalid number of crawlers.')
         except ValueError:
             _error('invalid value for num_crawlers in the config file.')
         if config['user'] is not None:

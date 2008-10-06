@@ -229,12 +229,12 @@ class TaskQueue(object):
                     site_id, site_priority = self._sites.head()
                 except QueueError:
                     # Empty queue.  Running without sites?
-                    raise EmptyQueue()
+                    raise EmptyQueue('Queue without sites.')
                 else:
                     if site_priority > self._get_priority():
                         # The site at the head of the queue cannot be visited
                         # right now.  Then, the queue is empty.
-                        raise EmptyQueue()
+                        raise EmptyQueue('Queue without available sites.')
                     else:
                         try:
                             task, task_priority = self._tasks[site_id].head()
