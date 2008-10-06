@@ -132,7 +132,7 @@ class ProcessorManager(threading.Thread):
         """
         if self._processor.process(result):
             self._results.report_done(result)
-            logging.info('Sucessfully processed result for %s'
+            logging.info('Successfully processed result for %s'
                          % result.task.url)
         else:
             logging.error('Error processing result for %s'
