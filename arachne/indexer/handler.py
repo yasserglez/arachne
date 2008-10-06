@@ -148,6 +148,10 @@ class FTPHandler(ProtocolHandler):
                 error = error[1]
             logging.error('Error visiting "%s" (%s)' % (url, error))
             return None
+        except EOFError:
+            ftp.close()
+            logging.error('Error visiting "%s" (Error reading data)' % url)
+            return None
         except ftplib.Error, error:
             ftp.quit()
             logging.error('Error visiting "%s" (%s)' % (url, error))
