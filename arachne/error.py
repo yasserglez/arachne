@@ -15,10 +15,18 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Module with exceptions raised in the searcher daemon.
+"""Exceptions raised in the module.
 """
 
 
-class SearcherException(Exception):
-    """Base class for all exceptions raised in the Searcher daemon.
+class ArachneException(Exception):
+    """Base class for all exceptions raised in the module.
+    """
+
+
+class EmptyQueue(ArachneException):
+    """Empty queue error.
+
+    Exception raised by the `get()` methods of the `TaskQueue` and
+    `ResultQueue` if no item is available.
     """

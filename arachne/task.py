@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`CrawlTask` and `TaskQueue`.
+"""Queue for crawl tasks and the crawl task itself.
 """
 
 import os
@@ -23,7 +23,7 @@ import time
 import math
 import threading
 
-from arachne.indexer.error import EmptyQueue
+from arachne.error import EmptyQueue
 from arachne.util.persist import PriorityQueue, QueueError
 
 

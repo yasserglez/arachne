@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`CrawlResult` and `ResultQueue`.
+"""Queue for crawl result and the crawl result itself.
 """
 
 import os
 import threading
 
-from arachne.indexer.error import EmptyQueue
+from arachne.error import EmptyQueue
 from arachne.util.persist import Queue, QueueError
 
 

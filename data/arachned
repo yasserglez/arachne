@@ -1,0 +1,40 @@
+#!/bin/sh
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+NAME=arachned
+DESC="file search engine"
+DAEMON=/usr/sbin/arachned
+PIDFILE=/var/run/arachne/arachned.pid
+SCRIPTNAME=/etc/init.d/arachned
+
+[ -x "$DAEMON" ] || exit 0
+
+case "$1" in
+	start)
+		echo -n "Starting $DESC: "
+		start-stop-daemon --start --quiet --pidfile $PIDFILE \
+			--exec $DAEMON
+		echo "$NAME."
+		;;
+	stop)
+		echo -n "Stopping $DESC: "
+		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+			--retry=TERM/30/KILL/forever
+		echo "$NAME."
+		;;
+	restart|force-reload)
+		echo -n "Restarting $DESC: "
+		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+			--retry=TERM/30/KILL/forever
+		start-stop-daemon --start --quiet --pidfile $PIDFILE \
+			--exec $DAEMON
+		echo "$NAME."
+		;;
+	*)
+		echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+		exit 1
+		;;
+esac
+
+exit 0

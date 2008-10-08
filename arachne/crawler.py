@@ -15,15 +15,15 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`SiteCrawler` and `CrawlerManager`.
+"""Components related with the crawling process.
 """
 
 import time
 import logging
 import threading
 
-from arachne.indexer.error import EmptyQueue
-from arachne.indexer.handler import ProtocolHandler
+from arachne.error import EmptyQueue
+from arachne.handler import ProtocolHandler
 
 
 class SiteCrawler(threading.Thread):
@@ -103,10 +103,8 @@ class CrawlerManager(object):
         Create a group of site crawlers according the the value of the
         `num_crawlers` argument.
         """
-        self._crawlers = []
-        for i in xrange(num_crawlers):
-            crawler = SiteCrawler(sites_info, tasks, results)
-            self._crawlers.append(crawler)
+        self._crawlers = [SiteCrawler(sites_info, tasks, results)
+                          for i in range(num_crawlers)]
         logging.info('Using %d site crawlers' % num_crawlers)
 
     def start(self):

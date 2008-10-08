@@ -23,7 +23,7 @@ import socket
 import ftplib
 import logging
 
-from arachne.indexer.result import CrawlResult
+from arachne.result import CrawlResult
 
 
 class ProtocolHandler(object):

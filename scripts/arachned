@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Script that starts the Arachne indexer daemon.
+"""Script that starts the Arachne daemon.
 """
 
 import sys
@@ -25,24 +25,24 @@ import optparse
 import ConfigParser
 
 from arachne import __author__, __version__
-from arachne.indexer import IndexerDaemon
+from arachne.daemon import ArachneDaemon
 
 
 def _parse_args():
     """Parse the command line arguments.
     """
     usage = '%prog [options]'
-    version = 'arachne-indexer (Arachne) %s\nCopyright (C) 2008 %s.\nYou may' \
-        ' redistribute copies of Arachne under the terms of the GNU General\n' \
+    version = 'arachned (Arachne) %s\nCopyright (C) 2008 %s.\nYou may ' \
+        'redistribute copies of Arachne under the terms of the GNU General\n' \
         'Public License version 3 or later.  For more information about' \
         ' these matters,\nsee the file named LICENSE found in the source' \
         ' distribution.' % (__version__, ' '.join(__author__.split()[:-1]))
-    description = 'Indexer daemon of the Arachne file search engine.'
+    description = 'Daemon of the Arachne file search engine.'
     parser = optparse.OptionParser(usage=usage, version=version,
                                    description=description)
     parser.add_option('-f', '--file', metavar='FILE', dest='config_file',
                       help='specify config file (default %default)')
-    parser.set_defaults(config_file='/etc/arachne/indexer.conf')
+    parser.set_defaults(config_file='/etc/arachne/arachned.conf')
     return parser.parse_args()[0].__dict__
 
 
@@ -54,10 +54,10 @@ def _parse_config_file(configfile):
         'user': None,
         'group': None,
         'sites_file': '/etc/arachne/sites.conf',
-        'pid_file': '/var/run/arachne/indexer.pid',
+        'pid_file': '/var/run/arachne/arachned.pid',
         'spool_dir': '/var/lib/spool/arachne/',
         'database_dir': '/var/lib/arachne/',
-        'log_file': '/var/log/arachne/indexer.log',
+        'log_file': '/var/log/arachne/arachned.log',
         'log_level': logging.INFO,
     }
     parser = ConfigParser.ConfigParser()
@@ -65,7 +65,7 @@ def _parse_config_file(configfile):
         parser.read(configfile)
         for option in config.iterkeys():
             try:
-                value = parser.get('indexer', option)
+                value = parser.get('arachned', option)
             except ConfigParser.NoOptionError:
                 # Ignore missing options, use default values.
                 pass
@@ -73,7 +73,7 @@ def _parse_config_file(configfile):
                 # Use the value from the configuration file.
                 config[option] = value
     except ConfigParser.NoSectionError:
-        _error('failed to read config file or indexer section is missing.')
+        _error('failed to read config file or arachned section is missing.')
     except ConfigParser.ParsingError:
         _error('invalid syntax in the config file.')
     except ConfigParser.Error:
@@ -152,12 +152,12 @@ def _error(message):
 
 
 def main():
-    """Start the indexer daemon.
+    """Start the daemon.
     """
     options = _parse_args()
     config = _parse_config_file(options['config_file'])
     sites = _parse_sites_file(config['sites_file'])
-    daemon = IndexerDaemon(sites, config['num_crawlers'], config['spool_dir'],
+    daemon = ArachneDaemon(sites, config['num_crawlers'], config['spool_dir'],
                            config['database_dir'], config['log_file'],
                            config['log_level'], config['pid_file'],
                            config['user'], config['group'])

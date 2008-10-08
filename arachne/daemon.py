@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Subpackage with classes related with the indexer daemon.
+"""UNIX daemon of the Arachne file search engine.
 """
 
 import os
@@ -24,16 +24,16 @@ import logging
 import hashlib
 
 from arachne import __version__
+from arachne.task import TaskQueue
+from arachne.result import ResultQueue
+from arachne.crawler import CrawlerManager
+from arachne.processor import ProcessorManager
 from arachne.util.url import URL
 from arachne.util.daemon import Daemon
-from arachne.indexer.task import TaskQueue
-from arachne.indexer.result import ResultQueue
-from arachne.indexer.crawler import CrawlerManager
-from arachne.indexer.processor import ProcessorManager
 
 
-class IndexerDaemon(Daemon):
-    """Indexer daemon.
+class ArachneDaemon(Daemon):
+    """Arachne UNIX daemon.
 
     This class implements the UNIX daemon used to crawl the sites and generate
     the index.  When the `start()` method is invoked it starts the components
@@ -42,7 +42,7 @@ class IndexerDaemon(Daemon):
 
     def __init__(self, sites, num_crawlers, spool_dir, database_dir, log_file,
                  log_level, pid_file, user, group):
-        """Initialize the indexer daemon.
+        """Initialize the daemon.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
         `ProcessorManager` instances.  The `sites` argument should be a list
@@ -52,7 +52,7 @@ class IndexerDaemon(Daemon):
         logging.basicConfig(filename=log_file, level=log_level,
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
-        logging.info('Starting Arachne indexer daemon %s' % __version__)
+        logging.info('Starting Arachne daemon %s' % __version__)
         logging.info('Running with %d sites configured' % len(sites))
         # Create URL instances and assign an id to each site.
         sites_info = {}

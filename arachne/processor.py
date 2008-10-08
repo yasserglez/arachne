@@ -15,15 +15,15 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""`ProcessorManager` and related classes.
+"""Components used to process the crawl results.
 """
 
 import time
 import logging
 import threading
 
-from arachne.indexer.error import EmptyQueue
-from arachne.indexer.task import CrawlTask
+from arachne.error import EmptyQueue
+from arachne.task import CrawlTask
 
 
 class ResultProcessor(object):
@@ -36,7 +36,6 @@ class ResultProcessor(object):
     def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
-        raise NotImplementedError('A subclass must override this method.')
 
     def process(self, result):
         """Process a crawl result.
@@ -58,6 +57,7 @@ class NaiveProcessor(ResultProcessor):
     def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
+        ResultProcessor.__init__(self, sites_info, index_dir, tasks, results)
         self._tasks = tasks
 
     def process(self, result):
@@ -77,7 +77,7 @@ class IndexProcessor(ResultProcessor):
     def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
-        raise NotImplementedError('A subclass must override this method.')
+        ResultProcessor.__init__(self, sites_info, index_dir, tasks, results)
 
     def process(self, result):
         """Process a crawl result.

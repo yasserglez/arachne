@@ -30,18 +30,15 @@ setup(name='Arachne',
       author=' '.join(__author__.split()[:-1]),
       author_email=__author__.split()[-1].strip('<>'),
       platforms=[],
-      packages=['arachne', 'arachne.indexer', 'arachne.searcher',
-                'arachne.util'],
+      packages=['arachne', 'arachne.util'],
       package_dir={'arachne': 'arachne'},
       data_files=[
-        ('/etc/init.d/', ['data/arachne']),
-        ('/etc/arachne/', ['data/indexer.conf', 'data/searcher.conf',
-                          'data/sites.conf']),
+        ('/etc/init.d/', ['data/arachned']),
+        ('/etc/arachne/', ['data/arachned.conf', 'data/sites.conf']),
         ('share/doc/arachne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
                                'THANKS']),
-        # Daemon scripts are installed as data files because they should be
-        # copied to the /usr/sbin/ directory.
-        ('/usr/sbin/', ['scripts/arachne-indexer', 'scripts/arachne-searcher']),
+        # The daemon script should be copied to the /usr/sbin/ directory.
+        ('/usr/sbin/', ['scripts/arachned']),
         # Empty directories required by the default configuration.
         ('/var/run/arachne/', []),
         ('/var/lib/spool/arachne', []),
