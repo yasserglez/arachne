@@ -35,8 +35,8 @@ from arachne.task import CrawlTask, TaskQueue
 class TestTaskQueue(unittest.TestCase):
 
     def setUp(self):
-        self._dir_path = os.path.join(TESTDIR, 'testtaskqueue')
-        os.mkdir(self._dir_path)
+        self._db_home = os.path.join(TESTDIR, 'testtaskqueue')
+        os.mkdir(self._db_home)
         self._request_wait = 2
         self._error_wait = 4
         self._min_revisit_wait = 2
@@ -76,7 +76,7 @@ class TestTaskQueue(unittest.TestCase):
             for name in (str(n) for n in xrange(tasks_per_site)):
                 task_list.append(CrawlTask(site_id, info['url'].join(name)))
             self._tasks[site_id] = task_list
-        self._queue = TaskQueue(self._sites_info, self._dir_path)
+        self._queue = TaskQueue(self._sites_info, self._db_home)
 
     def test_length(self):
         # It should contain tasks for the root directories.
@@ -130,7 +130,7 @@ class TestTaskQueue(unittest.TestCase):
         self._queue.close()
         # It should not return tasks from the removed site.
         del self._sites_info[self._sites_info.keys()[0]]
-        self._queue = TaskQueue(self._sites_info, self._dir_path)
+        self._queue = TaskQueue(self._sites_info, self._db_home)
         i = 0
         num_sites = len(self._sites_info)
         while self._queue:
@@ -186,9 +186,9 @@ class TestTaskQueue(unittest.TestCase):
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
     def tearDown(self):
-        if os.path.isdir(self._dir_path):
+        if os.path.isdir(self._db_home):
             self._queue.close()
-            shutil.rmtree(self._dir_path)
+            shutil.rmtree(self._db_home)
 
     def _leave_one_task(self):
         # Remove all the tasks in the queue but one.
