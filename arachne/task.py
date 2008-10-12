@@ -70,7 +70,9 @@ class CrawlTask(object):
         """Report that the directory was revisited.
 
         The `changed` argument should be set to `True` if the content of the
-        directory changed, `False` otherwise.
+        directory changed, `False` otherwise.  This method is invoked by the
+        `TaskQueue` when task is added to the queue using the `put_revisited()`
+        method.
         """
         if changed:
             self._change_count += 1
