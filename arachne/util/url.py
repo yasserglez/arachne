@@ -28,22 +28,20 @@ class URL(object):
     def __init__(self, url):
         """Initialize the URL from the string `url`.
         """
-        url = url.rstrip('/')
         splitted_url = urlparse.urlsplit(url)
-        root_url = '%s://%s' % (splitted_url.scheme, splitted_url.netloc)
-        self._url = url
+        root_url = '%s://%s/' % (splitted_url.scheme, splitted_url.netloc)
         self._scheme = splitted_url.scheme
         self._username = splitted_url.username
         self._password = splitted_url.password
         self._hostname = splitted_url.hostname
         self._port = splitted_url.port
-        path = url[len(root_url):]
+        path = url[len(root_url):].rstrip('/')
         if not path:
-            # Include the / in the URL of the root directory.
-            self._url = '%s/' % self._url
             self._path = '/'
+            self._url = root_url
         else:
-            self._path = path
+            self._path = '/%s' % path.lstrip('/')
+            self._url = '%s%s' % (root_url, path.lstrip('/'))
 
     def __str__(self):
         """Return the URL as string.
@@ -65,7 +63,8 @@ class URL(object):
     def join(self, path):
         """Join a path to the URL and return the new URL.
         """
-        return URL('%s/%s' % (self._url.rstrip('/'), path.lstrip('/')))
+        base_url = self._url[:-1] if self._path == '/' else self._url
+        return URL('%s/%s' % (base_url, path.lstrip('/')))
 
     def _get_scheme(self):
         """Get method for the `scheme` property.
@@ -102,10 +101,7 @@ class URL(object):
 
         This method will return '/' for URL of the root directory.
         """
-        # If the path ends with a / then it is the root directory and it is
-        # returned.  Otherwise, the basename will be the rest of the string
-        # after the last / found.
-        if self._path.endswith('/'):
+        if self._path == '/':
             return self._path
         else:
             return self._path[self._path.rindex('/') + 1:]

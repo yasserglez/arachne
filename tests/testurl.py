@@ -32,15 +32,33 @@ class TestURL(unittest.TestCase):
 
     def setUp(self):
         self._urls = (
-            ('file:///home/yglez',
-             ('file', None, None, None, None, '/home/yglez', 'yglez'),
-             ('tmp', 'file:///home/yglez/tmp')),
-            ('ftp://deltha.uh.cu:21/debian',
-             ('ftp', None, None, 'deltha.uh.cu', 21, '/debian', 'debian'),
-             ('pool', 'ftp://deltha.uh.cu:21/debian/pool')),
-            ('ftp://user:passwd@host:21/',
-             ('ftp', 'user', 'passwd', 'host', 21, '/', '/'),
-             ('foo.txt', 'ftp://user:passwd@host:21/foo.txt')),
+            ('file:///',
+             ('file', None, None, None, None, '/', '/'),
+             ('etc', 'file:///etc')),
+
+            ('file:///home',
+             ('file', None, None, None, None, '/home', 'home'),
+             ('yglez', 'file:///home/yglez')),
+
+            ('ftp://deltha.uh.cu/',
+             ('ftp', None, None, 'deltha.uh.cu', None, '/', '/'),
+             ('debian', 'ftp://deltha.uh.cu/debian')),
+
+            ('ftp://username:password@deltha.uh.cu/',
+             ('ftp', 'username', 'password', 'deltha.uh.cu', None, '/', '/'),
+             ('debian', 'ftp://username:password@deltha.uh.cu/debian')),
+
+            ('ftp://deltha.uh.cu:21/',
+             ('ftp', None, None, 'deltha.uh.cu', 21, '/', '/'),
+             ('debian', 'ftp://deltha.uh.cu:21/debian')),
+
+            ('ftp://username:password@deltha.uh.cu:21/',
+             ('ftp', 'username', 'password', 'deltha.uh.cu', 21, '/', '/'),
+             ('debian', 'ftp://username:password@deltha.uh.cu:21/debian')),
+
+            ('ftp://deltha.uh.cu/debian',
+             ('ftp', None, None, 'deltha.uh.cu', None, '/debian', 'debian'),
+             ('pool', 'ftp://deltha.uh.cu/debian/pool')),
         )
 
     def test_properties(self):
@@ -76,7 +94,7 @@ def main():
     parser.add_option('-v', dest='verbosity', default='2',
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
-    options, args = parser.parse_args()
+    options = parser.parse_args()[0]
     module = os.path.basename(__file__)[:-3]
     suite = unittest.TestLoader().loadTestsFromName(module)
     runner = unittest.TextTestRunner(verbosity=int(options.verbosity))
