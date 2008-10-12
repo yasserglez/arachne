@@ -25,8 +25,8 @@ TESTDIR = os.path.dirname(os.path.abspath(__file__))
 SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
-from arachne.util.url import URL
 from arachne.error import EmptyQueue
+from arachne.util.url import URL
 from arachne.task import CrawlTask
 from arachne.result import CrawlResult, ResultQueue
 
@@ -59,9 +59,9 @@ class TestResultQueue(unittest.TestCase):
                 {'url': URL('ftp://bristol.reduh.uh.cu/')},
         }
         self._results = []
-        results_per_site = 10
+        self._results_per_site = 10
         for site_id, info in self._sites_info.iteritems():
-            for name in (str(n) for n in xrange(results_per_site)):
+            for name in (str(n) for n in xrange(self._results_per_site)):
                 task = CrawlTask(site_id, info['url'].join(name))
                 self._results.append(CrawlResult(task, True))
         self._queue = ResultQueue(self._sites_info, self._db_home)
@@ -72,7 +72,7 @@ class TestResultQueue(unittest.TestCase):
             self._queue.put(result)
             self.assertEquals(len(self._queue), i + 1)
         num_results = len(self._results)
-        for i in xrange(len(self._results)):
+        for i in xrange(num_results):
             result = self._queue.get()
             self._queue.report_done(result)
             self.assertEquals(len(self._queue), num_results - i - 1)
@@ -88,17 +88,35 @@ class TestResultQueue(unittest.TestCase):
             self._queue.report_done(result)
         self.assertRaises(EmptyQueue, self._queue.get)
 
-    def test_persist(self):
+    def test_persistence(self):
+        for result in self._results:
+            self._queue.put(result)
+        for i, result in enumerate(self._results):
+            if i % (self._results_per_site / 2) == 0:
+                # When a few results have been removed close the database to
+                # write all the results to disk and open it again.
+                self._queue.close()
+                self._queue = ResultQueue(self._sites_info, self._db_home)
+            returned = self._queue.get()
+            self.assertEquals(returned.task.site_id, result.task.site_id)
+            self.assertEquals(str(returned.task.url), str(result.task.url))
+            self._queue.report_done(returned)
+
+    def test_remove_site(self):
         for result in self._results:
             self._queue.put(result)
         self._queue.close()
-        # It should not return results from the removed site.
+        # Remove a site.  It should not return results from this site but it
+        # should keep the order of the other results in the queue.
         del self._sites_info[self._sites_info.keys()[0]]
         self._queue = ResultQueue(self._sites_info, self._db_home)
-        while self._queue:
-            returned = self._queue.get()
-            self.assertTrue(returned.task.site_id in self._sites_info)
-            self._queue.report_done(returned)
+        for result in self._results:
+            if result.task.site_id in self._sites_info:
+                returned = self._queue.get()
+                self.assertEquals(returned.task.site_id, result.task.site_id)
+                self.assertEquals(str(returned.task.url), str(result.task.url))
+                self._queue.report_done(returned)
+        self.assertEquals(len(self._queue), 0)
 
     def tearDown(self):
         if os.path.isdir(self._db_home):
@@ -111,7 +129,7 @@ def main():
     parser.add_option('-v', dest='verbosity', default='2',
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
-    options, args = parser.parse_args()
+    options = parser.parse_args()[0]
     module = os.path.basename(__file__)[:-3]
     suite = unittest.TestLoader().loadTestsFromName(module)
     runner = unittest.TextTestRunner(verbosity=int(options.verbosity))

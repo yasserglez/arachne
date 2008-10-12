@@ -69,8 +69,8 @@ class TestFTPHandler(unittest.TestCase):
         self._handler = FTPHandler(self._sites_info)
 
     def test_parse_list(self):
-        for line, parsed in self._list_responses:
-            self.assertEquals(self._handler._parse_list(line), parsed)
+        for line, parsed_line in self._list_responses:
+            self.assertEquals(self._handler._parse_list(line), parsed_line)
 
 
 def main():
@@ -78,7 +78,7 @@ def main():
     parser.add_option('-v', dest='verbosity', default='2',
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
-    options, args = parser.parse_args()
+    options = parser.parse_args()[0]
     module = os.path.basename(__file__)[:-3]
     suite = unittest.TestLoader().loadTestsFromName(module)
     runner = unittest.TextTestRunner(verbosity=int(options.verbosity))

@@ -64,7 +64,9 @@ class TestTaskQueue(unittest.TestCase):
                 {'url': URL('ftp://bristol.reduh.uh.cu/')},
         }
         self._tasks = {}
-        tasks_per_site = 5
+        self._tasks_per_site = 10
+        self._num_sites = len(self._sites_info)
+        self._num_tasks = self._num_sites * self._tasks_per_site
         for site_id, info in self._sites_info.iteritems():
             # Set common information.
             info['error_wait'] = self._error_wait
@@ -73,35 +75,33 @@ class TestTaskQueue(unittest.TestCase):
             info['default_revisit_wait'] = self._default_revisit_wait
             # Create tasks for site.
             task_list = []
-            for name in (str(n) for n in xrange(tasks_per_site)):
+            for name in (str(n) for n in xrange(self._tasks_per_site)):
                 task_list.append(CrawlTask(site_id, info['url'].join(name)))
             self._tasks[site_id] = task_list
         self._queue = TaskQueue(self._sites_info, self._db_home)
 
     def test_length(self):
         # It should contain tasks for the root directories.
-        num_sites = len(self._sites_info)
-        self.assertEquals(len(self._queue), num_sites)
+        self.assertEquals(len(self._queue), self._num_sites)
         for i, task in enumerate(itertools.chain(*self._tasks.itervalues())):
             self._queue.put_new(task)
-            self.assertEquals(len(self._queue), num_sites + i + 1)
-        num_tasks = sum(len(tasks) for tasks in self._tasks.itervalues())
-        for i in xrange(num_tasks):
-            if i % num_sites == 0 and i != 0:
+            self.assertEquals(len(self._queue), self._num_sites + i + 1)
+        for i in xrange(self._num_tasks):
+            if i % self._num_sites == 0 and i != 0:
                 time.sleep(self._request_wait)
             task = self._queue.get()
             self._queue.report_done(task)
-            self.assertEquals(len(self._queue), num_sites + num_tasks - i - 1)
+            self.assertEquals(len(self._queue),
+                              self._num_sites + self._num_tasks - i - 1)
         # Remove the tasks for the root directories.
         time.sleep(self._request_wait)
-        for i in xrange(num_sites):
+        for i in xrange(self._num_sites):
             self._queue.report_done(self._queue.get())
-            self.assertEquals(len(self._queue), num_sites - i - 1)
+            self.assertEquals(len(self._queue), self._num_sites - i - 1)
 
     def test_populate(self):
         # Remove the tasks for the root directories.
-        num_sites = len(self._sites_info)
-        for i in xrange(num_sites):
+        for i in xrange(self._num_sites):
             self._queue.report_done(self._queue.get())
         time.sleep(self._request_wait)
         self.assertRaises(EmptyQueue, self._queue.get)
@@ -110,9 +110,8 @@ class TestTaskQueue(unittest.TestCase):
             self._queue.put_new(task)
         # Remove tasks for the queue.
         i = 0
-        num_tasks = sum(len(tasks) for tasks in self._tasks.itervalues())
-        while i < num_tasks:
-            if i % num_sites == 0:
+        while i < self._num_tasks:
+            if i % self._num_sites == 0:
                 time.sleep(self._request_wait)
             returned = self._queue.get()
             task_list = self._tasks[returned.site_id]
@@ -124,7 +123,25 @@ class TestTaskQueue(unittest.TestCase):
             # The lists of tasks should be empty.
             self.assertEquals(len(task_list), 0)
 
-    def test_persist(self):
+    def test_persistence(self):
+        for task in itertools.chain(*self._tasks.values()):
+            self._queue.put_new(task)
+        i = 0
+        while self._queue:
+            if i % (self._tasks_per_site / 2) == 0:
+                # When a few tasks have been removed close the database to
+                # write all the tasks to disk and open it again.
+                self._queue.close()
+                self._queue = TaskQueue(self._sites_info, self._db_home)
+            if i % (self._num_sites - 1) == 0:
+                time.sleep(self._request_wait)
+            returned = self._queue.get()
+            self._queue.report_done(returned)
+            i += 1
+        # Check that all tasks were returned.
+        self.assertEquals(i, self._num_sites + self._num_tasks)
+
+    def test_remove_site(self):
         for task in itertools.chain(*self._tasks.values()):
             self._queue.put_new(task)
         self._queue.close()
@@ -132,14 +149,16 @@ class TestTaskQueue(unittest.TestCase):
         del self._sites_info[self._sites_info.keys()[0]]
         self._queue = TaskQueue(self._sites_info, self._db_home)
         i = 0
-        num_sites = len(self._sites_info)
         while self._queue:
-            if i % (num_sites - 1) == 0:
+            if i % (self._num_sites - 1) == 0:
                 time.sleep(self._request_wait)
             returned = self._queue.get()
             self.assertTrue(returned.site_id in self._sites_info)
             self._queue.report_done(returned)
             i += 1
+        # Check that all tasks were returned.
+        self.assertEquals(i + self._tasks_per_site + 1,
+                          self._num_sites + self._num_tasks)
 
     def test_put_visited(self):
         self._leave_one_task()
@@ -185,20 +204,18 @@ class TestTaskQueue(unittest.TestCase):
         time.sleep(self._error_wait / 2)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
+    def _leave_one_task(self):
+        # Remove all the tasks in the queue but one.
+        for i in xrange(len(self._queue) - 1):
+            if i != 0 and i % self._num_sites == 0:
+                time.sleep(self._request_wait)
+            self._queue.report_done(self._queue.get())
+        self.assertEquals(len(self._queue), 1)
+
     def tearDown(self):
         if os.path.isdir(self._db_home):
             self._queue.close()
             shutil.rmtree(self._db_home)
-
-    def _leave_one_task(self):
-        # Remove all the tasks in the queue but one.
-        num_sites = len(self._sites_info)
-        num_tasks = len(self._queue)
-        for i in xrange(num_tasks - 1):
-            if i % num_sites == 0 and i != 0:
-                time.sleep(self._request_wait)
-            self._queue.report_done(self._queue.get())
-        self.assertEquals(len(self._queue), 1)
 
 
 def main():
@@ -206,7 +223,7 @@ def main():
     parser.add_option('-v', dest='verbosity', default='2',
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
-    options, args = parser.parse_args()
+    options = parser.parse_args()[0]
     module = os.path.basename(__file__)[:-3]
     suite = unittest.TestLoader().loadTestsFromName(module)
     runner = unittest.TextTestRunner(verbosity=int(options.verbosity))

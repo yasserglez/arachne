@@ -30,11 +30,11 @@ def main():
     parser.add_option('-v', dest='verbosity', default='2',
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
-    options, args = parser.parse_args()
+    options = parser.parse_args()[0]
     sys.path.append(TESTDIR)
-    names = [f[:-3] for f in os.listdir(TESTDIR)
-             if (f.startswith('test') and f.endswith('.py')
-                 and f != os.path.basename(__file__))]
+    names = [filename[:-3] for filename in os.listdir(TESTDIR)
+             if (filename.startswith('test') and filename.endswith('.py')
+                 and filename != os.path.basename(__file__))]
     suite = unittest.TestLoader().loadTestsFromNames(names)
     runner = unittest.TextTestRunner(verbosity=int(options.verbosity))
     result = runner.run(suite)

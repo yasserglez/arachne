@@ -32,11 +32,12 @@ from arachne.result import CrawlResult
 class TestCrawlResult(unittest.TestCase):
 
     def setUp(self):
+        url = 'ftp://deltha.uh.cu/'
+        site_id = 'aa958756e769188be9f76fbdb291fe1b2ddd4777'
         self._found = True
-        self._task = CrawlTask('aa958756e769188be9f76fbdb291fe1b2ddd4777',
-                               'ftp://deltha.uh.cu/')
+        self._task = CrawlTask(site_id, url)
         self._result = CrawlResult(self._task, self._found)
-        self._entries = (('a', {'is_dir': True}), ('b', {'is_dir': False}))
+        self._entries = [(str(i), {'is_dir': True}) for i in range(100)]
 
     def test_properties(self):
         self.assertEquals(self._result.task.site_id, self._task.site_id)
@@ -57,7 +58,7 @@ class TestCrawlResult(unittest.TestCase):
         self.assertEquals(self._result.task.site_id, result.task.site_id)
         self.assertEquals(self._result.task.url, result.task.url)
         self.assertEquals(self._result.found, result.found)
-        self.assertEquals(list(self._result), list(result))
+        self.assertEquals(list(result), list(self._result))
 
 
 def main():
@@ -65,7 +66,7 @@ def main():
     parser.add_option('-v', dest='verbosity', default='2',
                       type='choice', choices=['0', '1', '2'],
                       help='verbosity level: 0 = minimal, 1 = normal, 2 = all')
-    options, args = parser.parse_args()
+    options = parser.parse_args()[0]
     module = os.path.basename(__file__)[:-3]
     suite = unittest.TestLoader().loadTestsFromName(module)
     runner = unittest.TextTestRunner(verbosity=int(options.verbosity))
