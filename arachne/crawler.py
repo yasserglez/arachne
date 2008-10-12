@@ -43,8 +43,9 @@ class SiteCrawler(threading.Thread):
         self._tasks = tasks
         self._results = results
         self._handlers = {}
-        for handler in ProtocolHandler.__subclasses__():
-            self._handlers[handler.scheme] = handler(sites_info)
+        for handler_class in ProtocolHandler.__subclasses__():
+            handler = handler_class(sites_info, tasks, results)
+            self._handlers[handler_class.scheme] = handler
         # Flag used to stop the loop started by the run() method.
         self._running = False
 
@@ -83,11 +84,6 @@ class SiteCrawler(threading.Thread):
         else:
             logging.info('Visiting "%s"' % task.url)
             result = handler.execute(task)
-            if result is not None:
-                self._results.put(result)
-                self._tasks.report_done(task)
-            else:
-                self._tasks.report_error(task)
 
 
 class CrawlerManager(object):

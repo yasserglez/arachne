@@ -65,8 +65,7 @@ class TestFTPHandler(unittest.TestCase):
             ('total 14786', None),
             ('Total of 11 Files, 10966 Blocks', None),
         )
-        self._sites_info = []
-        self._handler = FTPHandler(self._sites_info)
+        self._handler = FTPHandler([], None, None)
 
     def test_parse_list(self):
         for line, parsed_line in self._list_responses:

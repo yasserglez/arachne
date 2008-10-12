@@ -39,20 +39,22 @@ class ProtocolHandler(object):
 
     scheme = ''
 
-    def __init__(self, sites_info):
+    def __init__(self, sites_info, tasks, results):
         """Initialize the protocol handler.
 
-        The `sites_info` argument will be a dictionary mapping site IDs to the
-        information for the sites.  This can be usefull to support advanced
+        The `sites_info` argument will be a dictionary mapping site ID to the
+        information for the sites.  This can be useful to support advanced
         settings for a site (e.g. proxy server).
         """
 
     def execute(self, task):
-        """Execute the task and return the result.
+        """Execute a task.
 
-        If the task is successfully executed the `CrawlResult` instance should
-        be returned, `None` otherwise.  If an error occurs the handler should
-        print a message usign `logging.error`.
+        If the task is successfully executed the handler should put the result
+        in the `ResultQueue` and report the task as done to the `TaskQueue`
+        using the `report_done()`.  When an error occurs the handler should
+        report it to the `TaskQueue` using `report_error()` and print a message
+        with `logging.error()`.
         """
         raise NotImplementedError('A subclass must override this method.')
 
@@ -63,10 +65,12 @@ class FileHandler(ProtocolHandler):
 
     scheme = 'file'
 
-    def __init__(self, sites_info):
+    def __init__(self, sites_info, tasks, results):
         """Initialize handler.
         """
-        ProtocolHandler.__init__(self, sites_info)
+        ProtocolHandler.__init__(self, sites_info, tasks, results)
+        self._tasks = tasks
+        self._results = results
 
     def execute(self, task):
         """Execute the task and return the result.
@@ -83,10 +87,11 @@ class FileHandler(ProtocolHandler):
             else:
                 result = CrawlResult(task, False)
         except OSError, error:
+            self._tasks.report_error(task)
             logging.error('Error visiting %s (%s)' % (url, error.strerror))
-            return None
         else:
-            return result
+            self._results.put(result)
+            self._tasks.report_done(task)
 
 
 class FTPHandler(ProtocolHandler):
@@ -95,10 +100,12 @@ class FTPHandler(ProtocolHandler):
 
     scheme = 'ftp'
 
-    def __init__(self, sites_info):
+    def __init__(self, sites_info, tasks, results):
         """Initialize the handler.
         """
-        ProtocolHandler.__init__(self, sites_info)
+        ProtocolHandler.__init__(self, sites_info, tasks, results)
+        self._tasks = tasks
+        self._results = results
 
     def execute(self, task):
         """Execute the task and return the result.
@@ -144,20 +151,24 @@ class FTPHandler(ProtocolHandler):
                     result.append(entry_name, data)
             ftp.quit()
         except socket.error, error:
+            self._tasks.report_error(task)
             if not isinstance(error, basestring):
                 error = error[1]
             logging.error('Error visiting "%s" (%s)' % (url, error))
             return None
         except EOFError:
             ftp.close()
+            self._tasks.report_error(task)
             logging.error('Error visiting "%s" (Error reading data)' % url)
             return None
         except ftplib.Error, error:
             ftp.quit()
+            self._tasks.report_error(task)
             logging.error('Error visiting "%s" (%s)' % (url, error))
             return None
         else:
-            return result
+            self._result.put(result)
+            self._tasks.report_done(task)
 
     @staticmethod
     def _parse_list(line):

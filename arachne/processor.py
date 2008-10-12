@@ -40,8 +40,11 @@ class ResultProcessor(object):
     def process(self, result):
         """Process a crawl result.
 
-        If the result is successfully processed `True` should be returned,
-        `False` otherwise.
+        If the result is successfully processed the handler should report the
+        result as done to the `ResultQueue` using `report_done()`.  When an
+        error occurs processing the result the processor should report it to
+        the `ResultQueue` using `report_error()` and print a message with
+        `logging.error()`.
         """
         raise NotImplementedError('A subclass must override this method.')
 
@@ -50,8 +53,8 @@ class NaiveProcessor(ResultProcessor):
     """Naive processor.
 
     This processor only will add a new task to `TaskQueue` for each directory
-    entry found in the result.  This can be used to walk the directory tree of
-    all the configured sites.
+    entry found in the result.  This can be used to walk the entire directory
+    tree.
     """
 
     def __init__(self, sites_info, index_dir, tasks, results):
@@ -59,6 +62,7 @@ class NaiveProcessor(ResultProcessor):
         """
         ResultProcessor.__init__(self, sites_info, index_dir, tasks, results)
         self._tasks = tasks
+        self._results = results
 
     def process(self, result):
         """Process a crawl result.
@@ -67,7 +71,7 @@ class NaiveProcessor(ResultProcessor):
             if data['is_dir']:
                 task = CrawlTask(result.task.site_id, entry_url)
                 self._tasks.put_new(task)
-        return True
+        self._results.report_done(result)
 
 
 class IndexProcessor(ResultProcessor):
@@ -131,5 +135,4 @@ class ProcessorManager(threading.Thread):
         """Process a crawl result.
         """
         logging.info('Processing "%s"' % result.task.url)
-        if self._processor.process(result):
-            self._results.report_done(result)
+        self._processor.process(result)

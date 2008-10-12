@@ -162,7 +162,7 @@ def main():
                            config['log_level'], config['pid_file'],
                            config['user'], config['group'])
     daemon.start()
-    sys.exit(0)
+    sys.exit()
 
 
 if __name__ == '__main__':
