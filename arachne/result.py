@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Queue for crawl results and the crawl result definition.
+"""Crawl result and result queue.
 """
 
 import os
 import sys
 import glob
 import bsddb
-import pickle
+import cPickle
 import threading
 
 from arachne.error import EmptyQueue
@@ -93,11 +93,10 @@ class ResultQueue(object):
     def __init__(self, sites_info, db_home):
         """Initialize the queue.
         """
-        self._mutex = threading.Lock()
         # Initialize the Berkeley DB environment.  This environment will
         # contain Btree databases with duplicated records (unsorted).  Records
-        # in all databases use the same key (self._db_key), so, they will be
-        # organized by the order of insertion.
+        # in all databases use the same key, so, they will be organized by the
+        # order of insertion.
         self._db_env = bsddb.db.DBEnv()
         self._db_env.open(db_home, bsddb.db.DB_CREATE | bsddb.db.DB_RECOVER
                           | bsddb.db.DB_INIT_TXN | bsddb.db.DB_INIT_LOG
@@ -125,6 +124,9 @@ class ResultQueue(object):
             self._result_dbs[site_id] = result_db
             if result_db_name in old_dbs:
                 old_dbs.remove(result_db_name)
+        for result_db_name in old_dbs:
+            self._db_env.dbremove(result_db_name)
+        self._mutex = threading.Lock()
 
     def __len__(self):
         """Return the number of crawl results in the queue.
@@ -143,8 +145,10 @@ class ResultQueue(object):
         try:
             site_id = result.task.site_id
             result_db = self._result_dbs[site_id]
-            self._sites_db.put(self._db_key, site_id)
-            result_db.put(self._db_key, pickle.dumps(result))
+            txn = self._db_env.txn_begin()
+            self._sites_db.put(self._db_key, site_id, txn)
+            result_db.put(self._db_key, cPickle.dumps(result, 2), txn)
+            txn.commit()
         finally:
             self._mutex.release()
 
@@ -157,30 +161,42 @@ class ResultQueue(object):
         """
         self._mutex.acquire()
         try:
+            if not self._sites_db:
+                # Sites database is empty.
+                raise EmptyQueue('No sites.')
             result = None
+            txn = self._db_env.txn_begin()
+            sites_cursor = self._sites_db.cursor(txn)
+            sites_cursor.first()
             while result is None:
-                if not self._sites_db:
-                    raise EmptyQueue('Queue without results.')
+                site_id = sites_cursor.current()[1]
+                try:
+                    result_db = self._result_dbs[site_id]
+                except KeyError:
+                    # The head of the sites database is an old site.
+                    sites_cursor.delete()
+                    if not sites_cursor.next():
+                        # Last site in database checked.
+                        sites_cursor.close()
+                        txn.commit()
+                        raise EmptyQueue('No results.')
                 else:
-                    transaction = self._db_env.txn_begin()
-                    sites_cursor = self._sites_db.cursor(transaction)
-                    site_id = sites_cursor.first()[1]
-                    try:
-                        result_db = self._result_dbs[site_id]
-                    except KeyError:
-                        # The head of the sites databse is an old site.
+                    if not result_db:
+                        # The database can be empty if a site is removed from
+                        # the configuration file and added again.
                         sites_cursor.delete()
+                        if not sites_cursor.next():
+                            # Last site in database checked.
+                            sites_cursor.close()
+                            txn.commit()
+                            raise EmptyQueue('No results.')
                     else:
-                        if not result_db:
-                            # The database can be empty if a site is removed
-                            # from the configuration file and added again.
-                            sites_cursor.delete()
-                        else:
-                            result_cursor = result_db.cursor(transaction)
-                            result = pickle.loads(result_cursor.first()[1])
-                            result_cursor.close()
-                    sites_cursor.close()
-                    transaction.commit()
+                        result_cursor = result_db.cursor(txn)
+                        pickled_result = result_cursor.first()[1]
+                        result = cPickle.loads(pickled_result)
+                        result_cursor.close()
+            sites_cursor.close()
+            txn.commit()
             return result
         finally:
             self._mutex.release()
@@ -194,16 +210,16 @@ class ResultQueue(object):
         try:
             site_id = result.task.site_id
             result_db = self._result_dbs[site_id]
-            transaction = self._db_env.txn_begin()
-            sites_cursor = self._sites_db.cursor(transaction)
+            txn = self._db_env.txn_begin()
+            sites_cursor = self._sites_db.cursor(txn)
             sites_cursor.first()
             sites_cursor.delete()
             sites_cursor.close()
-            result_cursor = result_db.cursor(transaction)
+            result_cursor = result_db.cursor(txn)
             result_cursor.first()
             result_cursor.delete()
             result_cursor.close()
-            transaction.commit()
+            txn.commit()
         finally:
             self._mutex.release()
 

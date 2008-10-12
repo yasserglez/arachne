@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Queue for crawl tasks and the crawl task definition.
+"""Crawl task and task queue.
 """
 
 import os
@@ -24,7 +24,7 @@ import time
 import glob
 import math
 import bsddb
-import pickle
+import cPickle
 import threading
 
 from arachne.error import EmptyQueue
@@ -34,7 +34,7 @@ class CrawlTask(object):
     """Crawl task.
 
     This class represents an action to list the content of a directory.
-    Executing a task produces a `CrawlResult`.
+    Executing a task produces a `CrawlTask`.
     """
 
     def __init__(self, site_id, url):
@@ -124,8 +124,7 @@ class CrawlTask(object):
 class TaskQueue(object):
     """Task queue.
 
-    Queue used to collect the crawl tasks (`CrawlTask`) that are going to be
-    executed in the future.
+    Queue used to collect the crawl tasks that are going to be executed.
     """
 
     def __init__(self, sites_info, db_home):
@@ -133,7 +132,7 @@ class TaskQueue(object):
         """
         # Initialize the Berkeley DB environment.  This environment will
         # contain Btree databases with duplicated records (unsorted).  Records
-        # in all databases uses strings with an integer indicating when the
+        # in all databases uses an integer (as string) indicating when the
         # tasks should be executed.
         self._db_env = bsddb.db.DBEnv()
         self._db_env.open(db_home, bsddb.db.DB_CREATE | bsddb.db.DB_RECOVER
@@ -163,11 +162,10 @@ class TaskQueue(object):
             if task_db_name in old_dbs:
                 old_dbs.remove(task_db_name)
             else:
-                # New site added to the configuration file.  Create a new task
-                # to list the content of the root directory.
-                self._sites_db.put(self._get_priority(), site_id)
-                task = CrawlTask(site_id, info['url'])
-                self._put(task, self._get_priority())
+                # New site added to the configuration file.  Add site to the
+                # database and create a new task to list the root directory.
+                self._sites_db.put(self._get_key(), site_id)
+                self._put(CrawlTask(site_id, info['url']))
         for task_db_name in old_dbs:
             self._db_env.dbremove(task_db_name)
         self._sites_info = sites_info
@@ -191,7 +189,7 @@ class TaskQueue(object):
         """
         self._mutex.acquire()
         try:
-            self._put(task, self._get_priority())
+            self._put(task)
         finally:
             self._mutex.release()
 
@@ -204,9 +202,9 @@ class TaskQueue(object):
         self._mutex.acquire()
         try:
             site_id = task.site_id
-            revisit_wait = self._sites_info[site_id]['default_revisit_wait']
-            task.revisit_wait = revisit_wait
-            self._put(task, self._get_priority(task.revisit_wait))
+            site_info = self._sites_info[site_id]
+            task.revisit_wait = site_info['default_revisit_wait']
+            self._put(task, task.revisit_wait)
         finally:
             self._mutex.release()
 
@@ -222,13 +220,14 @@ class TaskQueue(object):
         self._mutex.acquire()
         try:
             site_id = task.site_id
+            site_info = self._sites_info[site_id]
             task.report_revisit(changed)
             if task.revisit_count >= self._revisits:
+                minimum = site_info['min_revisit_wait']
+                maximum = site_info['max_revisit_wait']
                 estimated = self._estimate_revisit_wait(task)
-                minimum = self._sites_info[site_id]['min_revisit_wait']
-                maximum = self._sites_info[site_id]['max_revisit_wait']
                 task.revisit_wait = min(maximum, max(minimum, estimated))
-            self._put(task, self._get_priority(task.revisit_wait))
+            self._put(task, task.revisit_wait)
         finally:
             self._mutex.release()
 
@@ -243,55 +242,55 @@ class TaskQueue(object):
         try:
             if not self._sites_db:
                 # Sites database is empty.
-                raise EmptyQueue('Queue without sites.')
+                raise EmptyQueue('No sites.')
             task = None
-            transaction = self._db_env.txn_begin()
-            sites_cursor = self._sites_db.cursor(transaction)
+            txn = self._db_env.txn_begin()
+            sites_cursor = self._sites_db.cursor(txn)
             site_priority, site_id = sites_cursor.first()
             while task is None:
                 site_priority, site_id = sites_cursor.current()
-                if site_priority > self._get_priority():
+                if site_priority > self._get_key():
                     # The site cannot be visited right now.
                     sites_cursor.close()
-                    transaction.commit()
-                    raise EmptyQueue('Queue without available sites.')
+                    txn.commit()
+                    raise EmptyQueue('No available sites.')
                 try:
                     task_db = self._task_dbs[site_id]
                 except KeyError:
-                    # The head of the sites database is an old site.
+                    # Got the ID of an old site.
                     sites_cursor.delete()
                     if not sites_cursor.next():
                         # Last site in database checked.
                         sites_cursor.close()
-                        transaction.commit()
-                        raise EmptyQueue('Queue without available sites.')
+                        txn.commit()
+                        raise EmptyQueue('No executable tasks.')
                 else:
                     if not task_db:
                         # The task database is empty.
                         if not sites_cursor.next():
                             # Last site in database checked.
                             sites_cursor.close()
-                            transaction.commit()
-                            raise EmptyQueue('Queue without available sites.')
+                            txn.commit()
+                            raise EmptyQueue('No executable tasks.')
                     else:
-                        task_cursor = task_db.cursor(transaction)
-                        task_priority, task_data = task_cursor.first()
-                        if task_priority > self._get_priority():
+                        task_cursor = task_db.cursor(txn)
+                        task_priority, pickled_task = task_cursor.first()
+                        if task_priority > self._get_key():
                             # The task at the head of the database is not
                             # executable right now.
                             if not sites_cursor.next():
                                 # Last site in database checked.
                                 task_cursor.close()
                                 sites_cursor.close()
-                                transaction.commit()
-                                raise EmptyQueue('Queue without available sites.')
+                                txn.commit()
+                                raise EmptyQueue('No executable tasks.')
                         else:
                             # There is an executable task.
                             sites_cursor.delete()
-                            task = pickle.loads(task_data)
+                            task = cPickle.loads(pickled_task)
                         task_cursor.close()
             sites_cursor.close()
-            transaction.commit()
+            txn.commit()
             return task
         finally:
             self._mutex.release()
@@ -306,16 +305,16 @@ class TaskQueue(object):
         self._mutex.acquire()
         try:
             site_id = task.site_id
+            site_info = self._sites_info[site_id]
+            txn = self._db_env.txn_begin()
+            site_key = self._get_key(site_info['request_wait'])
+            self._sites_db.put(site_key, site_id, txn)
             task_db = self._task_dbs[site_id]
-            transaction = self._db_env.txn_begin()
-            request_wait = self._sites_info[site_id]['request_wait']
-            site_key = self._get_priority(request_wait)
-            self._sites_db.put(site_key, site_id, transaction)
-            task_cursor = task_db.cursor(transaction)
+            task_cursor = task_db.cursor(txn)
             task_cursor.first()
             task_cursor.delete()
             task_cursor.close()
-            transaction.commit()
+            txn.commit()
         finally:
             self._mutex.release()
 
@@ -331,8 +330,8 @@ class TaskQueue(object):
         try:
             # Do not remove the task from the database!
             site_id = task.site_id
-            error_wait = self._sites_info[site_id]['error_wait']
-            site_key = self._get_priority(error_wait)
+            site_info = self._sites_info[site_id]
+            site_key = self._get_key(site_info['error_wait'])
             self._sites_db.put(site_key, site_id)
         finally:
             self._mutex.release()
@@ -360,22 +359,25 @@ class TaskQueue(object):
         finally:
             self._mutex.release()
 
-    def _put(self, task, priority):
+    def _put(self, task, seconds=0):
         """Put a task in the queue.
 
-        Internal method used to put a task in the queue.  It is invoked by
-        `put_new()`, `put_visited()` and `put_revisited()` with the right
-        priority for the task.
+        Internal method used to put a task in the queue that should be executed
+        after the given number of seconds.  It is invoked by `put_new()`,
+        `put_visited()` and `put_revisited()`.  The default value for the
+        `seconds` argument is 0, meaning right now.
         """
-        task_db = self._task_dbs[task.site_id]
-        task_db.put(priority, pickle.dumps(task))
+        site_id = task.site_id
+        task_db = self._task_dbs[site_id]
+        task_db.put(self._get_key(seconds), cPickle.dumps(task, 2))
 
-    def _get_priority(self, seconds=0):
-        """Return a priority value.
+    def _get_key(self, seconds=0):
+        """Return a key for a site or task.
 
-        Return an string (seconds since UNIX epoch) that can be used as
-        priority for a task that needs to be executed after `seconds` seconds.
-        The default value for the `seconds` argument is 0, meaning right now.
+        Return an string that can be used as a key for a task that should to be
+        executed after the given number of seconds.  It will use an string with
+        the number of seconds since UNIX epoch.  The default value for the
+        `seconds` argument is 0, meaning right now.
         """
         return str(int(time.time()) + seconds).zfill(self._key_length)
 
@@ -392,7 +394,6 @@ class TaskQueue(object):
             wait = task.revisit_wait
             new_wait  = wait / - math.log((visits - changes + 0.5) /
                                           (visits + 0.5))
-            new_wait = int(round(new_wait))
         else:
             new_wait = task.revisit_wait
-        return new_wait
+        return int(round(new_wait))
