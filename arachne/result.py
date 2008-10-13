@@ -100,14 +100,15 @@ class ResultQueue(object):
         self._db_env = bsddb.db.DBEnv()
         self._db_env.open(db_home, bsddb.db.DB_CREATE | bsddb.db.DB_RECOVER
                           | bsddb.db.DB_INIT_TXN | bsddb.db.DB_INIT_LOG
-                          | bsddb.db.DB_INIT_MPOOL)
+                          | bsddb.db.DB_INIT_MPOOL | bsddb.db.DB_THREAD)
         self._db_key = '0'.zfill(len(str(sys.maxint)))
         # Create the database for the sites.
         sites_db_name = 'sites.db'
         self._sites_db = bsddb.db.DB(self._db_env)
         self._sites_db.set_flags(bsddb.db.DB_DUP)
         self._sites_db.open(sites_db_name, bsddb.db.DB_BTREE,
-                            bsddb.db.DB_CREATE | bsddb.db.DB_AUTO_COMMIT)
+                            bsddb.db.DB_CREATE | bsddb.db.DB_AUTO_COMMIT
+                            | bsddb.db.DB_THREAD)
         # Get the list of databases to purge old ones (sites that were removed
         # from the configuration file).
         old_dbs = [os.path.basename(db_path)
@@ -120,7 +121,8 @@ class ResultQueue(object):
             result_db = bsddb.db.DB(self._db_env)
             result_db.set_flags(bsddb.db.DB_DUP)
             result_db.open(result_db_name, bsddb.db.DB_BTREE,
-                           bsddb.db.DB_CREATE | bsddb.db.DB_AUTO_COMMIT)
+                           bsddb.db.DB_CREATE | bsddb.db.DB_AUTO_COMMIT
+                           | bsddb.db.DB_THREAD)
             self._result_dbs[site_id] = result_db
             if result_db_name in old_dbs:
                 old_dbs.remove(result_db_name)

@@ -167,7 +167,7 @@ class FTPHandler(ProtocolHandler):
             logging.error('Error visiting "%s" (%s)' % (url, error))
             return None
         else:
-            self._result.put(result)
+            self._results.put(result)
             self._tasks.report_done(task)
 
     @staticmethod

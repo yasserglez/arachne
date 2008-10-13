@@ -139,14 +139,15 @@ class TaskQueue(object):
         self._db_env = bsddb.db.DBEnv()
         self._db_env.open(db_home, bsddb.db.DB_CREATE | bsddb.db.DB_RECOVER
                           | bsddb.db.DB_INIT_TXN | bsddb.db.DB_INIT_LOG
-                          | bsddb.db.DB_INIT_MPOOL)
+                          | bsddb.db.DB_INIT_MPOOL | bsddb.db.DB_THREAD)
         self._key_length = len(str(sys.maxint))
         # Create the database for the sites.
         sites_db_name = 'sites.db'
         self._sites_db = bsddb.db.DB(self._db_env)
         self._sites_db.set_flags(bsddb.db.DB_DUP)
         self._sites_db.open(sites_db_name, bsddb.db.DB_BTREE,
-                            bsddb.db.DB_CREATE | bsddb.db.DB_AUTO_COMMIT)
+                            bsddb.db.DB_CREATE | bsddb.db.DB_AUTO_COMMIT
+                            | bsddb.db.DB_THREAD)
         # Get the list of databases to purge old ones (sites that were removed
         # from the configuration file).
         old_dbs = [os.path.basename(db_path)
@@ -158,8 +159,8 @@ class TaskQueue(object):
             task_db_name = '%s.db' % site_id
             task_db = bsddb.db.DB(self._db_env)
             task_db.set_flags(bsddb.db.DB_DUP)
-            task_db.open(task_db_name, bsddb.db.DB_BTREE,
-                         bsddb.db.DB_CREATE | bsddb.db.DB_AUTO_COMMIT)
+            task_db.open(task_db_name, bsddb.db.DB_BTREE, bsddb.db.DB_CREATE
+                         | bsddb.db.DB_AUTO_COMMIT | bsddb.db.DB_THREAD)
             self._task_dbs[site_id] = task_db
             if task_db_name in old_dbs:
                 old_dbs.remove(task_db_name)

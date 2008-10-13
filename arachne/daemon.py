@@ -55,32 +55,21 @@ class ArachneDaemon(Daemon):
         logging.info('Starting Arachne daemon %s' % __version__)
         logging.info('Running with %d sites configured' % len(sites))
         # Create URL instances and assign an id to each site.
-        sites_info = {}
+        self._sites_info = {}
         for site in sites:
             site['url'] = URL(site['url'])
-            sites_info[hashlib.sha1(str(site['url'])).hexdigest()] = site
+            self._sites_info[hashlib.sha1(str(site['url'])).hexdigest()] = site
         # Create or check required directories.
-        results_dir = os.path.join(spool_dir, 'results')
-        if not os.path.isdir(results_dir):
-            os.mkdir(results_dir)
-        tasks_dir = os.path.join(spool_dir, 'tasks')
-        if not os.path.isdir(tasks_dir):
-            os.mkdir(tasks_dir)
-        index_dir = os.path.join(database_dir, 'index')
-        if not os.path.isdir(index_dir):
-            os.mkdir(index_dir)
-        # Initialize components.
-        self._tasks = TaskQueue(sites_info, tasks_dir)
-        logging.info('There are %d tasks waiting for execution'
-                     % len(self._tasks))
-        self._results = ResultQueue(sites_info, results_dir)
-        logging.info('There are %d results waiting for processing'
-                     % len(self._results))
-        self._crawlers = CrawlerManager(sites_info, num_crawlers, self._tasks,
-                                        self._results)
-        self._processor = ProcessorManager(sites_info, index_dir, self._tasks,
-                                           self._results)
-        # Flag used to stop the loop started by the run() method.
+        self._results_dir = os.path.join(spool_dir, 'results')
+        if not os.path.isdir(self._results_dir):
+            os.mkdir(self._results_dir)
+        self._tasks_dir = os.path.join(spool_dir, 'tasks')
+        if not os.path.isdir(self._tasks_dir):
+            os.mkdir(self._tasks_dir)
+        self._index_dir = os.path.join(database_dir, 'index')
+        if not os.path.isdir(self._index_dir):
+            os.mkdir(self._index_dir)
+        self._num_crawlers = num_crawlers
         self._running = False
 
     def run(self):
@@ -88,10 +77,26 @@ class ArachneDaemon(Daemon):
         """
         try:
             self._running = True
+            # Initialize components.
+            self._tasks = TaskQueue(self._sites_info, self._tasks_dir)
+            logging.info('There are %d tasks waiting for execution'
+                         % len(self._tasks))
+            self._results = ResultQueue(self._sites_info, self._results_dir)
+            logging.info('There are %d results waiting for processing'
+                         % len(self._results))
+            self._crawlers = CrawlerManager(self._sites_info,
+                                            self._num_crawlers, self._tasks,
+                                            self._results)
+            self._processor = ProcessorManager(self._sites_info,
+                                               self._index_dir, self._tasks,
+                                               self._results)
+            # Start components.
             self._crawlers.start()
             self._processor.start()
+            # Run the main loop.
             while self._running:
                 signal.pause()
+            # Stop and close components.
             self._crawlers.stop()
             self._processor.stop()
             self._crawlers.join()
