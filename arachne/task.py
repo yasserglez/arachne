@@ -148,8 +148,8 @@ class TaskQueue(object):
         self._sites_db.open(sites_db_name, bsddb.db.DB_BTREE,
                             bsddb.db.DB_CREATE | bsddb.db.DB_AUTO_COMMIT
                             | bsddb.db.DB_THREAD)
-        # Get the list of databases to purge old ones (sites that were removed
-        # from the configuration file).
+        # Get the list of databases to purge sites that were removed from the
+        # configuration file.
         old_dbs = [os.path.basename(db_path)
                    for db_path in glob.glob('%s/*.db' % db_home.rstrip('/'))]
         old_dbs.remove(sites_db_name)
@@ -164,9 +164,10 @@ class TaskQueue(object):
             self._task_dbs[site_id] = task_db
             if task_db_name in old_dbs:
                 old_dbs.remove(task_db_name)
+                if site_id not in self._sites_db.values():
+                    self._sites_db.put(self._get_key(), site_id)
             else:
-                # New site added to the configuration file.  Add site to the
-                # database and create a new task to list the root directory.
+                # New site added to the configuration file.
                 self._sites_db.put(self._get_key(), site_id)
                 self._put(CrawlTask(site_id, info['url']))
         for task_db_name in old_dbs:
