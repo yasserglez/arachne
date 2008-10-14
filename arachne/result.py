@@ -206,7 +206,7 @@ class ResultQueue(object):
     def report_done(self, result):
         """Report a result as processed.
 
-        This method removes the result at the head of the queue.
+        This method removes the result from the head of the queue.
         """
         self._mutex.acquire()
         try:
@@ -221,6 +221,31 @@ class ResultQueue(object):
             result_cursor.first()
             result_cursor.delete()
             result_cursor.close()
+            txn.commit()
+        finally:
+            self._mutex.release()
+
+    def report_error(self, result):
+        """Report an error processing a crawl result.
+
+        This method removes the result from the head of the queue and put it in
+        the tail allowing other results to be processed.
+        """
+        self._mutex.acquire()
+        try:
+            site_id = result.task.site_id
+            result_db = self._result_dbs[site_id]
+            txn = self._db_env.txn_begin()
+            sites_cursor = self._sites_db.cursor(txn)
+            sites_cursor.first()
+            sites_cursor.delete()
+            sites_cursor.close()
+            result_cursor = result_db.cursor(txn)
+            result_cursor.first()
+            result_cursor.delete()
+            result_cursor.close()
+            self._sites_db.put(self._db_key, site_id, txn)
+            result_db.put(self._db_key, cPickle.dumps(result, 2), txn)
             txn.commit()
         finally:
             self._mutex.release()

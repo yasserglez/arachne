@@ -79,18 +79,15 @@ class TestResultQueue(unittest.TestCase):
 
     def test_populate(self):
         self.assertRaises(EmptyQueue, self._queue.get)
-        for result in self._results:
-            self._queue.put(result)
+        self._populate_queue()
         for result in self._results:
             returned = self._queue.get()
-            self.assertEquals(returned.task.site_id, result.task.site_id)
             self.assertEquals(str(returned.task.url), str(result.task.url))
             self._queue.report_done(result)
         self.assertRaises(EmptyQueue, self._queue.get)
 
     def test_persistence(self):
-        for result in self._results:
-            self._queue.put(result)
+        self._populate_queue()
         for i, result in enumerate(self._results):
             if i % (self._results_per_site / 2) == 0:
                 # When a few results have been removed close the database to
@@ -98,13 +95,11 @@ class TestResultQueue(unittest.TestCase):
                 self._queue.close()
                 self._queue = ResultQueue(self._sites_info, self._db_home)
             returned = self._queue.get()
-            self.assertEquals(returned.task.site_id, result.task.site_id)
             self.assertEquals(str(returned.task.url), str(result.task.url))
             self._queue.report_done(returned)
 
     def test_remove_site(self):
-        for result in self._results:
-            self._queue.put(result)
+        self._populate_queue()
         self._queue.close()
         # Remove a site.  It should not return results from this site but it
         # should keep the order of the other results in the queue.
@@ -113,10 +108,48 @@ class TestResultQueue(unittest.TestCase):
         for result in self._results:
             if result.task.site_id in self._sites_info:
                 returned = self._queue.get()
-                self.assertEquals(returned.task.site_id, result.task.site_id)
                 self.assertEquals(str(returned.task.url), str(result.task.url))
                 self._queue.report_done(returned)
         self.assertEquals(len(self._queue), 0)
+
+    def test_report_done(self):
+        self._populate_queue()
+        self._clear_queue(remain=1)
+        result = self._queue.get()
+        self._queue.report_done(result)
+        self.assertEquals(len(self._queue), 0)
+
+    def test_report_error_one_result(self):
+        self._populate_queue()
+        self._clear_queue(remain=1)
+        result = self._queue.get()
+        self._queue.report_error(result)
+        returned = self._queue.get()
+        self.assertEquals(str(result.task.url), str(returned.task.url))
+        self._queue.report_done(returned)
+
+    def test_report_error_two_results(self):
+        self._populate_queue()
+        self._clear_queue(remain=2)
+        result = self._queue.get()
+        self._queue.report_error(result)
+        returned = self._queue.get()
+        self.assertTrue(str(result.task.url) != str(returned.task.url))
+        self._queue.report_done(returned)
+        returned = self._queue.get()
+        self.assertEquals(str(result.task.url), str(returned.task.url))
+        self._queue.report_done(returned)
+
+    def _clear_queue(self, remain=0):
+        # Remove results from the queue until the specified number of results
+        # (default 0) remains in the queue.
+        for i in xrange(len(self._queue) - remain):
+            self._queue.report_done(self._queue.get())
+        self.assertEquals(len(self._queue), remain)
+
+    def _populate_queue(self):
+        for result in self._results:
+            self._queue.put(result)
 
     def tearDown(self):
         if os.path.isdir(self._db_home):
