@@ -19,6 +19,7 @@
 """
 
 import os
+import errno
 import socket
 import ftplib
 import logging
@@ -71,6 +72,7 @@ class FileHandler(ProtocolHandler):
         ProtocolHandler.__init__(self, sites_info, tasks, results)
         self._tasks = tasks
         self._results = results
+        self._errnos_dir = (errno.EACCES, )
 
     def execute(self, task):
         """Execute the task and return the result.
@@ -87,7 +89,13 @@ class FileHandler(ProtocolHandler):
             else:
                 result = CrawlResult(task, False)
         except OSError, error:
-            self._tasks.report_error(task)
+            if error.errno in self._errnos_dir:
+                self._tasks.report_error_dir(task)
+            else:
+                self._tasks.report_error_site(task)
+            logging.error('Error visiting %s (%s)' % (url, error.strerror))
+        except IOError, error:
+            self._tasks.report_error_site(task)
             logging.error('Error visiting %s (%s)' % (url, error.strerror))
         else:
             self._results.put(result)
@@ -151,21 +159,25 @@ class FTPHandler(ProtocolHandler):
                     result.append(entry_name, data)
             ftp.quit()
         except socket.error, error:
-            self._tasks.report_error(task)
+            self._tasks.report_error_site(task)
             if not isinstance(error, basestring):
                 error = error[1]
             logging.error('Error visiting "%s" (%s)' % (url, error))
-            return None
+        except IOError, error:
+            self._tasks.report_error_site(task)
+            logging.error('Error visiting %s (%s)' % (url, error.strerror))
         except EOFError:
             ftp.close()
-            self._tasks.report_error(task)
+            self._tasks.report_error_site(task)
             logging.error('Error visiting "%s" (Error reading data)' % url)
-            return None
         except ftplib.Error, error:
-            ftp.quit()
-            self._tasks.report_error(task)
-            logging.error('Error visiting "%s" (%s)' % (url, error))
-            return None
+            try:
+                ftp.quit()
+            except ftplib.Error:
+                ftp.close()
+            self._tasks.report_error_dir(task)
+            msg = 'Error visiting "%s" (%s)' % (url, str(error).strip())
+            logging.error(msg)
         else:
             self._results.put(result)
             self._tasks.report_done(task)

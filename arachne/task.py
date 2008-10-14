@@ -301,9 +301,7 @@ class TaskQueue(object):
     def report_done(self, task):
         """Report task as done.
 
-        Report a task returned by `get()` as successfully done.  The
-        `TaskQueue` will guarantee that the site will not be visited until the
-        time of request wait is elapsed.
+        Report a task returned by `get()` as successfully done.
         """
         self._mutex.acquire()
         try:
@@ -321,21 +319,44 @@ class TaskQueue(object):
         finally:
             self._mutex.release()
 
-    def report_error(self, task):
-        """Report an error executing a task.
+    def report_error_site(self, task):
+        """Report error executing a task.
 
-        Report an error executing a task returned by `get()`.  This usually
-        means that the site was unreachable.  The `TaskQueue` should wait a
-        time longer than the request wait before allowing contact the site
-        again.
+        Report an error executing a task returned by `get()`.  Protocol
+        handlers should use this method to report an error contacting a site.
         """
         self._mutex.acquire()
         try:
             # Do not remove the task from the database!
             site_id = task.site_id
             site_info = self._sites_info[site_id]
-            site_key = self._get_key(site_info['error_wait'])
+            site_key = self._get_key(site_info['error_site_wait'])
             self._sites_db.put(site_key, site_id)
+        finally:
+            self._mutex.release()
+
+
+    def report_error_dir(self, task):
+        """Report error executing a task.
+
+        Report an error executing a task returned by `get()`.  Protocol
+        handlers should use this method to report that they contacted the site
+        but an error occurs retrieving the content of a directory.
+        """
+        self._mutex.acquire()
+        try:
+            site_id = task.site_id
+            site_info = self._sites_info[site_id]
+            txn = self._db_env.txn_begin()
+            site_key = self._get_key(site_info['request_wait'])
+            self._sites_db.put(site_key, site_id, txn)
+            task_db = self._task_dbs[site_id]
+            task_cursor = task_db.cursor(txn)
+            task_cursor.first()
+            task_cursor.delete()
+            task_cursor.close()
+            self._put(task, site_info['error_dir_wait'], txn)
+            txn.commit()
         finally:
             self._mutex.release()
 
@@ -362,7 +383,7 @@ class TaskQueue(object):
         finally:
             self._mutex.release()
 
-    def _put(self, task, seconds=0):
+    def _put(self, task, seconds=0, txn=None):
         """Put a task in the queue.
 
         Internal method used to put a task in the queue that should be executed
@@ -372,7 +393,10 @@ class TaskQueue(object):
         """
         site_id = task.site_id
         task_db = self._task_dbs[site_id]
-        task_db.put(self._get_key(seconds), cPickle.dumps(task, 2))
+        if txn is None:
+            task_db.put(self._get_key(seconds), cPickle.dumps(task, 2))
+        else:
+            task_db.put(self._get_key(seconds), cPickle.dumps(task, 2), txn)
 
     def _get_key(self, seconds=0):
         """Return a key for a site or task.

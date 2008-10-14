@@ -38,7 +38,8 @@ class TestTaskQueue(unittest.TestCase):
         self._db_home = os.path.join(TESTDIR, 'testtaskqueue')
         os.mkdir(self._db_home)
         self._request_wait = 2
-        self._error_wait = 4
+        self._error_dir_wait = 3
+        self._error_site_wait = 4
         self._min_revisit_wait = 2
         self._default_revisit_wait = 4
         self._sites_info = {
@@ -69,8 +70,9 @@ class TestTaskQueue(unittest.TestCase):
         self._num_tasks = self._num_sites * self._tasks_per_site
         for site_id, info in self._sites_info.iteritems():
             # Set common information.
-            info['error_wait'] = self._error_wait
             info['request_wait'] = self._request_wait
+            info['error_dir_wait'] = self._error_dir_wait
+            info['error_site_wait'] = self._error_site_wait
             info['min_revisit_wait'] = self._min_revisit_wait
             info['default_revisit_wait'] = self._default_revisit_wait
             # Create tasks for site.
@@ -161,56 +163,57 @@ class TestTaskQueue(unittest.TestCase):
                           self._num_sites + self._num_tasks)
 
     def test_put_visited(self):
-        self._leave_one_task()
+        self._clear_queue(remain=1)
         task = self._queue.get()
         self._queue.put_visited(task)
         self._queue.report_done(task)
-        time.sleep(self._default_revisit_wait / 2)
-        # The task should not be returned yet.
         self.assertRaises(EmptyQueue, self._queue.get)
-        time.sleep(self._default_revisit_wait / 2)
+        time.sleep(self._default_revisit_wait)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
     def test_put_revisited(self):
-        self._leave_one_task()
+        self._clear_queue(remain=1)
         task = self._queue.get()
         self._queue.put_revisited(task, False)
         self._queue.report_done(task)
-        time.sleep(self._min_revisit_wait / 2)
-        # The task should not be returned yet.
         self.assertRaises(EmptyQueue, self._queue.get)
-        time.sleep(self._min_revisit_wait / 2)
+        time.sleep(self._min_revisit_wait)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
     def test_report_done(self):
-        self._leave_one_task()
+        self._clear_queue(remain=1)
         task = self._queue.get()
+        # Ensure both are tasks for the same site.
         self._queue.put_new(task)
         self._queue.report_done(task)
-        time.sleep(self._request_wait / 2)
-        # The task should not be returned yet.
         self.assertRaises(EmptyQueue, self._queue.get)
-        time.sleep(self._request_wait / 2)
+        time.sleep(self._request_wait)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
-    def test_report_error(self):
-        self._leave_one_task()
+    def test_report_error_site(self):
+        self._clear_queue(remain=1)
         task = self._queue.get()
-        self._queue.put_new(task)
-        self._queue.report_error(task)
-        time.sleep(self._error_wait / 2)
-        # The task should not be returned yet.
+        self._queue.report_error_site(task)
         self.assertRaises(EmptyQueue, self._queue.get)
-        time.sleep(self._error_wait / 2)
+        time.sleep(self._error_site_wait)
         self.assertEquals(str(task.url), str(self._queue.get().url))
 
-    def _leave_one_task(self):
-        # Remove all the tasks in the queue but one.
-        for i in xrange(len(self._queue) - 1):
+    def test_report_error_dir(self):
+        self._clear_queue(remain=1)
+        task = self._queue.get()
+        self._queue.report_error_dir(task)
+        self.assertRaises(EmptyQueue, self._queue.get)
+        time.sleep(self._error_dir_wait)
+        self.assertEquals(str(task.url), str(self._queue.get().url))
+
+    def _clear_queue(self, remain=0):
+        # Remove tasks from the queue until the specified number of tasks
+        # (default 0) remains in the queue.
+        for i in xrange(len(self._queue) - remain):
             if i != 0 and i % self._num_sites == 0:
                 time.sleep(self._request_wait)
             self._queue.report_done(self._queue.get())
-        self.assertEquals(len(self._queue), 1)
+        self.assertEquals(len(self._queue), remain)
 
     def tearDown(self):
         if os.path.isdir(self._db_home):

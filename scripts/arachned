@@ -114,8 +114,9 @@ def _parse_sites_file(sites_file):
     # The format used by this file is based on the configuration file of
     # Planet <http://www.planetplanet.org/>.
     defaults = {
-        'error_wait': 1800,
         'request_wait': 30,
+        'error_site_wait': 1800,
+        'error_dir_wait': 900,
         'min_revisit_wait': 86400,
         'max_revisit_wait': 15552000,
         'default_revisit_wait': 604800,
@@ -136,8 +137,9 @@ def _parse_sites_file(sites_file):
         if not sites:
             _error('failed to read the sites file or no sites configured.')
         else:
-            int_keys = ('error_wait', 'request_wait', 'min_revisit_wait',
-                        'max_revisit_wait', 'default_revisit_wait')
+            int_keys = ('request_wait', 'error_site_wait', 'error_dir_wait',
+                        'min_revisit_wait', 'max_revisit_wait',
+                        'default_revisit_wait')
             for info in sites:
                 for key in int_keys:
                     info[key] = int(info[key])
@@ -162,7 +164,7 @@ def main():
                            config['log_level'], config['pid_file'],
                            config['user'], config['group'])
     daemon.start()
-    sys.exit()
+    sys.exit(0)
 
 
 if __name__ == '__main__':
