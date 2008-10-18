@@ -31,34 +31,35 @@ from arachne.util.url import URL
 class TestURL(unittest.TestCase):
 
     def setUp(self):
+        self._encoding = 'utf-8'
         self._urls = (
             ('file:///',
-             ('file', None, None, None, None, '/', '/'),
+             (u'file', None, None, None, None, u'/', u'/'),
              ('etc', 'file:///etc')),
 
             ('file:///home',
-             ('file', None, None, None, None, '/home', 'home'),
+             (u'file', None, None, None, None, u'/home', u'home'),
              ('yglez', 'file:///home/yglez')),
 
             ('ftp://deltha.uh.cu/',
-             ('ftp', None, None, 'deltha.uh.cu', None, '/', '/'),
+             (u'ftp', None, None, u'deltha.uh.cu', None, u'/', u'/'),
              ('debian', 'ftp://deltha.uh.cu/debian')),
 
-            ('ftp://username:password@deltha.uh.cu/',
-             ('ftp', 'username', 'password', 'deltha.uh.cu', None, '/', '/'),
-             ('debian', 'ftp://username:password@deltha.uh.cu/debian')),
+            ('ftp://user:passwd@deltha.uh.cu/',
+             (u'ftp', u'user', u'passwd', u'deltha.uh.cu', None, u'/', u'/'),
+             ('debian', 'ftp://user:passwd@deltha.uh.cu/debian')),
 
             ('ftp://deltha.uh.cu:21/',
-             ('ftp', None, None, 'deltha.uh.cu', 21, '/', '/'),
+             (u'ftp', None, None, u'deltha.uh.cu', 21, u'/', u'/'),
              ('debian', 'ftp://deltha.uh.cu:21/debian')),
 
-            ('ftp://username:password@deltha.uh.cu:21/',
-             ('ftp', 'username', 'password', 'deltha.uh.cu', 21, '/', '/'),
-             ('debian', 'ftp://username:password@deltha.uh.cu:21/debian')),
+            ('ftp://user:passwd@deltha.uh.cu:21/',
+             (u'ftp', u'user', u'passwd', u'deltha.uh.cu', 21, u'/', u'/'),
+             ('debian', 'ftp://user:passwd@deltha.uh.cu:21/debian')),
 
-            ('ftp://deltha.uh.cu/debian',
-             ('ftp', None, None, 'deltha.uh.cu', None, '/debian', 'debian'),
-             ('pool', 'ftp://deltha.uh.cu/debian/pool')),
+            ('file:///unívoco/güije',
+             (u'file', None, None, None, None, u'/unívoco/güije', u'güije'),
+             ('gruñón', 'file:///unívoco/güije/gruñón')),
         )
 
     def test_properties(self):
@@ -72,10 +73,28 @@ class TestURL(unittest.TestCase):
             self.assertEquals(url.path, attrs[5])
             self.assertEquals(url.basename, attrs[6])
 
+    def test_properties_unicode_args(self):
+        for url_str, attrs, join_info in self._urls:
+            url = URL(url_str.decode(self._encoding))
+            self.assertEquals(url.scheme, attrs[0])
+            self.assertEquals(url.username, attrs[1])
+            self.assertEquals(url.password, attrs[2])
+            self.assertEquals(url.hostname, attrs[3])
+            self.assertEquals(url.port, attrs[4])
+            self.assertEquals(url.path, attrs[5])
+            self.assertEquals(url.basename, attrs[6])
+
     def test_join(self):
         for url_str, attrs, join_info in self._urls:
             url = URL(url_str)
-            self.assertEquals(str(url.join(join_info[0])), join_info[1])
+            joined_url = url.join(join_info[0])
+            self.assertEquals(str(joined_url), join_info[1])
+
+    def test_join_unicode_args(self):
+        for url_str, attrs, join_info in self._urls:
+            url = URL(url_str.decode(self._encoding))
+            joined_url = url.join(join_info[0].decode(self._encoding))
+            self.assertEquals(str(joined_url), join_info[1])
 
     def test_pickling(self):
         for url_str, attrs, join_info in self._urls:
@@ -87,6 +106,29 @@ class TestURL(unittest.TestCase):
             self.assertEquals(url.port, attrs[4])
             self.assertEquals(url.path, attrs[5])
             self.assertEquals(url.basename, attrs[6])
+
+    def test_type_unicode(self):
+       for url_str, attrs, join_info in self._urls:
+           url = URL(url_str)
+           self.assertTrue(type(url.scheme) is unicode)
+           if attrs[1] is not None:
+               self.assertTrue(type(url.username) is unicode)
+           if attrs[2] is not None:
+               self.assertTrue(type(url.password) is unicode)
+           if attrs[3] is not None:
+               self.assertTrue(type(url.hostname) is unicode)
+           self.assertTrue(type(url.path) is unicode)
+           self.assertTrue(type(url.basename) is unicode)
+           pickled_url = pickle.loads(pickle.dumps(url))
+           self.assertTrue(type(pickled_url.scheme) is unicode)
+           if attrs[1] is not None:
+               self.assertTrue(type(pickled_url.username) is unicode)
+           if attrs[2] is not None:
+               self.assertTrue(type(pickled_url.password) is unicode)
+           if attrs[3] is not None:
+               self.assertTrue(type(pickled_url.hostname) is unicode)
+           self.assertTrue(type(pickled_url.path) is unicode)
+           self.assertTrue(type(pickled_url.basename) is unicode)
 
 
 def main():

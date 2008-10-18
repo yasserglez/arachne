@@ -112,6 +112,7 @@ class FTPHandler(ProtocolHandler):
         """Initialize the handler.
         """
         ProtocolHandler.__init__(self, sites_info, tasks, results)
+        self._encoding = 'utf-8'
         self._tasks = tasks
         self._results = results
 
@@ -122,15 +123,16 @@ class FTPHandler(ProtocolHandler):
         try:
             ftp = ftplib.FTP()
             if url.port:
-                ftp.connect(url.hostname, url.port)
+                ftp.connect(url.hostname.encode(self._encoding), url.port)
             else:
-                ftp.connect(url.hostname)
+                ftp.connect(url.hostname.encode(self._encoding))
             if url.username:
-                ftp.login(url.username, url.password)
+                ftp.login(url.username.encode(self._encoding),
+                          url.password.encode(self._encoding))
             else:
                 ftp.login()
             try:
-                ftp.cwd(url.path)
+                ftp.cwd(url.path.encode(self._encoding))
             except ftplib.error_perm:
                 # Failed to change directory.
                 result = CrawlResult(task, False)
@@ -151,7 +153,7 @@ class FTPHandler(ProtocolHandler):
                         # assume it is a file.
                         try:
                             entry_url = url.join(entry_name)
-                            ftp.cwd(entry_url.path)
+                            ftp.cwd(entry_url.path.encode(self._encoding))
                         except ftplib.error_perm:
                             data['is_dir'] = False
                         else:

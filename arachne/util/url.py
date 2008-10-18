@@ -28,31 +28,34 @@ class URL(object):
     def __init__(self, url):
         """Initialize the URL from the string `url`.
         """
+        self._encoding = 'utf-8'
+        if not isinstance(url, unicode):
+            url = url.decode(self._encoding)
         splitted_url = urlparse.urlsplit(url)
-        root_url = '%s://%s/' % (splitted_url.scheme, splitted_url.netloc)
+        root_url = u'%s://%s/' % (splitted_url.scheme, splitted_url.netloc)
         self._scheme = splitted_url.scheme
         self._username = splitted_url.username
         self._password = splitted_url.password
         self._hostname = splitted_url.hostname
         self._port = splitted_url.port
-        path = url[len(root_url):].rstrip('/')
+        path = url[len(root_url):].rstrip(u'/')
         if not path:
-            self._path = '/'
+            self._path = u'/'
             self._url = root_url
         else:
-            self._path = '/%s' % path.lstrip('/')
-            self._url = '%s%s' % (root_url, path.lstrip('/'))
+            self._path = u'/%s' % path.lstrip(u'/')
+            self._url = u'%s%s' % (root_url, path.lstrip(u'/'))
 
     def __str__(self):
         """Return the URL as string.
         """
-        return self._url
+        return self._url.encode(self._encoding)
 
     def __getstate__(self):
         """Used by pickle when instances are serialized.
         """
         return {
-            'url': self._url,
+            'url': self._url.encode(self._encoding),
         }
 
     def __setstate__(self, state):
@@ -63,8 +66,10 @@ class URL(object):
     def join(self, path):
         """Join a path to the URL and return the new URL.
         """
-        base_url = self._url[:-1] if self._path == '/' else self._url
-        return URL('%s/%s' % (base_url, path.lstrip('/')))
+        if not isinstance(path, unicode):
+            path = path.decode(self._encoding)
+        base_url = self._url[:-1] if self._path == u'/' else self._url
+        return URL(u'%s/%s' % (base_url, path.lstrip(u'/')))
 
     def _get_scheme(self):
         """Get method for the `scheme` property.
@@ -101,10 +106,10 @@ class URL(object):
 
         This method will return '/' for URL of the root directory.
         """
-        if self._path == '/':
+        if self._path == u'/':
             return self._path
         else:
-            return self._path[self._path.rindex('/') + 1:]
+            return self._path[self._path.rindex(u'/') + 1:]
 
     scheme = property(_get_scheme)
 
