@@ -74,12 +74,12 @@ class CrawlResult(object):
         """
         return self._task
 
+    task = property(_get_task)
+
     def _get_found(self):
         """Get method for the `found` property.
         """
         return self._found
-
-    task = property(_get_task)
 
     found = property(_get_found)
 

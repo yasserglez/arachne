@@ -83,10 +83,14 @@ class CrawlTask(object):
         """
         return self._site_id
 
+    site_id = property(_get_site_id)
+
     def _get_url(self):
         """Get method for the `url` property.
         """
         return self._url
+
+    url = property(_get_url)
 
     def _get_revisit_wait(self):
         """Get method for the `revisit_wait` property.
@@ -102,23 +106,19 @@ class CrawlTask(object):
         self._revisit_count = 0
         self._change_count = 0
 
+    revisit_wait = property(_get_revisit_wait, _set_revisit_wait)
+
     def _get_revisit_count(self):
         """Get method for the `revisit_count` property.
         """
         return self._revisit_count
 
+    revisit_count = property(_get_revisit_count)
+
     def _get_change_count(self):
         """Get method for the `change_count` property.
         """
         return self._change_count
-
-    site_id = property(_get_site_id)
-
-    url = property(_get_url)
-
-    revisit_wait = property(_get_revisit_wait, _set_revisit_wait)
-
-    revisit_count = property(_get_revisit_count)
 
     change_count = property(_get_change_count)
 
