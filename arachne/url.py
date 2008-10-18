@@ -46,9 +46,11 @@ class URL(object):
         if not path:
             self._path = u'/'
             self._url = root_url
+            self._basename = self._path
         else:
             self._path = u'/%s' % path.lstrip(u'/')
             self._url = u'%s%s' % (root_url, path.lstrip(u'/'))
+            self._basename = self._path[self._path.rindex(u'/') + 1:]
         self._is_root = is_root
 
     def __str__(self):
@@ -128,12 +130,7 @@ class URL(object):
 
     def _get_basename(self):
         """Get method for the `basename` property.
-
-        This method will return '/' for URL of the root directory.
         """
-        if self._path == u'/':
-            return self._path
-        else:
-            return self._path[self._path.rindex(u'/') + 1:]
+        return self._basename
 
     basename = property(_get_basename)
