@@ -25,8 +25,12 @@ class URL(object):
     """Uniform Resource Locator.
     """
 
-    def __init__(self, url):
-        """Initialize the URL from the string `url`.
+    def __init__(self, url, is_root=False):
+        """Initialize the URL.
+
+        Initialize the URL from the string `url`. The string should be a
+        unicode string or a UTF-8 encoded bytestring. The `is_root` argument
+        indicates if it is the URL of the root directory of a site.
         """
         self._encoding = 'utf-8'
         if not isinstance(url, unicode):
@@ -45,6 +49,7 @@ class URL(object):
         else:
             self._path = u'/%s' % path.lstrip(u'/')
             self._url = u'%s%s' % (root_url, path.lstrip(u'/'))
+        self._is_root = is_root
 
     def __str__(self):
         """Return the URL as string.
@@ -56,12 +61,13 @@ class URL(object):
         """
         return {
             'url': self._url.encode(self._encoding),
+            'is_root': self._is_root,
         }
 
     def __setstate__(self, state):
         """Used by pickle when instances are unserialized.
         """
-        self.__init__(state['url'])
+        self.__init__(state['url'], state['is_root'])
 
     def join(self, path):
         """Join a path to the URL and return the new URL.
@@ -71,35 +77,54 @@ class URL(object):
         base_url = self._url[:-1] if self._path == u'/' else self._url
         return URL(u'%s/%s' % (base_url, path.lstrip(u'/')))
 
+    def _get_is_root(self):
+        """Get method for the `is_root` property.
+        """
+        return self._is_root
+
+    is_root = property(_get_is_root)
+
     def _get_scheme(self):
         """Get method for the `scheme` property.
         """
         return self._scheme
+
+    scheme = property(_get_scheme)
 
     def _get_username(self):
         """Get method for the `username` property.
         """
         return self._username
 
+    username = property(_get_username)
+
     def _get_password(self):
         """Get method for the `password` property.
         """
         return self._password
+
+    password = property(_get_password)
 
     def _get_hostname(self):
         """Get method for the `hostname` property.
         """
         return self._hostname
 
+    hostname = property(_get_hostname)
+
     def _get_port(self):
         """Get method for the `port` property.
         """
         return self._port
 
+    port = property(_get_port)
+
     def _get_path(self):
         """Get method for the `path` property.
         """
         return self._path
+
+    path = property(_get_path)
 
     def _get_basename(self):
         """Get method for the `basename` property.
@@ -110,17 +135,5 @@ class URL(object):
             return self._path
         else:
             return self._path[self._path.rindex(u'/') + 1:]
-
-    scheme = property(_get_scheme)
-
-    username = property(_get_username)
-
-    password = property(_get_password)
-
-    hostname = property(_get_hostname)
-
-    port = property(_get_port)
-
-    path = property(_get_path)
 
     basename = property(_get_basename)
