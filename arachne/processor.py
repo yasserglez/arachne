@@ -22,8 +22,8 @@ import time
 import logging
 import threading
 
-from arachne.error import EmptyQueue
 from arachne.task import CrawlTask
+from arachne.error import EmptyQueue
 
 
 class ResultProcessor(object):
@@ -48,6 +48,10 @@ class ResultProcessor(object):
         """
         raise NotImplementedError('A subclass must override this method.')
 
+    def close(self):
+        """Close the processor.
+        """
+
 
 class NaiveProcessor(ResultProcessor):
     """Naive processor.
@@ -60,7 +64,6 @@ class NaiveProcessor(ResultProcessor):
     def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
-        ResultProcessor.__init__(self, sites_info, index_dir, tasks, results)
         self._tasks = tasks
         self._results = results
 
@@ -81,12 +84,14 @@ class IndexProcessor(ResultProcessor):
     def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
-        ResultProcessor.__init__(self, sites_info, index_dir, tasks, results)
 
     def process(self, result):
         """Process a crawl result.
         """
-        raise NotImplementedError('A subclass must override this method.')
+
+    def close(self):
+        """Close the processor.
+        """
 
 
 class ProcessorManager(threading.Thread):
@@ -122,7 +127,9 @@ class ProcessorManager(threading.Thread):
                 except EmptyQueue:
                     time.sleep(self._sleep)
                 else:
-                    self._process(result)
+                    logging.info('Processing "%s"' % result.task.url)
+                    self._processor.process(result)
+            self._processor.close()
         except:
             logging.exception('Unhandled exception, printing traceback')
 
@@ -130,9 +137,3 @@ class ProcessorManager(threading.Thread):
         """Order the main loop to end.
         """
         self._running = False
-
-    def _process(self, result):
-        """Process a crawl result.
-        """
-        logging.info('Processing "%s"' % result.task.url)
-        self._processor.process(result)

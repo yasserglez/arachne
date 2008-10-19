@@ -69,7 +69,6 @@ class FileHandler(ProtocolHandler):
     def __init__(self, sites_info, tasks, results):
         """Initialize handler.
         """
-        ProtocolHandler.__init__(self, sites_info, tasks, results)
         self._tasks = tasks
         self._results = results
         self._errnos_dir = (errno.EACCES, )
@@ -111,7 +110,6 @@ class FTPHandler(ProtocolHandler):
     def __init__(self, sites_info, tasks, results):
         """Initialize the handler.
         """
-        ProtocolHandler.__init__(self, sites_info, tasks, results)
         self._encoding = 'utf-8'
         self._tasks = tasks
         self._results = results
