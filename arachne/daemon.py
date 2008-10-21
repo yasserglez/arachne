@@ -24,12 +24,12 @@ import logging
 import hashlib
 
 from arachne import __version__
-from arachne.url import URL
 from arachne.task import TaskQueue
 from arachne.result import ResultQueue
 from arachne.crawler import CrawlerManager
 from arachne.processor import ProcessorManager
 from arachne.util.daemon import Daemon
+from arachne.util.url import URL
 
 
 class ArachneDaemon(Daemon):
