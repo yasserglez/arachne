@@ -25,12 +25,11 @@ class URL(object):
     """Uniform Resource Locator.
     """
 
-    def __init__(self, url, is_root=False):
+    def __init__(self, url):
         """Initialize the URL.
 
         Initialize the URL from the string `url`. The string should be a
-        unicode string or a UTF-8 encoded bytestring. The `is_root` argument
-        indicates if it is the URL of the root directory of a site.
+        unicode string or a UTF-8 encoded bytestring.
         """
         self._encoding = 'utf-8'
         if not isinstance(url, unicode):
@@ -46,12 +45,15 @@ class URL(object):
         if not path:
             self._path = u'/'
             self._url = root_url
-            self._basename = self._path
+            self._basename = u'/'
+            self._dirname = u'/'
         else:
             self._path = u'/%s' % path.lstrip(u'/')
             self._url = u'%s%s' % (root_url, path.lstrip(u'/'))
             self._basename = self._path[self._path.rindex(u'/') + 1:]
-        self._is_root = is_root
+            self._dirname = self._path[:- len(self._basename) - 1]
+            if not self._dirname:
+                self._dirname = u'/'
 
     def __str__(self):
         """Return the URL as string.
@@ -63,13 +65,12 @@ class URL(object):
         """
         return {
             'url': self._url.encode(self._encoding),
-            'is_root': self._is_root,
         }
 
     def __setstate__(self, state):
         """Used by pickle when instances are unserialized.
         """
-        self.__init__(state['url'], state['is_root'])
+        self.__init__(state['url'])
 
     def join(self, path):
         """Join a path to the URL and return the new URL.
@@ -78,13 +79,6 @@ class URL(object):
             path = path.decode(self._encoding)
         base_url = self._url[:-1] if self._path == u'/' else self._url
         return URL(u'%s/%s' % (base_url, path.lstrip(u'/')))
-
-    def _get_is_root(self):
-        """Get method for the `is_root` property.
-        """
-        return self._is_root
-
-    is_root = property(_get_is_root)
 
     def _get_scheme(self):
         """Get method for the `scheme` property.
@@ -127,6 +121,13 @@ class URL(object):
         return self._path
 
     path = property(_get_path)
+
+    def _get_dirname(self):
+        """Get method for the `dirname` property.
+        """
+        return self._dirname
+
+    dirname = property(_get_dirname)
 
     def _get_basename(self):
         """Get method for the `basename` property.
