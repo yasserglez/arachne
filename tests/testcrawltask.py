@@ -26,18 +26,19 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from arachne.task import CrawlTask
+from arachne.util.url import URL
 
 
 class TestCrawlTask(unittest.TestCase):
 
     def setUp(self):
-        self._url = 'ftp://deltha.uh.cu/'
+        self._url = URL('ftp://deltha.uh.cu/')
         self._site_id = 'aa958756e769188be9f76fbdb291fe1b2ddd4777'
         self._task = CrawlTask(self._site_id, self._url)
 
     def test_properties(self):
         self.assertEquals(self._task.site_id, self._site_id)
-        self.assertEquals(self._task.url, self._url)
+        self.assertEquals(str(self._task.url), str(self._url))
         self.assertEquals(self._task.revisit_wait, 0)
         self.assertEquals(self._task.revisit_count, 0)
         self.assertEquals(self._task.change_count, 0)
@@ -45,7 +46,7 @@ class TestCrawlTask(unittest.TestCase):
     def test_pickling(self):
         task = pickle.loads(pickle.dumps(self._task))
         self.assertEquals(self._task.site_id, task.site_id)
-        self.assertEquals(self._task.url, task.url)
+        self.assertEquals(str(self._task.url), str(task.url))
         self.assertEquals(self._task.revisit_wait, task.revisit_wait)
         self.assertEquals(self._task.revisit_count, task.revisit_count)
         self.assertEquals(self._task.change_count, task.change_count)

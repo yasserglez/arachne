@@ -27,38 +27,62 @@ sys.path.insert(0, SRCDIR)
 
 from arachne.task import CrawlTask
 from arachne.result import CrawlResult
+from arachne.util.url import URL
 
 
 class TestCrawlResult(unittest.TestCase):
 
     def setUp(self):
-        url = 'ftp://deltha.uh.cu/'
+        url = URL('ftp://deltha.uh.cu/')
         site_id = 'aa958756e769188be9f76fbdb291fe1b2ddd4777'
+        self._num_entries = 10
         self._found = True
         self._task = CrawlTask(site_id, url)
+        self._entries = [(str(i), {'is_dir': i < (self._num_entries / 2)})
+                         for i in range(self._num_entries)]
         self._result = CrawlResult(self._task, self._found)
-        self._entries = [(str(i), {'is_dir': True}) for i in range(100)]
 
     def test_properties(self):
         self.assertEquals(self._result.task.site_id, self._task.site_id)
-        self.assertEquals(self._result.task.url, self._task.url)
+        self.assertEquals(str(self._result.task.url), str(self._task.url))
         self.assertEquals(self._result.found, self._found)
 
-    def test_entries(self):
+    def test_append_and_iter(self):
         for entry, data in self._entries:
             self._result.append(entry, data)
-        entries = [(self._task.url.join(entry), data)
-                   for entry, data in self._entries]
-        self.assertEquals(list(self._result), entries)
+        entries = map(lambda i: i[0], self._entries)
+        for entry, data in self._result:
+            entries.remove(entry)
+        self.assertEquals(len(entries), 0)
+
+    def test_contains(self):
+        entry, data = self._entries[0]
+        self._result.append(entry, data)
+        self.assertTrue(entry in self._result)
+        self.assertFalse(entry * 2 in self._result)
+
+    def test_len(self):
+        for entry, data in self._entries:
+            self._result.append(entry, data)
+        self.assertEquals(len(self._result), self._num_entries)
+
+    def test_getitem(self):
+        entry, data = self._entries[0]
+        self._result.append(entry, data)
+        self.assertEquals(self._result[entry], data)
+        self.assertRaises(KeyError, self._result.__getitem__, entry * 2)
 
     def test_pickling(self):
         for entry, data in self._entries:
             self._result.append(entry, data)
         result = pickle.loads(pickle.dumps(self._result))
         self.assertEquals(self._result.task.site_id, result.task.site_id)
-        self.assertEquals(self._result.task.url, result.task.url)
+        self.assertEquals(str(self._result.task.url), str(result.task.url))
         self.assertEquals(self._result.found, result.found)
-        self.assertEquals(list(result), list(self._result))
+        entries = map(lambda i: i[0], self._entries)
+        for entry, data in result:
+            entries.remove(entry)
+        self.assertEquals(len(entries), 0)
 
 
 def main():

@@ -132,6 +132,7 @@ class XapianProcessor(ResultProcessor):
 
         def __call__(self, doc):
             doc_value = doc.get_value(XapianProcessor._DIRNAME_SLOT)
+            doc_value = doc_value.decode('utf-8')
             return doc_value == self._value
 
     class PrefixPathDecider(xapian.MatchDecider):
@@ -144,6 +145,7 @@ class XapianProcessor(ResultProcessor):
 
         def __call__(self, doc):
             doc_value = doc.get_value(XapianProcessor._DIRNAME_SLOT)
+            doc_value = doc_value.decode('utf-8')
             return doc_value.startswith(self._prefix)
 
     def __init__(self, sites_info, index_dir, tasks, results):
@@ -166,43 +168,46 @@ class XapianProcessor(ResultProcessor):
         """Process a crawl result.
         """
         site_id = result.task.site_id
-        entries = dict((url.basename, (url, data)) for url, data in result)
-        # The last / is required to match prefixes.
+        # The leading / is required to match prefixes.
         dir_path = result.task.url.path.rstrip(u'/') + u'/'
-        total_docs = self._db.get_doccount()
+        doc_count = self._db.get_doccount()
         enquire = xapian.Enquire(self._db)
         enquire.set_query(xapian.Query(self._SITE_ID_PREFIX + site_id))
         # Get all the entries of this directory in the index.
+        indexed_entries = []
         decider = self.ExactPathDecider(dir_path)
-        for match in enquire.get_mset(0, total_docs, None, decider):
+        for match in enquire.get_mset(0, doc_count, None, decider):
             doc = match.get_document()
             is_dir = self._IS_DIR_TAG in [term.term for term in doc]
-            basename = doc.get_value(self._BASENAME_SLOT).decode('utf-8')
+            basename = doc.get_value(self._BASENAME_SLOT)
+            basename = basename.decode('utf-8')
             try:
-                url, data = entries[basename]
+                data = result[basename]
             except KeyError:
                 # Entry removed from the directory in the site.
                 self._db.delete_document(doc.get_docid())
                 if is_dir:
                     # Remove entries in the sub-tree of the directory.
-                    dirname = doc.get_value(self._DIRNAME_SLOT).decode('utf-8')
+                    dirname = doc.get_value(self._DIRNAME_SLOT)
+                    dirname = dirname.decode('utf-8')
                     path_prefix = dirname.rstrip(u'/') + u'/' + basename + u'/'
                     decider = self.PrefixPathDecider(path_prefix)
-                    for match in enquire.get_mset(0, total_docs, None, decider):
+                    for match in enquire.get_mset(0, doc_count, None, decider):
                         doc = match.get_document()
                         self._db.delete_document(doc.get_docid())
             else:
                 # If the data is updated remove the entry from the dictionary.
                 if is_dir == data['is_dir']:
-                    del entries[basename]
+                    indexed_entries.append(basename)
                 else:
                     # Lazy solution.  Remove the document from the index and
                     # then add it again with the right data.
                     self._db.delete_document(doc.get_docid())
         # Add new or modified entries.
-        for url, data in entries.itervalues():
-            doc = self._create_document(site_id, url, data)
-            self._db.add_document(doc)
+        for entry, data in result:
+            if entry not in indexed_entries:
+                doc = self._create_document(site_id, data)
+                self._db.add_document(doc)
 
     def close(self):
         """Close the processor.
@@ -210,9 +215,10 @@ class XapianProcessor(ResultProcessor):
         # There is currently no close() method for xapian databases.
         self._db.flush()
 
-    def _create_document(self, site_id, url, data):
-        """Create and return a Xapian document with the given information.
+    def _create_document(self, site_id, data):
+        """Create and return a Xapian document from `data`.
         """
+        url = data['url']
         doc = xapian.Document()
         doc.add_term(self._SITE_ID_PREFIX + site_id, 0)
         if data['is_dir']:

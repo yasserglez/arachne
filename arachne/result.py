@@ -40,12 +40,27 @@ class CrawlResult(object):
         """
         self._task = task
         self._found = found
-        self._entries = []
+        self._entries = {}
 
     def __iter__(self):
         """Iterate over entries in the directory.
         """
-        return iter(self._entries)
+        return self._entries.iteritems()
+
+    def __contains__(self, entry):
+        """Check if an entry is contained in the directory.
+        """
+        return entry in self._entries
+
+    def __len__(self):
+        """Return the number of entries in the directory.
+        """
+        return len(self._entries)
+
+    def __getitem__(self, entry):
+        """Return data for the given entry.
+        """
+        return self._entries[entry]
 
     def __getstate__(self):
         """Used by pickle when instances are serialized.
@@ -66,8 +81,8 @@ class CrawlResult(object):
     def append(self, entry, data):
         """Append a new entry.
         """
-        entry_url = self._task.url.join(entry)
-        self._entries.append((entry_url, data))
+        data['url'] = self._task.url.join(entry)
+        self._entries[entry] = data
 
     def _get_task(self):
         """Get method for the `task` property.
