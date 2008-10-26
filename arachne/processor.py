@@ -220,10 +220,13 @@ class XapianProcessor(ResultProcessor):
         for term in self._BASENAME_SPLIT_RE.split(basename):
             term = term.strip()
             if len(term) >= self._MIN_TERM_LENGTH:
-                terms.append(term.lower())
+                lower_term = term.lower()
+                if lower_term not in terms:
+                    terms.append(lower_term)
                 translated = term.translate(self._BASENAME_TERM_TABLE)
                 if translated != term:
-                    terms.append(translated.lower())
+                    lower_translated = translated.lower()
+                    terms.append(lower_translated)
         return terms
 
     def _get_dirname_terms(self, dirname):
@@ -232,7 +235,9 @@ class XapianProcessor(ResultProcessor):
         terms = []
         dirname = dirname.strip(u'/')
         for basename in self._DIRNAME_SPLIT_RE.split(dirname):
-            terms += self._get_basename_terms(basename)
+            for term in self._get_basename_terms(basename):
+                if term not in terms:
+                    terms.append(term)
         return terms
 
     def _create_document(self, site_id, data):

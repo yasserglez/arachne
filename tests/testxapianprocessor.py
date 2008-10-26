@@ -62,10 +62,6 @@ class TestXapianProcessor(unittest.TestCase):
             (u'AFewCamelCasedWords',
              [u'few', u'camel', u'cased', u'words']),
 
-            # The ' between letters should not split the string.
-            (u'A hard day\'s night',
-             [u'hard', u'day\'s', u'night']),
-
             (u'It should ignore this: ! # &.',
              [u'it', u'should', u'ignore', u'this']),
 
@@ -84,10 +80,9 @@ class TestXapianProcessor(unittest.TestCase):
         # Don't test so hard since it only calls _get_basename_terms() for each
         # directory in the path.
         test_data = (
-            (u'/Books/Programming/Python/dive_into_python.zip',
-             [u'books', u'programming', u'python', u'dive', u'into', u'python']),
+            (u'/Books/Programming/Python/dive_into_python',
+             [u'books', u'programming', u'python', u'dive', u'into']),
 
-            # Do not return repeated terms.
             (u'/Music/The Beatles/Meet The Beatles!',
              [u'music', u'the', u'beatles', u'meet']),
         )
