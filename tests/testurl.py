@@ -41,6 +41,10 @@ class TestURL(unittest.TestCase):
              (u'file', None, None, None, None, u'/home', u'/', u'home'),
              ('yglez', 'file:///home/yglez')),
 
+            ('file:///home/yglez',
+             (u'file', None, None, None, None, u'/home/yglez', u'/home', u'yglez'),
+             ('projects', 'file:///home/yglez/projects')),
+
             ('ftp://deltha.uh.cu/',
              (u'ftp', None, None, u'deltha.uh.cu', None, u'/', u'/', u'/'),
              ('debian', 'ftp://deltha.uh.cu/debian')),

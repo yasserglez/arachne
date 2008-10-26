@@ -57,7 +57,7 @@ class ResultProcessor(object):
 
 
 class NaiveProcessor(ResultProcessor):
-    """Naive processor.
+    """Naive result processor.
 
     This processor only will add a new task to `TaskQueue` for each directory
     entry found in the result.  This can be used to walk the entire directory
@@ -81,32 +81,32 @@ class NaiveProcessor(ResultProcessor):
 
 
 class XapianProcessor(ResultProcessor):
-    """Xapian index processor.
+    """Xapian result procesor.
     """
 
     # Term prefixes.
-    _IS_DIR_PREFIX = 'D'
-    _SITE_ID_PREFIX = 'S'
-    _BASENAME_FULL_PREFIX = 'B'
-    _BASENAME_TOKEN_PREFIX = 'T'
-
-    # Slots for values.
-    _DIRNAME_SLOT = 0
-    _BASENAME_SLOT = 1
+    _BASENAME_FULL_PREFIX = u'A'
+    _BASENAME_TERM_PREFIX = u'B'
+    _DIRNAME_FULL_PREFIX = u'C'
+    _DIRNAME_TERM_PREFIX = u'D'
+    _IS_DIR_PREFIX = u'E'
+    _SITE_ID_PREFIX = u'F'
 
     # Tags for Boolean properties.
-    _IS_DIR_TAG = _IS_DIR_PREFIX + 'is_dir'
+    _IS_DIR_TAG = _IS_DIR_PREFIX + u'is_dir'
 
-    # Attributes used by the _extract_terms() method.
+    # Attributes used by the _get_basename_terms() and _get_dirname_terms().
     _MIN_TERM_LENGTH = 2
 
-    _SPLIT_TERM_RE = re.compile(ur'\s+|(?<=\D)[.,]+|[.,]+(?=\D)')
+    _DIRNAME_SPLIT_RE = re.compile(ur'(?<=[^/])/(?=[^/])')
 
-    _BASENAME_TABLE = {}
+    _BASENAME_SPLIT_RE = re.compile(ur'\s+|(?<=\D)[.,]+|[.,]+(?=\D)')
+
+    _BASENAME_FULL_TABLE = {}
     for c in u'!"#$%&\'()*+-/:;<=>?@[\]^_`{|}~':
-        _BASENAME_TABLE[ord(c)] = u' '
+        _BASENAME_FULL_TABLE[ord(c)] = u' '
 
-    _TERM_TABLE = {
+    _BASENAME_TERM_TABLE = {
         ord(u'á') : u'a',
         ord(u'Á') : u'A',
         ord(u'é') : u'e',
@@ -122,38 +122,13 @@ class XapianProcessor(ResultProcessor):
         ord(u'ñ') : u'n',
     }
 
-    class ExactPathDecider(xapian.MatchDecider):
-        """Exact path match decider.
-        """
-
-        def __init__(self, value):
-            xapian.MatchDecider.__init__(self)
-            self._value = value
-
-        def __call__(self, doc):
-            doc_value = doc.get_value(XapianProcessor._DIRNAME_SLOT)
-            doc_value = doc_value.decode('utf-8')
-            return doc_value == self._value
-
-    class PrefixPathDecider(xapian.MatchDecider):
-        """Path prefix match decider.
-        """
-
-        def __init__(self, prefix):
-            xapian.MatchDecider.__init__(self)
-            self._prefix = prefix
-
-        def __call__(self, doc):
-            doc_value = doc.get_value(XapianProcessor._DIRNAME_SLOT)
-            doc_value = doc_value.decode('utf-8')
-            return doc_value.startswith(self._prefix)
-
     def __init__(self, sites_info, index_dir, tasks, results):
         """Initialize the processor.
         """
+        self._tasks = tasks
+        self._results = results
         self._db = xapian.WritableDatabase(index_dir, xapian.DB_CREATE_OR_OPEN)
-        # Remove documents of old sites from the index (sites removed from the
-        # configuration file).
+        # Remove documents of old sites from the index.
         old_site_ids = [term.term[len(self._SITE_ID_PREFIX):]
                         for term in self._db.allterms(self._SITE_ID_PREFIX)]
         for site_id in sites_info.iterkeys():
@@ -161,40 +136,50 @@ class XapianProcessor(ResultProcessor):
                 old_site_ids.remove(site_id)
         for site_id in old_site_ids:
             self._db.delete_document(self._SITE_ID_PREFIX + site_id)
-        self._tasks = tasks
-        self._results = results
 
     def process(self, result):
         """Process a crawl result.
         """
+        url = result.task.url
         site_id = result.task.site_id
-        # The leading / is required to match prefixes.
-        dir_path = result.task.url.path.rstrip(u'/') + u'/'
         doc_count = self._db.get_doccount()
         enquire = xapian.Enquire(self._db)
-        enquire.set_query(xapian.Query(self._SITE_ID_PREFIX + site_id))
+        enquire.set_docid_order(xapian.Enquire.DONT_CARE)
         # Get all the entries of this directory in the index.
+        dirname = url.path.rstrip(u'/') + u'/'
+        query = xapian.Query(xapian.Query.OP_AND,
+                             self._SITE_ID_PREFIX + site_id,
+                             self._DIRNAME_FULL_PREFIX + dirname)
+        enquire.set_query(query)
         indexed_entries = []
-        decider = self.ExactPathDecider(dir_path)
-        for match in enquire.get_mset(0, doc_count, None, decider):
+        for match in enquire.get_mset(0, doc_count):
             doc = match.get_document()
-            is_dir = self._IS_DIR_TAG in [term.term for term in doc]
-            basename = doc.get_value(self._BASENAME_SLOT)
-            basename = basename.decode('utf-8')
+            is_dir = bool(self._get_term_value(doc, self._IS_DIR_PREFIX))
+            basename = self._get_term_value(doc, self._BASENAME_FULL_PREFIX)
             try:
                 data = result[basename]
             except KeyError:
                 # Entry removed from the directory in the site.
-                self._db.delete_document(doc.get_docid())
                 if is_dir:
-                    # Remove entries in the sub-tree of the directory.
-                    dirname = doc.get_value(self._DIRNAME_SLOT)
-                    dirname = dirname.decode('utf-8')
-                    path_prefix = dirname.rstrip(u'/') + u'/' + basename + u'/'
-                    decider = self.PrefixPathDecider(path_prefix)
-                    for match in enquire.get_mset(0, doc_count, None, decider):
-                        doc = match.get_document()
-                        self._db.delete_document(doc.get_docid())
+                    # Remove entries in the sub-tree of the directory.  This is
+                    # an slow operation.
+                    dirname_prefix = dirname + basename + u'/'
+                    term_prefix = self._DIRNAME_FULL_PREFIX + dirname_prefix
+                    dirname_terms = []
+                    for term in self._db.allterms(term_prefix):
+                        term = term.term.decode('utf-8')
+                        dirname_terms.append(term)
+                    dirname_query = xapian.Query(xapian.Query.OP_OR,
+                                                 dirname_terms)
+                    site_id_term = self._SITE_ID_PREFIX + site_id
+                    site_id_query = xapian.Query(site_id_term)
+                    query = xapian.Query(xapian.Query.OP_AND,
+                                         site_id_query, dirname_query)
+                    enquire.set_query(query)
+                    for match in enquire.get_mset(0, doc_count):
+                        sub_doc = match.get_document()
+                        self._db.delete_document(sub_doc.get_docid())
+                self._db.delete_document(doc.get_docid())
             else:
                 # If the data is updated remove the entry from the dictionary.
                 if is_dir == data['is_dir']:
@@ -212,8 +197,43 @@ class XapianProcessor(ResultProcessor):
     def close(self):
         """Close the processor.
         """
-        # There is currently no close() method for xapian databases.
+        # There is currently no close() method for Xapian databases.
         self._db.flush()
+
+    @staticmethod
+    def _get_term_value(document, prefix):
+        """Return value of the term with the given prefix.
+
+        If a term with the given prefix is not found `None` is returned
+        otherwise the first match.
+        """
+        for term in document.termlist():
+            term = term.term.decode('utf-8')
+            if term.startswith(prefix):
+                return term[len(prefix):]
+
+    def _get_basename_terms(self, basename):
+        """Extract terms from the basename of a URL.
+        """
+        terms = []
+        basename = basename.translate(self._BASENAME_FULL_TABLE)
+        for term in self._BASENAME_SPLIT_RE.split(basename):
+            term = term.strip()
+            if len(term) >= self._MIN_TERM_LENGTH:
+                terms.append(term.lower())
+                translated = term.translate(self._BASENAME_TERM_TABLE)
+                if translated != term:
+                    terms.append(translated.lower())
+        return terms
+
+    def _get_dirname_terms(self, dirname):
+        """Extract terms from the dirname of a URL.
+        """
+        terms = []
+        dirname = dirname.strip(u'/')
+        for basename in self._DIRNAME_SPLIT_RE.split(dirname):
+            terms += self._get_basename_terms(basename)
+        return terms
 
     def _create_document(self, site_id, data):
         """Create and return a Xapian document from `data`.
@@ -224,28 +244,15 @@ class XapianProcessor(ResultProcessor):
         if data['is_dir']:
             doc.add_term(self._IS_DIR_TAG, 0)
         doc.add_term(self._BASENAME_FULL_PREFIX + url.basename)
-        for token in self._extract_terms(url.basename):
-            doc.add_term(self._BASENAME_TOKEN_PREFIX + token)
-        # Add more URL properties here if needed.
-        doc.add_value(self._DIRNAME_SLOT, url.dirname.rstrip(u'/') + u'/')
-        doc.add_value(self._BASENAME_SLOT, url.basename)
+        for term in self._get_basename_terms(url.basename):
+            doc.add_term(self._BASENAME_TERM_PREFIX + term)
+        # The leading / is required to math sub-directories.
+        dirname = url.dirname.rstrip(u'/') + u'/'
+        doc.add_term(self._DIRNAME_FULL_PREFIX + dirname, 0)
+        for term in self._get_dirname_terms(url.dirname):
+            doc.add_term(self._DIRNAME_TERM_PREFIX + term)
         doc.set_data(str(url))
         return doc
-
-    def _extract_terms(self, basename):
-        """Extract terms from the basename of a URL.
-        """
-        # TODO: This surely can be improved.
-        terms = []
-        basename = basename.translate(self._BASENAME_TABLE)
-        for term in self._SPLIT_TERM_RE.split(basename):
-            term = term.strip()
-            if len(term) >= self._MIN_TERM_LENGTH:
-                terms.append(term.lower())
-                translated = term.translate(self._TERM_TABLE)
-                if translated != term:
-                    terms.append(translated.lower())
-        return terms
 
 
 class ProcessorManager(threading.Thread):
