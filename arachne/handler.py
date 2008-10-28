@@ -18,11 +18,11 @@
 """Protocol handlers.
 """
 
-import os
 import errno
-import socket
 import ftplib
 import logging
+import os
+import socket
 
 from arachne.result import CrawlResult
 

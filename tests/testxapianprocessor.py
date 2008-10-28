@@ -26,7 +26,7 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from arachne.processor import XapianProcessor
-from arachne.util.url import URL
+from arachne.url import URL
 
 
 class TestXapianProcessor(unittest.TestCase):

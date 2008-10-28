@@ -18,11 +18,11 @@
 """Crawl result and result queue.
 """
 
-import os
-import sys
-import glob
 import bsddb
 import cPickle
+import glob
+import os
+import sys
 import threading
 
 from arachne.error import EmptyQueue

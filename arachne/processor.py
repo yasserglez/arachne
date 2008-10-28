@@ -18,15 +18,15 @@
 """Components used to process the crawl results.
 """
 
-import re
-import time
 import logging
+import re
 import threading
+import time
 
 import xapian
 
-from arachne.task import CrawlTask
 from arachne.error import EmptyQueue
+from arachne.task import CrawlTask
 
 
 class ResultProcessor(object):

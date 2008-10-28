@@ -18,14 +18,14 @@
 """Crawl task and task queue.
 """
 
-import os
-import sys
-import time
-import glob
-import math
 import bsddb
 import cPickle
+import glob
+import math
+import os
+import sys
 import threading
+import time
 
 from arachne.error import EmptyQueue
 

@@ -18,9 +18,9 @@
 """Components related with the crawling process.
 """
 
-import time
 import logging
 import threading
+import time
 
 from arachne.error import EmptyQueue
 from arachne.handler import ProtocolHandler

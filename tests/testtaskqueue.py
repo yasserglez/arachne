@@ -28,8 +28,8 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from arachne.error import EmptyQueue
-from arachne.util.url import URL
 from arachne.task import CrawlTask, TaskQueue
+from arachne.url import URL
 
 
 class TestTaskQueue(unittest.TestCase):
