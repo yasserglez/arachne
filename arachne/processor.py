@@ -102,6 +102,8 @@ class XapianProcessor(ResultProcessor):
 
     _BASENAME_SPLIT_RE = re.compile(ur'\s+|(?<=\D)[.,]+|[.,]+(?=\D)')
 
+    _CAMEL_SUB_RE = re.compile('(?<=[a-zA-Z])(?=[A-Z][a-z])')
+
     _BASENAME_FULL_TABLE = {}
     for c in u'!"#$%&\'()*+-/:;<=>?@[\]^_`{|}~':
         _BASENAME_FULL_TABLE[ord(c)] = u' '
@@ -226,7 +228,16 @@ class XapianProcessor(ResultProcessor):
                 translated = term.translate(self._BASENAME_TERM_TABLE)
                 if translated != term:
                     lower_translated = translated.lower()
-                    terms.append(lower_translated)
+                    if translated not in terms:
+                        terms.append(lower_translated)
+                # Process camel cased text.
+                words = self._CAMEL_SUB_RE.sub(u' ', translated).split(u' ')
+                for word in words:
+                    word = word.strip()
+                    if len(word) >= self._MIN_TERM_LENGTH:
+                        word = word.lower()
+                        if word not in terms:
+                            terms.append(word)
         return terms
 
     def _get_dirname_terms(self, dirname):
