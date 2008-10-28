@@ -95,20 +95,18 @@ class XapianProcessor(ResultProcessor):
     # Tags for Boolean properties.
     _IS_DIR_TAG = _IS_DIR_PREFIX + u'is_dir'
 
-    # Attributes used by the _get_basename_terms() and _get_dirname_terms().
+    # Attributes used by the _get_terms() method.
     _MIN_TERM_LENGTH = 2
 
-    _DIRNAME_SPLIT_RE = re.compile(ur'(?<=[^/])/(?=[^/])')
+    _TERM_SPLIT_RE = re.compile(ur'\s+|(?<=\D)[.,]+|[.,]+(?=\D)')
 
-    _BASENAME_SPLIT_RE = re.compile(ur'\s+|(?<=\D)[.,]+|[.,]+(?=\D)')
+    _TERM_CAMEL_RE = re.compile('(?<=[a-zA-Z])(?=[A-Z][a-z])')
 
-    _CAMEL_SUB_RE = re.compile('(?<=[a-zA-Z])(?=[A-Z][a-z])')
-
-    _BASENAME_FULL_TABLE = {}
+    _PATH_TABLE = {}
     for c in u'!"#$%&\'()*+-/:;<=>?@[\]^_`{|}~':
-        _BASENAME_FULL_TABLE[ord(c)] = u' '
+        _PATH_TABLE[ord(c)] = u' '
 
-    _BASENAME_TERM_TABLE = {
+    _TERM_TABLE = {
         ord(u'á') : u'a',
         ord(u'Á') : u'A',
         ord(u'é') : u'e',
@@ -214,41 +212,34 @@ class XapianProcessor(ResultProcessor):
             if term.startswith(prefix):
                 return term[len(prefix):]
 
-    def _get_basename_terms(self, basename):
-        """Extract terms from the basename of a URL.
+    def _get_terms(self, path):
+        """Extract terms from the given path.
+
+        This algorithm treats the slashes correctly, so, the path can be
+        absolute or relative.
         """
         terms = []
-        basename = basename.translate(self._BASENAME_FULL_TABLE)
-        for term in self._BASENAME_SPLIT_RE.split(basename):
+        path = path.translate(self._PATH_TABLE)
+        for term in self._TERM_SPLIT_RE.split(path):
             term = term.strip()
             if len(term) >= self._MIN_TERM_LENGTH:
                 lower_term = term.lower()
                 if lower_term not in terms:
                     terms.append(lower_term)
-                translated = term.translate(self._BASENAME_TERM_TABLE)
+                # Add translated terms.
+                translated = term.translate(self._TERM_TABLE)
                 if translated != term:
                     lower_translated = translated.lower()
-                    if translated not in terms:
+                    if lower_translated not in terms:
                         terms.append(lower_translated)
-                # Process camel cased text.
-                words = self._CAMEL_SUB_RE.sub(u' ', translated).split(u' ')
+                # Add camel cased words.
+                words = self._TERM_CAMEL_RE.sub(u' ', translated).split(u' ')
                 for word in words:
                     word = word.strip()
                     if len(word) >= self._MIN_TERM_LENGTH:
-                        word = word.lower()
-                        if word not in terms:
-                            terms.append(word)
-        return terms
-
-    def _get_dirname_terms(self, dirname):
-        """Extract terms from the dirname of a URL.
-        """
-        terms = []
-        dirname = dirname.strip(u'/')
-        for basename in self._DIRNAME_SPLIT_RE.split(dirname):
-            for term in self._get_basename_terms(basename):
-                if term not in terms:
-                    terms.append(term)
+                        lower_word = word.lower()
+                        if lower_word not in terms:
+                            terms.append(lower_word)
         return terms
 
     def _create_document(self, site_id, data):
@@ -260,12 +251,12 @@ class XapianProcessor(ResultProcessor):
         if data['is_dir']:
             doc.add_term(self._IS_DIR_TAG, 0)
         doc.add_term(self._BASENAME_FULL_PREFIX + url.basename)
-        for term in self._get_basename_terms(url.basename):
+        for term in self._get_terms(url.basename):
             doc.add_term(self._BASENAME_TERM_PREFIX + term)
         # The leading / is required to math sub-directories.
         dirname = url.dirname.rstrip(u'/') + u'/'
         doc.add_term(self._DIRNAME_FULL_PREFIX + dirname, 0)
-        for term in self._get_dirname_terms(url.dirname):
+        for term in self._get_terms(url.dirname):
             doc.add_term(self._DIRNAME_TERM_PREFIX + term)
         doc.set_data(str(url))
         return doc

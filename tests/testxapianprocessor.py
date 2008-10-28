@@ -42,7 +42,7 @@ class TestXapianProcessor(unittest.TestCase):
         self._processor = XapianProcessor(self._sites_info, self._index_dir,
                                           None, None)
 
-    def test_get_basename_terms(self):
+    def test_get_terms(self):
         test_data = (
             (u'Arachne',
              [u'arachne']),
@@ -65,28 +65,17 @@ class TestXapianProcessor(unittest.TestCase):
             (u'It should ignore this: ! # &.',
              [u'it', u'should', u'ignore', u'this']),
 
-            # Do not return repeated terms.
             (u'Please, please me',
              [u'please', u'me']),
-        )
-        for basename, right_terms in test_data:
-            terms = self._processor._get_basename_terms(basename)
-            for term in terms:
-                self.assertTrue(term in right_terms)
-                right_terms.remove(term)
 
-    def test_get_dirname_terms(self):
-        # Don't test so hard since it only calls _get_basename_terms() for each
-        # directory in the path.
-        test_data = (
             (u'/Books/Programming/Python/dive_into_python',
              [u'books', u'programming', u'python', u'dive', u'into']),
 
             (u'/Music/The Beatles/Meet The Beatles!',
              [u'music', u'the', u'beatles', u'meet']),
         )
-        for dirname, right_terms in test_data:
-            terms = self._processor._get_dirname_terms(dirname)
+        for basename, right_terms in test_data:
+            terms = self._processor._get_terms(basename)
             for term in terms:
                 self.assertTrue(term in right_terms)
                 right_terms.remove(term)
