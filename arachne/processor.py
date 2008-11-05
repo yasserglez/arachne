@@ -89,6 +89,7 @@ class XapianProcessor(ResultProcessor):
     _IS_DIR_PREFIX = u'I'
     _BASENAME_TERM_PREFIX = u'B'
     _DIRNAME_TERM_PREFIX = u'D'
+    _STEM_PREFIX = u'Z'
 
     # Values for Boolean terms.
     _IS_DIR_FALSE = u'0'
@@ -98,6 +99,9 @@ class XapianProcessor(ResultProcessor):
     _BASENAME_FULL_SLOT = 0
     _DIRNAME_FULL_SLOT = 1
     _IS_DIR_SLOT = 2
+
+    # Stemming languages.
+    _STEM_LANGS = (u'en', u'es')
 
     # Attributes used by the _get_terms() method.
     _MIN_TERM_LENGTH = 2
@@ -134,6 +138,11 @@ class XapianProcessor(ResultProcessor):
         self._tasks = tasks
         self._results = results
         self._db = xapian.WritableDatabase(index_dir, xapian.DB_CREATE_OR_OPEN)
+        # Create the stemmers.
+        self._stemmers = []
+        for lang in self._STEM_LANGS:
+            stemmer = xapian.Stem(lang)
+            self._stemmers.append(stemmer)
         # Remove documents of old sites from the index.
         old_site_ids = [term.term[len(self._SITE_ID_PREFIX):]
                         for term in self._db.allterms(self._SITE_ID_PREFIX)]
@@ -254,10 +263,21 @@ class XapianProcessor(ResultProcessor):
         else:
             doc.add_value(self._IS_DIR_SLOT, self._IS_DIR_FALSE)
             doc.add_term(self._IS_DIR_PREFIX + self._IS_DIR_FALSE, 0)
+        stemmed_terms = []
         for term in self._get_terms(url.basename):
             doc.add_term(self._BASENAME_TERM_PREFIX + term)
+            for stemmer in self._stemmers:
+                stemmed_term = stemmer(term).decode('utf-8')
+                if stemmed_term not in stemmed_terms:
+                    stemmed_terms.append(stemmed_term)
         for term in self._get_terms(url.dirname):
             doc.add_term(self._DIRNAME_TERM_PREFIX + term)
+            for stemmer in self._stemmers:
+                stemmed_term = stemmer(term).decode('utf-8')
+                if stemmed_term not in stemmed_terms:
+                    stemmed_terms.append(stemmed_term)
+        for stemmed_term in stemmed_terms:
+            doc.add_term(self._STEM_PREFIX + stemmed_term)
         doc.add_value(self._BASENAME_FULL_SLOT, url.basename)
         doc.add_value(self._DIRNAME_FULL_SLOT, url.dirname.rstrip(u'/') + u'/')
         doc.set_data(str(url))
