@@ -102,6 +102,8 @@ class XapianProcessor(ResultProcessor):
     # Attributes used by the _get_terms() method.
     _MIN_TERM_LENGTH = 2
 
+    _VALID_SHORT_TERMS = ('C', 'c')
+
     _TERM_SPLIT_RE = re.compile(ur'\s+|(?<=\D)[.,]+|[.,]+(?=\D)')
 
     _TERM_CAMEL_RE = re.compile('(?<=[a-zA-Z])(?=[A-Z][a-z])')
@@ -219,7 +221,8 @@ class XapianProcessor(ResultProcessor):
         path = path.translate(self._PATH_TABLE)
         for term in self._TERM_SPLIT_RE.split(path):
             term = term.strip()
-            if len(term) >= self._MIN_TERM_LENGTH:
+            if (len(term) >= self._MIN_TERM_LENGTH
+                or term in self._VALID_SHORT_TERMS):
                 lower_term = term.lower()
                 if lower_term not in terms:
                     terms.append(lower_term)

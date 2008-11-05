@@ -26,7 +26,18 @@ SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
 from arachne.processor import XapianProcessor
+from arachne.result import CrawlResult
+from arachne.task import CrawlTask
 from arachne.url import URL
+
+
+class _DumpObject(object):
+
+    def __call__(self):
+        return self
+
+    def __getattr__(self, attr):
+        return self
 
 
 class TestXapianProcessor(unittest.TestCase):
@@ -39,8 +50,9 @@ class TestXapianProcessor(unittest.TestCase):
             '7e019d6f671d336a0cc31f137ba034efb13fc327':
                 {'url': URL('ftp://andromeda.uh.cu/')},
         }
+        self._tasks = self._results = _DumpObject()
         self._processor = XapianProcessor(self._sites_info, self._index_dir,
-                                          None, None)
+                                          self._tasks, self._results)
 
     def test_get_terms(self):
         test_data = (
@@ -73,6 +85,9 @@ class TestXapianProcessor(unittest.TestCase):
 
             (u'/Music/The Beatles/Meet The Beatles!',
              [u'music', u'the', u'beatles', u'meet']),
+
+            (u'The C Programming Language',
+             [u'the', u'c', u'programming', u'language']),
         )
         for basename, right_terms in test_data:
             terms = self._processor._get_terms(basename)
