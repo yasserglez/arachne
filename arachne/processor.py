@@ -81,19 +81,23 @@ class NaiveProcessor(ResultProcessor):
 
 
 class XapianProcessor(ResultProcessor):
-    """Xapian result procesor.
+    """Xapian result processor.
     """
 
     # Term prefixes.
-    _BASENAME_FULL_PREFIX = u'A'
+    _SITE_ID_PREFIX = u'S'
+    _IS_DIR_PREFIX = u'I'
     _BASENAME_TERM_PREFIX = u'B'
-    _DIRNAME_FULL_PREFIX = u'C'
     _DIRNAME_TERM_PREFIX = u'D'
-    _IS_DIR_PREFIX = u'E'
-    _SITE_ID_PREFIX = u'F'
 
-    # Tags for Boolean properties.
-    _IS_DIR_TAG = _IS_DIR_PREFIX + u'is_dir'
+    # Values for Boolean terms.
+    _IS_DIR_FALSE = u'0'
+    _IS_DIR_TRUE = u'1'
+
+    # Values slots.
+    _BASENAME_FULL_SLOT = 0
+    _DIRNAME_FULL_SLOT = 1
+    _IS_DIR_SLOT = 2
 
     # Attributes used by the _get_terms() method.
     _MIN_TERM_LENGTH = 2
@@ -146,35 +150,32 @@ class XapianProcessor(ResultProcessor):
         enquire = xapian.Enquire(self._db)
         enquire.set_docid_order(xapian.Enquire.DONT_CARE)
         # Get all the entries of this directory in the index.
+        site_id_query = xapian.Query(self._SITE_ID_PREFIX + site_id)
         dirname = url.path.rstrip(u'/') + u'/'
-        query = xapian.Query(xapian.Query.OP_AND,
-                             self._SITE_ID_PREFIX + site_id,
-                             self._DIRNAME_FULL_PREFIX + dirname)
+        dirname_query = xapian.Query(xapian.Query.OP_VALUE_RANGE,
+                                     self._DIRNAME_FULL_SLOT, dirname,
+                                     dirname)
+        query = xapian.Query(xapian.Query.OP_FILTER, site_id_query,
+                             dirname_query)
         enquire.set_query(query)
         indexed_entries = []
         for match in enquire.get_mset(0, doc_count):
             doc = match.get_document()
-            is_dir = bool(self._get_term_value(doc, self._IS_DIR_PREFIX))
-            basename = self._get_term_value(doc, self._BASENAME_FULL_PREFIX)
+            is_dir = self._get_doc_value(doc, self._IS_DIR_SLOT)
+            basename = self._get_doc_value(doc, self._BASENAME_FULL_SLOT)
             try:
                 data = result[basename]
             except KeyError:
                 # Entry removed from the directory in the site.
                 if is_dir:
-                    # Remove entries in the sub-tree of the directory.  This is
-                    # an slow operation.
-                    dirname_prefix = dirname + basename + u'/'
-                    term_prefix = self._DIRNAME_FULL_PREFIX + dirname_prefix
-                    dirname_terms = []
-                    for term in self._db.allterms(term_prefix):
-                        term = term.term.decode('utf-8')
-                        dirname_terms.append(term)
-                    dirname_query = xapian.Query(xapian.Query.OP_OR,
-                                                 dirname_terms)
-                    site_id_term = self._SITE_ID_PREFIX + site_id
-                    site_id_query = xapian.Query(site_id_term)
-                    query = xapian.Query(xapian.Query.OP_AND,
-                                         site_id_query, dirname_query)
+                    # Remove entries in the sub-tree of the directory.
+                    dirname_start = dirname + basename + u'/'
+                    dirname_end = dirname_start + u'\U0010ffff'
+                    dirname_query = xapian.Query(xapian.Query.OP_VALUE_RANGE,
+                                                 self._DIRNAME_FULL_SLOT,
+                                                 dirname_start, dirname_end)
+                    query = xapian.Query(xapian.Query.OP_FILTER, site_id_query,
+                                         dirname_query)
                     enquire.set_query(query)
                     for match in enquire.get_mset(0, doc_count):
                         sub_doc = match.get_document()
@@ -200,17 +201,13 @@ class XapianProcessor(ResultProcessor):
         # There is currently no close() method for Xapian databases.
         self._db.flush()
 
-    @staticmethod
-    def _get_term_value(document, prefix):
-        """Return value of the term with the given prefix.
-
-        If a term with the given prefix is not found `None` is returned
-        otherwise the first match.
+    def _get_doc_value(self, doc, slot):
+        """Return the value stored at the given slot.
         """
-        for term in document.termlist():
-            term = term.term.decode('utf-8')
-            if term.startswith(prefix):
-                return term[len(prefix):]
+        value = doc.get_value(slot).decode('utf-8')
+        if slot == self._IS_DIR_SLOT:
+            value = (value == self._IS_DIR_TRUE)
+        return value
 
     def _get_terms(self, path):
         """Extract terms from the given path.
@@ -249,15 +246,17 @@ class XapianProcessor(ResultProcessor):
         doc = xapian.Document()
         doc.add_term(self._SITE_ID_PREFIX + site_id, 0)
         if data['is_dir']:
-            doc.add_term(self._IS_DIR_TAG, 0)
-        doc.add_term(self._BASENAME_FULL_PREFIX + url.basename)
+            doc.add_value(self._IS_DIR_SLOT, self._IS_DIR_TRUE)
+            doc.add_term(self._IS_DIR_PREFIX + self._IS_DIR_TRUE, 0)
+        else:
+            doc.add_value(self._IS_DIR_SLOT, self._IS_DIR_FALSE)
+            doc.add_term(self._IS_DIR_PREFIX + self._IS_DIR_FALSE, 0)
         for term in self._get_terms(url.basename):
             doc.add_term(self._BASENAME_TERM_PREFIX + term)
-        # The leading / is required to math sub-directories.
-        dirname = url.dirname.rstrip(u'/') + u'/'
-        doc.add_term(self._DIRNAME_FULL_PREFIX + dirname, 0)
         for term in self._get_terms(url.dirname):
             doc.add_term(self._DIRNAME_TERM_PREFIX + term)
+        doc.add_value(self._BASENAME_FULL_SLOT, url.basename)
+        doc.add_value(self._DIRNAME_FULL_SLOT, url.dirname.rstrip(u'/') + u'/')
         doc.set_data(str(url))
         return doc
 
