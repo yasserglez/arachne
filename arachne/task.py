@@ -43,7 +43,7 @@ class CrawlTask(object):
         self._site_id = site_id
         self._url = url
         self._revisit_wait = 0
-        self._revisit_count = 0
+        self._visit_count = 0
         self._change_count = 0
 
     def __getstate__(self):
@@ -53,7 +53,7 @@ class CrawlTask(object):
             'site_id': self._site_id,
             'url': self._url,
             'revisit_wait': self._revisit_wait,
-            'revisit_count': self._revisit_count,
+            'visit_count': self._visit_count,
             'change_count': self._change_count,
         }
 
@@ -63,20 +63,25 @@ class CrawlTask(object):
         self._site_id = state['site_id']
         self._url = state['url']
         self._revisit_wait = state['revisit_wait']
-        self._revisit_count = state['revisit_count']
+        self._visit_count = state['visit_count']
         self._change_count = state['change_count']
 
-    def report_revisit(self, changed):
-        """Report that the directory was revisited.
+    def report_visit(self, changed):
+        """Report that the directory was visited.
 
-        The `changed` argument should be set to `True` if the content of the
-        directory changed, `False` otherwise.  This method is invoked by the
-        `TaskQueue` when task is added to the queue using the `put_revisited()`
-        method.
+        The `changed` argument should be `True` if the content of the directory
+        changed, `False` otherwise.  If it's the first time visited the value
+        of this argument will be ignored.
         """
-        if changed:
+        if self._visit_count and changed:
             self._change_count += 1
-        self._revisit_count += 1
+        self._visit_count += 1
+
+    def reset_counters(self):
+        """Reset counters for revisit and changes.
+        """
+        self._visit_count = 0
+        self._change_count = 0
 
     def _get_site_id(self):
         """Get method for the `site_id` property.
@@ -99,19 +104,15 @@ class CrawlTask(object):
 
     def _set_revisit_wait(self, seconds):
         """Set method for the `revisit_wait` property.
-
-        This method also resets the counters for revisits and changes.
         """
         self._revisit_wait = seconds
-        self._revisit_count = 0
-        self._change_count = 0
 
     revisit_wait = property(_get_revisit_wait, _set_revisit_wait)
 
     def _get_revisit_count(self):
         """Get method for the `revisit_count` property.
         """
-        return self._revisit_count
+        return (self._visit_count - 1 if self._visit_count else 0)
 
     revisit_count = property(_get_revisit_count)
 
@@ -197,40 +198,31 @@ class TaskQueue(object):
         finally:
             self._mutex.release()
 
-    def put_visited(self, task):
+    def put_visited(self, task, changed):
         """Put a task for a visited directory.
 
-        A visited directory is a directory visited for first time.  The
-        `TaskQueue` will schedule a task to revisit the directory.
+        If the directory is visited for the first time the `changed` argument
+        will be ignored.  If the directory was previously visited the `changed`
+        argument should be `True` if the directory changed, `False` otherwise.
+        This information will be used to estimate the change frequency.  In
+        both cases the `TaskQueue` will schedule a task to revisit the
+        directory.
         """
         self._mutex.acquire()
         try:
             site_id = task.site_id
             site_info = self._sites_info[site_id]
-            task.revisit_wait = site_info['default_revisit_wait']
-            self._put(task, task.revisit_wait)
-        finally:
-            self._mutex.release()
-
-    def put_revisited(self, task, changed):
-        """Put a task for a revisited directory.
-
-        A revisited directory is a directory that is already indexed and it is
-        visited to check if it changed.  The `changed` argument should be
-        `True` if the directory changed, `False` otherwise.  This information
-        will be used to estimate the change frequency.  The `TaskQueue` will
-        schedule a task to revisit the directory.
-        """
-        self._mutex.acquire()
-        try:
-            site_id = task.site_id
-            site_info = self._sites_info[site_id]
-            task.report_revisit(changed)
-            if task.revisit_count >= self._revisits:
-                minimum = site_info['min_revisit_wait']
-                maximum = site_info['max_revisit_wait']
-                estimated = self._estimate_revisit_wait(task)
-                task.revisit_wait = min(maximum, max(minimum, estimated))
+            task.report_visit(changed)
+            if task.revisit_count == 0:
+                # First visit.  Set default values.
+                task.revisit_wait = site_info['default_revisit_wait']
+            else:
+                if task.revisit_count >= self._revisits:
+                    minimum = site_info['min_revisit_wait']
+                    maximum = site_info['max_revisit_wait']
+                    estimated = self._estimate_revisit_wait(task)
+                    task.revisit_wait = min(maximum, max(minimum, estimated))
+                    task.reset_counters()
             self._put(task, task.revisit_wait)
         finally:
             self._mutex.release()

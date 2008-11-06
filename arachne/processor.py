@@ -158,15 +158,16 @@ class XapianProcessor(ResultProcessor):
         """
         url = result.task.url
         site_id = result.task.site_id
-        dirname = url.path.rstrip(u'/') + u'/'
         if not result.found:
             self._rmtree(site_id, dirname)
         else:
+            result_changed = False
+            doc_count = self._db.get_doccount()
             enquire = xapian.Enquire(self._db)
             enquire.set_docid_order(xapian.Enquire.DONT_CARE)
-            doc_count = self._db.get_doccount()
             site_id_query = xapian.Query(self._SITE_ID_PREFIX + site_id)
             # Get all the entries of this directory in the index.
+            dirname = url.path.rstrip(u'/') + u'/'
             dirname_query = xapian.Query(xapian.Query.OP_VALUE_RANGE,
                                          self._DIRNAME_SLOT, dirname, dirname)
             query = xapian.Query(xapian.Query.OP_FILTER, site_id_query,
@@ -181,17 +182,18 @@ class XapianProcessor(ResultProcessor):
                     data = result[basename]
                 except KeyError:
                     # Entry removed from the directory in the site.
+                    result_changed = True
                     if is_dir:
                         # Remove entries in the sub-tree of the directory.
                         self._rmtree(site_id, dirname + basename + u'/')
                     else:
                         self._db.delete_document(doc.get_docid())
                 else:
-                    # If the data is updated remove the entry from the
-                    # dictionary.
+                    # Check if metadata is updated.
                     if is_dir == data['is_dir']:
                         indexed_entries.append(basename)
                     else:
+                        result_changed = True
                         # Lazy solution.  Remove the document from the index
                         # and then add it again with the right data.
                         self._db.delete_document(doc.get_docid())
@@ -200,6 +202,13 @@ class XapianProcessor(ResultProcessor):
                 if entry not in indexed_entries:
                     doc = self._create_document(site_id, data)
                     self._db.add_document(doc)
+                    if data['is_dir']:
+                        task = CrawlTask(result.task.site_id, data['url'])
+                        self._tasks.put_new(task)
+            # Put a new task to visit the directory again.
+            self._tasks.put_visited(result.task, result_changed)
+        # Result sucessfully processed.
+        self._results.report_done(result)
 
     def close(self):
         """Close the processor.

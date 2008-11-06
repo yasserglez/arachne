@@ -165,20 +165,16 @@ class TestTaskQueue(unittest.TestCase):
     def test_put_visited(self):
         self._clear_queue(remain=1)
         task = self._queue.get()
-        self._queue.put_visited(task)
         self._queue.report_done(task)
+        self._queue.put_visited(task, True)
         self.assertRaises(EmptyQueue, self._queue.get)
         time.sleep(self._default_revisit_wait)
-        self.assertEquals(str(task.url), str(self._queue.get().url))
-
-    def test_put_revisited(self):
-        self._clear_queue(remain=1)
         task = self._queue.get()
-        self._queue.put_revisited(task, False)
         self._queue.report_done(task)
+        self._queue.put_visited(task, True)
         self.assertRaises(EmptyQueue, self._queue.get)
-        time.sleep(self._min_revisit_wait)
-        self.assertEquals(str(task.url), str(self._queue.get().url))
+        time.sleep(self._default_revisit_wait)
+        task = self._queue.get()
 
     def test_report_done(self):
         self._clear_queue(remain=1)

@@ -52,27 +52,30 @@ class TestCrawlTask(unittest.TestCase):
         self.assertEquals(self._task.change_count, task.change_count)
 
     def test_revisit_wait(self):
-        # It should also reset counters for revisits and changes.
-        revisit_wait = 60
-        self._task.report_revisit(True)
-        self._task.report_revisit(False)
-        self._task.revisit_wait = revisit_wait
-        self.assertEquals(self._task.revisit_wait, revisit_wait)
+        self._task.report_visit(True)
+        self._task.report_visit(False)
+        self._task.revisit_wait = 60
+        self.assertEquals(self._task.revisit_wait, 60)
+
+    def test_reset_counters(self):
+        self._task.report_visit(True)
+        self._task.report_visit(True)
+        self._task.reset_counters()
         self.assertEquals(self._task.revisit_count, 0)
         self.assertEquals(self._task.change_count, 0)
 
-    def test_report_revisit(self):
-        # Reporting visits without changes.
-        visits = 10
-        for i in xrange(visits):
-            self._task.report_revisit(False)
-            self.assertEquals(self._task.revisit_count, i + 1)
-            self.assertEquals(self._task.change_count, 0)
+    def test_report_visit(self):
+        self._task.report_visit(True)
+        # Reporting visit without changes.
+        self._task.report_visit(False)
+        self._task.report_visit(False)
+        self.assertEquals(self._task.revisit_count, 2)
+        self.assertEquals(self._task.change_count, 0)
         # Reporting visits with changes.
-        for i in xrange(visits):
-            self._task.report_revisit(True)
-            self.assertEquals(self._task.revisit_count, visits + i + 1)
-            self.assertEquals(self._task.change_count, i + 1)
+        self._task.report_visit(True)
+        self._task.report_visit(True)
+        self.assertEquals(self._task.revisit_count, 4)
+        self.assertEquals(self._task.change_count, 2)
 
 
 def main():
