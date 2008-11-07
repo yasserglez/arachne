@@ -51,6 +51,10 @@ class ResultProcessor(object):
         """
         raise NotImplementedError('A subclass must override this method.')
 
+    def flush(self):
+        """Flush to disc the modifications.
+        """
+
     def close(self):
         """Close the processor.
         """
@@ -210,6 +214,11 @@ class IndexProcessor(ResultProcessor):
         # Result sucessfully processed.
         self._results.report_done(result)
 
+    def flush(self):
+        """Flush to disc the modifications.
+        """
+        self._db.flush()
+
     def close(self):
         """Close the processor.
         """
@@ -348,6 +357,7 @@ class ProcessorManager(threading.Thread):
                 try:
                     result = self._results.get()
                 except EmptyQueue:
+                    self._processor.flush()
                     time.sleep(self._sleep)
                 else:
                     logging.info('Processing "%s"' % result.task.url)

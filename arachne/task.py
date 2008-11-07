@@ -353,8 +353,8 @@ class TaskQueue(object):
         finally:
             self._mutex.release()
 
-    def sync(self):
-        """Synchronize the queue on disk.
+    def flush(self):
+        """Flush to disc the modifications.
         """
         self._mutex.acquire()
         try:
