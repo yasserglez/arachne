@@ -80,8 +80,8 @@ class NaiveProcessor(ResultProcessor):
         self._results.report_done(result)
 
 
-class XapianProcessor(ResultProcessor):
-    """Xapian result processor.
+class IndexProcessor(ResultProcessor):
+    """Index result processor.
     """
 
     # Term prefixes.
@@ -335,7 +335,7 @@ class ProcessorManager(threading.Thread):
         threading.Thread.__init__(self)
         self._sleep = 1
         self._results = results
-        self._processor = NaiveProcessor(sites_info, index_dir, tasks, results)
+        self._processor = IndexProcessor(sites_info, index_dir, tasks, results)
         # Flag used to stop the loop started by the run() method.
         self._running = False
 

@@ -25,34 +25,24 @@ TESTDIR = os.path.dirname(os.path.abspath(__file__))
 SRCDIR = os.path.abspath(os.path.join(TESTDIR, os.path.pardir))
 sys.path.insert(0, SRCDIR)
 
-from arachne.processor import XapianProcessor
+from arachne.processor import IndexProcessor
 from arachne.result import CrawlResult
 from arachne.task import CrawlTask
 from arachne.url import URL
 
 
-class _DumpObject(object):
-
-    def __call__(self):
-        return self
-
-    def __getattr__(self, attr):
-        return self
-
-
-class TestXapianProcessor(unittest.TestCase):
+class TestIndexProcessor(unittest.TestCase):
 
     def setUp(self):
-        self._index_dir = os.path.join(TESTDIR, 'testxapianprocessor')
+        self._index_dir = os.path.join(TESTDIR, 'testindexprocessor')
         self._sites_info = {
             'a78e6853355ad5cdc751ad678d15339382f9ed21':
                 {'url': URL('ftp://atlantis.uh.cu/')},
             '7e019d6f671d336a0cc31f137ba034efb13fc327':
                 {'url': URL('ftp://andromeda.uh.cu/')},
         }
-        self._tasks = self._results = _DumpObject()
-        self._processor = XapianProcessor(self._sites_info, self._index_dir,
-                                          self._tasks, self._results)
+        self._processor = IndexProcessor(self._sites_info, self._index_dir,
+                                         None, None)
 
     def test_get_terms(self):
         test_data = (
