@@ -49,14 +49,17 @@ class TestIndexProcessor(unittest.TestCase):
             (u'Arachne',
              [u'arachne']),
 
+            (u'arachne1.0',
+             [u'arachne', u'1.0']),
+
             (u'Yasser González Fernández',
              [u'yasser', u'gonzález', u'gonzalez', u'fernández', u'fernandez']),
 
             (u'Python-3.0rc1.tar.bz2',
-             [u'python', u'3.0rc1', u'tar', u'bz2']),
+             [u'python', u'3.0', u'rc', u'1', u'tar', u'bz', u'2']),
 
             (u'07. (Let me be your) Teddy bear.mp3',
-             [u'07', u'let', u'me', u'be', u'your', u'teddy', u'bear', u'mp3']),
+             [u'07', u'let', u'me', u'be', u'your', u'teddy', u'bear', u'mp', u'3']),
 
             (u'dive_into_python.zip',
              [u'dive', u'into', u'python', u'zip']),
@@ -82,7 +85,7 @@ class TestIndexProcessor(unittest.TestCase):
         for basename, right_terms in test_data:
             terms = self._processor._get_terms(basename)
             for term in terms:
-                self.assertTrue(term in right_terms)
+                self.assertTrue(term in right_terms, term)
                 right_terms.remove(term)
             self.assertEquals(len(right_terms), 0)
 

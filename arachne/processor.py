@@ -111,17 +111,20 @@ class IndexProcessor(ResultProcessor):
     # Attributes used by the _get_terms() method.
     _MIN_TERM_LENGTH = 2
 
-    _VALID_SHORT_TERMS = (u'C', u'c')
+    _VALID_SHORT_TERMS = (u'0', u'1', u'2', u'3', u'4', u'5', u'6', u'7', u'8',
+                          u'9', u'c', u'C')
 
-    _TERM_SPLIT_RE = re.compile(ur'\s+|(?<=\D)[.,]+|[.,]+(?=\D)')
+    _SPLIT_RE = re.compile(ur'\s+|(?<=\D)[.,]+|[.,]+(?=\D)')
 
-    _TERM_CAMEL_RE = re.compile(ur'(?<=[a-zA-Z])(?=[A-Z][a-z])')
+    _CAMEL_CASE_RE = re.compile(ur'(?<=[a-zA-Z])(?=[A-Z][a-z])')
 
-    _PATH_TABLE = {}
+    _WHITE_SPACE_RE = re.compile(ur'(?<=\d)(?=[a-zA-Z])|(?<=[a-zA-Z])(?=\d)')
+
+    _WHITE_SPACE_TRANSLATION = {}
     for c in u'!"#$%&\'()*+-/:;<=>?@[\]^_`{|}~':
-        _PATH_TABLE[ord(c)] = u' '
+        _WHITE_SPACE_TRANSLATION[ord(c)] = u' '
 
-    _TERM_TABLE = {
+    _TERM_TRANSLATION = {
         ord(u'á') : u'a',
         ord(u'Á') : u'A',
         ord(u'é') : u'e',
@@ -268,8 +271,9 @@ class IndexProcessor(ResultProcessor):
         absolute or relative.
         """
         terms = []
-        path = path.translate(self._PATH_TABLE)
-        for term in self._TERM_SPLIT_RE.split(path):
+        path = path.translate(self._WHITE_SPACE_TRANSLATION)
+        path = self._WHITE_SPACE_RE.sub(u' ', path)
+        for term in self._SPLIT_RE.split(path):
             term = term.strip()
             if (len(term) >= self._MIN_TERM_LENGTH
                 or term in self._VALID_SHORT_TERMS):
@@ -277,16 +281,17 @@ class IndexProcessor(ResultProcessor):
                 if lower_term not in terms:
                     terms.append(lower_term)
                 # Add translated terms.
-                translated = term.translate(self._TERM_TABLE)
+                translated = term.translate(self._TERM_TRANSLATION)
                 if translated != term:
                     lower_translated = translated.lower()
                     if lower_translated not in terms:
                         terms.append(lower_translated)
                 # Add camel cased words.
-                words = self._TERM_CAMEL_RE.sub(u' ', translated).split(u' ')
+                words = self._CAMEL_CASE_RE.sub(u' ', translated).split(u' ')
                 for word in words:
                     word = word.strip()
-                    if len(word) >= self._MIN_TERM_LENGTH:
+                    if (len(word) >= self._MIN_TERM_LENGTH
+                        or word in self._VALID_SHORT_TERMS):
                         lower_word = word.lower()
                         if lower_word not in terms:
                             terms.append(lower_word)
