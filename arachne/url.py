@@ -18,6 +18,8 @@
 """URL class.
 """
 
+import logging
+
 import urlparse
 
 
@@ -33,7 +35,12 @@ class URL(object):
         """
         self._encoding = 'utf-8'
         if not isinstance(url, unicode):
-            url = url.decode(self._encoding)
+            try:
+                url = url.decode(self._encoding)
+            except UnicodeDecodeError:
+                logging.error('Could not decode "%s" using the "%s" codec, '
+                              'ignoring characters' % (url, self._encoding))
+                url = url.decode(self._encoding, 'ignore')
         splitted_url = urlparse.urlsplit(url)
         root_url = u'%s://%s/' % (splitted_url.scheme, splitted_url.netloc)
         self._scheme = splitted_url.scheme
@@ -76,7 +83,12 @@ class URL(object):
         """Join a path to the URL and return the new URL.
         """
         if not isinstance(path, unicode):
-            path = path.decode(self._encoding)
+            try:
+                path = path.decode(self._encoding)
+            except UnicodeDecodeError:
+                logging.error('Could not decode "%s" using the "%s" codec, '
+                              'ignoring characters' % (path, self._encoding))
+                path = path.decode(self._encoding, 'ignore')
         base_url = self._url[:-1] if self._path == u'/' else self._url
         return URL(u'%s/%s' % (base_url, path.lstrip(u'/')))
 
