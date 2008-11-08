@@ -214,14 +214,13 @@ class TaskQueue(object):
         try:
             site_id = task.site_id
             site_info = self._sites_info[site_id]
-            if task.revisit_count == -1:
-                task.report_visit(changed)
+            task.report_visit(changed)
+            if task.revisit_count == 0:
                 # First visit.  Set default values.
                 task.revisit_wait = site_info['default_revisit_wait']
                 logging.info('Setting revisit frequency for "%s" to '
                              '%d seconds' % (task.url, task.revisit_wait))
             else:
-                task.report_visit(changed)
                 if task.revisit_count >= self._revisits:
                     minimum = site_info['min_revisit_wait']
                     maximum = site_info['max_revisit_wait']
@@ -415,12 +414,12 @@ class TaskQueue(object):
         # This algorithm uses the estimator proposed by Junghoo Cho (University
         # of California, LA) and Hector Garcia-Molina (Stanford University) in
         # "Estimating Frequency of Change".
-        if task.change_count:
-            changes = task.change_count
-            visits = task.revisit_count
-            wait = task.revisit_wait
+        changes = task.change_count
+        visits = task.revisit_count
+        wait = task.revisit_wait
+        if changes > 0:
             new_wait  = wait / - math.log((visits - changes + 0.5) /
                                           (visits + 0.5))
         else:
-            new_wait = task.revisit_wait
+            new_wait = wait * visits
         return int(round(new_wait))

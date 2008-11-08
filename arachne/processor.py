@@ -166,7 +166,7 @@ class IndexProcessor(ResultProcessor):
         url = result.task.url
         site_id = result.task.site_id
         if not result.found:
-            self._rmtree(site_id, dirname)
+            self._rmtree(site_id, url.path)
         else:
             result_changed = False
             doc_count = self._db.get_doccount()
@@ -244,7 +244,7 @@ class IndexProcessor(ResultProcessor):
             doc = match.get_document()
             self._db.delete_document(doc.get_docid())
         # Remove documents of the decendants.
-        dirname_start = dirpath
+        dirname_start = dirpath.rstrip(u'/') + u'/'
         dirname_end = dirname_start + u'\U0010ffff'
         dirname_query = xapian.Query(xapian.Query.OP_VALUE_RANGE,
                                      self._DIRNAME_SLOT,
