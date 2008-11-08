@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+# Arachne, a search engine for files and directories.
 # Copyright (C) 2008 Yasser González Fernández <yglez@uh.cu>
 #
 # This program is free software: you can redistribute it and/or modify it under
@@ -22,9 +23,10 @@ from arachne import __author__, __version__
 
 setup(name='Arachne',
       version=__version__,
-      license='GNU General Public License version 3 or any later version',
-      description='File search engine.',
-      long_description='',
+      license='GNU General Public License version 3 or any later version.',
+      description='Search engine for files and directories.',
+      long_description='Arachne is a search engine for files and directories' \
+          + ' shared by FTP and similar\nprotocols in a networked environment.',
       url='',
       download_url='',
       author=' '.join(__author__.split()[:-1]),

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 #
+# Arachne, a search engine for files and directories.
 # Copyright (C) 2008 Yasser González Fernández <yglez@uh.cu>
 #
 # This program is free software: you can redistribute it and/or modify it under
