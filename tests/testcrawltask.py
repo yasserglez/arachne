@@ -40,7 +40,7 @@ class TestCrawlTask(unittest.TestCase):
         self.assertEquals(self._task.site_id, self._site_id)
         self.assertEquals(str(self._task.url), str(self._url))
         self.assertEquals(self._task.revisit_wait, 0)
-        self.assertEquals(self._task.revisit_count, 0)
+        self.assertEquals(self._task.revisit_count, -1)
         self.assertEquals(self._task.change_count, 0)
 
     def test_pickling(self):
@@ -60,7 +60,9 @@ class TestCrawlTask(unittest.TestCase):
     def test_reset_counters(self):
         self._task.report_visit(True)
         self._task.report_visit(True)
+        self._task.revisit_wait = 60
         self._task.reset_counters()
+        self.assertEquals(self._task.revisit_wait, 60)
         self.assertEquals(self._task.revisit_count, 0)
         self.assertEquals(self._task.change_count, 0)
 

@@ -18,9 +18,9 @@
 """Components related with the crawling process.
 """
 
+import time
 import logging
 import threading
-import time
 
 from arachne.error import EmptyQueue
 from arachne.handler import ProtocolHandler
@@ -83,7 +83,10 @@ class SiteCrawler(threading.Thread):
             self._tasks.report_error(task)
             logging.error('Scheme of "%s" is not supported' % task.url)
         else:
-            logging.info('Visiting "%s"' % task.url)
+            if task.revisit_count == -1:
+                logging.info('Visiting "%s"' % task.url)
+            else:
+                logging.info('Revisiting "%s"' % task.url)
             result = handler.execute(task)
 
 

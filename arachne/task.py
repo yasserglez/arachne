@@ -18,14 +18,16 @@
 """Crawl task and task queue.
 """
 
-import bsddb
-import cPickle
-import glob
-import math
+
 import os
 import sys
-import threading
 import time
+import glob
+import math
+import bsddb
+import cPickle
+import logging
+import threading
 
 from arachne.error import EmptyQueue
 
@@ -43,7 +45,7 @@ class CrawlTask(object):
         self._site_id = site_id
         self._url = url
         self._revisit_wait = 0
-        self._visit_count = 0
+        self._revisit_count = -1
         self._change_count = 0
 
     def __getstate__(self):
@@ -53,7 +55,7 @@ class CrawlTask(object):
             'site_id': self._site_id,
             'url': self._url,
             'revisit_wait': self._revisit_wait,
-            'visit_count': self._visit_count,
+            'revisit_count': self._revisit_count,
             'change_count': self._change_count,
         }
 
@@ -63,7 +65,7 @@ class CrawlTask(object):
         self._site_id = state['site_id']
         self._url = state['url']
         self._revisit_wait = state['revisit_wait']
-        self._visit_count = state['visit_count']
+        self._revisit_count = state['revisit_count']
         self._change_count = state['change_count']
 
     def report_visit(self, changed):
@@ -73,14 +75,14 @@ class CrawlTask(object):
         changed, `False` otherwise.  If it's the first time visited the value
         of this argument will be ignored.
         """
-        if self._visit_count and changed:
+        if self._revisit_count >= 0 and changed:
             self._change_count += 1
-        self._visit_count += 1
+        self._revisit_count += 1
 
     def reset_counters(self):
         """Reset counters for revisit and changes.
         """
-        self._visit_count = 0
+        self._revisit_count = 0
         self._change_count = 0
 
     def _get_site_id(self):
@@ -112,7 +114,7 @@ class CrawlTask(object):
     def _get_revisit_count(self):
         """Get method for the `revisit_count` property.
         """
-        return (self._visit_count - 1 if self._visit_count else 0)
+        return self._revisit_count
 
     revisit_count = property(_get_revisit_count)
 
@@ -212,17 +214,22 @@ class TaskQueue(object):
         try:
             site_id = task.site_id
             site_info = self._sites_info[site_id]
-            task.report_visit(changed)
-            if task.revisit_count == 0:
+            if task.revisit_count == -1:
+                task.report_visit(changed)
                 # First visit.  Set default values.
                 task.revisit_wait = site_info['default_revisit_wait']
+                logging.info('Setting revisit frequency for "%s" to '
+                             '%d seconds' % (task.url, task.revisit_wait))
             else:
+                task.report_visit(changed)
                 if task.revisit_count >= self._revisits:
                     minimum = site_info['min_revisit_wait']
                     maximum = site_info['max_revisit_wait']
                     estimated = self._estimate_revisit_wait(task)
                     task.revisit_wait = min(maximum, max(minimum, estimated))
                     task.reset_counters()
+                    logging.info('Changing revisit frequency for "%s" to '
+                                 '%d seconds' % (task.url, task.revisit_wait))
             self._put(task, task.revisit_wait)
         finally:
             self._mutex.release()
