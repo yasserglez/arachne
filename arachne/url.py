@@ -31,17 +31,10 @@ class URL(object):
     def __init__(self, url):
         """Initialize the URL.
 
-        Initialize the URL from the string `url`. The string should be a
-        unicode string or a UTF-8 encoded bytestring.
+        Initialize the URL from the string `url`.
         """
-        self._encoding = 'utf-8'
-        if not isinstance(url, unicode):
-            try:
-                url = url.decode(self._encoding)
-            except UnicodeDecodeError:
-                logging.error('Could not decode "%s" using the "%s" codec, '
-                              'ignoring characters' % (url, self._encoding))
-                url = url.decode(self._encoding, 'ignore')
+        self._encodings = ('utf-8', 'cp1252')
+        url = self._decode_str(url)
         splitted_url = urlparse.urlsplit(url)
         root_url = u'%s://%s/' % (splitted_url.scheme, splitted_url.netloc)
         self._scheme = splitted_url.scheme
@@ -66,13 +59,13 @@ class URL(object):
     def __str__(self):
         """Return the URL as string.
         """
-        return self._url.encode(self._encoding)
+        return self._url.encode(self._encodings[0])
 
     def __getstate__(self):
         """Used by pickle when instances are serialized.
         """
         return {
-            'url': self._url.encode(self._encoding),
+            'url': self._url.encode(self._encodings[0]),
         }
 
     def __setstate__(self, state):
@@ -83,15 +76,22 @@ class URL(object):
     def join(self, path):
         """Join a path to the URL and return the new URL.
         """
-        if not isinstance(path, unicode):
-            try:
-                path = path.decode(self._encoding)
-            except UnicodeDecodeError:
-                logging.error('Could not decode "%s" using the "%s" codec, '
-                              'ignoring characters' % (path, self._encoding))
-                path = path.decode(self._encoding, 'ignore')
+        path = self._decode_str(path)
         base_url = self._url[:-1] if self._path == u'/' else self._url
         return URL(u'%s/%s' % (base_url, path.lstrip(u'/')))
+
+    def _decode_str(self, byte_str):
+        """Return an unicode object for the given string.
+        """
+        if isinstance(byte_str, unicode):
+            return byte_str
+        for encoding in self._encodings:
+            try:
+                return byte_str.decode(encoding)
+            except UnicodeDecodeError:
+                pass
+        logging.error('Could not decode "%s", ignoring characters' % byte_str)
+        return byte_str.decode(self._encodings[0], 'ignore')
 
     def _get_scheme(self):
         """Get method for the `scheme` property.

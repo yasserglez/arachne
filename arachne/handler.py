@@ -83,9 +83,9 @@ class FileHandler(ProtocolHandler):
                 result = CrawlResult(task, True)
                 for entry_name in os.listdir(url.path):
                     data = {}
-                    entry_path = os.path.join(url.path, entry_name)
-                    data['is_dir'] = os.path.isdir(entry_path)
-                    result.append(entry_name, data)
+                    entry_url = url.join(entry_name)
+                    data['is_dir'] = os.path.isdir(entry_url.path)
+                    result.append(entry_url.basename, data)
             else:
                 result = CrawlResult(task, False)
         except OSError, error:
