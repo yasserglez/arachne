@@ -363,6 +363,7 @@ class ProcessorManager(threading.Thread):
                     result = self._results.get()
                 except EmptyQueue:
                     self._processor.flush()
+                    self._results.flush()
                     time.sleep(self._sleep)
                 else:
                     logging.info('Processing "%s"' % result.task.url)

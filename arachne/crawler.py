@@ -58,6 +58,7 @@ class SiteCrawler(threading.Thread):
                 try:
                     task = self._tasks.get()
                 except EmptyQueue:
+                    self._tasks.flush()
                     time.sleep(self._sleep)
                 else:
                     self._execute(task)
