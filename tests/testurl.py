@@ -34,42 +34,43 @@ class TestURL(unittest.TestCase):
     def setUp(self):
         self._encoding = 'utf-8'
         self._urls = (
-            ('file:///',
+            ('file:///', True,
              (u'file', None, None, None, None, u'/', u'/', u'/'),
              ('etc', 'file:///etc')),
 
-            ('file:///home',
+            ('file:///home', False,
              (u'file', None, None, None, None, u'/home', u'/', u'home'),
              ('yglez', 'file:///home/yglez')),
 
-            ('file:///home/yglez',
+            ('file:///home/yglez', False,
              (u'file', None, None, None, None, u'/home/yglez', u'/home', u'yglez'),
              ('projects', 'file:///home/yglez/projects')),
 
-            ('ftp://deltha.uh.cu/',
+            ('ftp://deltha.uh.cu/', True,
              (u'ftp', None, None, u'deltha.uh.cu', None, u'/', u'/', u'/'),
              ('debian', 'ftp://deltha.uh.cu/debian')),
 
-            ('ftp://user:passwd@deltha.uh.cu/',
+            ('ftp://user:passwd@deltha.uh.cu/', True,
              (u'ftp', u'user', u'passwd', u'deltha.uh.cu', None, u'/', u'/', u'/'),
              ('debian', 'ftp://user:passwd@deltha.uh.cu/debian')),
 
-            ('ftp://deltha.uh.cu:21/',
+            ('ftp://deltha.uh.cu:21/', True,
              (u'ftp', None, None, u'deltha.uh.cu', 21, u'/', u'/', u'/'),
              ('debian', 'ftp://deltha.uh.cu:21/debian')),
 
-            ('ftp://user:passwd@deltha.uh.cu:21/',
+            ('ftp://user:passwd@deltha.uh.cu:21/', True,
              (u'ftp', u'user', u'passwd', u'deltha.uh.cu', 21, u'/', u'/', u'/'),
              ('debian', 'ftp://user:passwd@deltha.uh.cu:21/debian')),
 
-            ('file:///unívoco/güije',
+            ('file:///unívoco/güije', False,
              (u'file', None, None, None, None, u'/unívoco/güije', u'/unívoco', u'güije'),
              ('gruñón', 'file:///unívoco/güije/gruñón')),
         )
 
     def test_properties(self):
-        for url_str, attrs, join_info in self._urls:
-            url = URL(url_str)
+        for url_str, is_root, attrs, join_info in self._urls:
+            url = URL(url_str, is_root)
+            self.assertEquals(url.is_root, is_root)
             self.assertEquals(url.scheme, attrs[0])
             self.assertEquals(url.username, attrs[1])
             self.assertEquals(url.password, attrs[2])
@@ -80,8 +81,9 @@ class TestURL(unittest.TestCase):
             self.assertEquals(url.basename, attrs[7])
 
     def test_properties_unicode_args(self):
-        for url_str, attrs, join_info in self._urls:
-            url = URL(url_str.decode(self._encoding))
+        for url_str, is_root, attrs, join_info in self._urls:
+            url = URL(url_str.decode(self._encoding), is_root)
+            self.assertEquals(url.is_root, is_root)
             self.assertEquals(url.scheme, attrs[0])
             self.assertEquals(url.username, attrs[1])
             self.assertEquals(url.password, attrs[2])
@@ -92,20 +94,25 @@ class TestURL(unittest.TestCase):
             self.assertEquals(url.basename, attrs[7])
 
     def test_join(self):
-        for url_str, attrs, join_info in self._urls:
-            url = URL(url_str)
+        for url_str, is_root, attrs, join_info in self._urls:
+            url = URL(url_str, is_root)
             joined_url = url.join(join_info[0])
+            self.assertEquals(joined_url.is_root, False)
+            # Joined URLs should not be root.
             self.assertEquals(str(joined_url), join_info[1])
 
     def test_join_unicode_args(self):
-        for url_str, attrs, join_info in self._urls:
-            url = URL(url_str.decode(self._encoding))
+        for url_str, is_root, attrs, join_info in self._urls:
+            url = URL(url_str.decode(self._encoding), is_root)
             joined_url = url.join(join_info[0].decode(self._encoding))
+            # Joined URLs should not be root.
+            self.assertEquals(joined_url.is_root, False)
             self.assertEquals(str(joined_url), join_info[1])
 
     def test_pickling(self):
-        for url_str, attrs, join_info in self._urls:
-            url = pickle.loads(pickle.dumps(URL(url_str)))
+        for url_str, is_root, attrs, join_info in self._urls:
+            url = pickle.loads(pickle.dumps(URL(url_str, is_root)))
+            self.assertEquals(url.is_root, is_root)
             self.assertEquals(url.scheme, attrs[0])
             self.assertEquals(url.username, attrs[1])
             self.assertEquals(url.password, attrs[2])
@@ -116,8 +123,8 @@ class TestURL(unittest.TestCase):
             self.assertEquals(url.basename, attrs[7])
 
     def test_type_unicode(self):
-       for url_str, attrs, join_info in self._urls:
-           url = URL(url_str)
+       for url_str, is_root, attrs, join_info in self._urls:
+           url = URL(url_str, is_root)
            self.assertTrue(type(url.scheme) is unicode)
            if attrs[1] is not None:
                self.assertTrue(type(url.username) is unicode)

@@ -28,11 +28,12 @@ class URL(object):
     """Uniform Resource Locator.
     """
 
-    def __init__(self, url):
+    def __init__(self, url, is_root=False):
         """Initialize the URL.
 
         Initialize the URL from the string `url`.
         """
+        self._is_root = is_root
         self._encodings = ('utf-8', 'cp1252')
         url = self._decode_str(url)
         splitted_url = urlparse.urlsplit(url)
@@ -66,12 +67,13 @@ class URL(object):
         """
         return {
             'url': self._url.encode(self._encodings[0]),
+            'is_root': self._is_root,
         }
 
     def __setstate__(self, state):
         """Used by pickle when instances are unserialized.
         """
-        self.__init__(state['url'])
+        self.__init__(state['url'], state['is_root'])
 
     def join(self, path):
         """Join a path to the URL and return the new URL.
@@ -148,3 +150,10 @@ class URL(object):
         return self._basename
 
     basename = property(_get_basename)
+
+    def _get_is_root(self):
+        """Get method for the `is_root` property.
+        """
+        return self._is_root
+
+    is_root = property(_get_is_root)

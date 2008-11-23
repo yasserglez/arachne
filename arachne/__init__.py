@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Main Python package of the Arachne file search engine.
+"""Main Python package of Arachne.
 """
 
 __author__ = 'Yasser González Fernández <yglez@uh.cu>'

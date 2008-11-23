@@ -92,19 +92,22 @@ class IndexProcessor(ResultProcessor):
     # Term prefixes.
     _SITE_ID_PREFIX = u'S'
     _IS_DIR_PREFIX = u'I'
+    _IS_ROOT_PREFIX = u'R'
     _BASENAME_PREFIX = u'B'
     _DIRNAME_PREFIX = u'D'
     _STEM_PREFIX = u'Z'
 
-    # Values for Boolean terms.
-    _IS_DIR_FALSE = u'0'
-    _IS_DIR_TRUE = u'1'
+    # Boolean values for terms and values.
+    _FALSE_VALUE = u'0'
+    _TRUE_VALUE = u'1'
 
     # Values slots.
-    _BASENAME_SLOT = 0
-    _DIRNAME_SLOT = 1
-    _PATH_SLOT = 2
-    _IS_DIR_SLOT = 3
+    _SITE_ID_SLOT = 0
+    _IS_DIR_SLOT = 1
+    _IS_ROOT_SLOT = 2
+    _BASENAME_SLOT = 3
+    _DIRNAME_SLOT = 4
+    _PATH_SLOT = 5
 
     # Stemming languages.
     _STEM_LANGS = (u'en', u'es')
@@ -169,11 +172,28 @@ class IndexProcessor(ResultProcessor):
         if not result.found:
             self._rmtree(site_id, url.path)
         else:
-            result_changed = False
-            doc_count = self._db.get_doccount()
             enquire = xapian.Enquire(self._db)
             enquire.set_docid_order(xapian.Enquire.DONT_CARE)
             site_id_query = xapian.Query(self._SITE_ID_PREFIX + site_id)
+            if url.is_root:
+                # The parent of the root directory is not known, or it can even
+                # not exist. We should check that the root directory is indexed
+                # because it is required to search for files in a selected
+                # number of sites.
+                root_query = xapian.Query(self._IS_ROOT_PREFIX
+                                          + self._TRUE_VALUE)
+                query = xapian.Query(xapian.Query.OP_FILTER, site_id_query,
+                                     root_query)
+                enquire.set_query(query)
+                mset = enquire.get_mset(0, 1)
+                if mset.empty():
+                    # Index this root directory.
+                    data = {'url': url, 'is_dir': True}
+                    doc = self._create_document(site_id, data)
+                    self._db.add_document(doc)
+            # Process entries of the directory.
+            result_changed = False
+            doc_count = self._db.get_doccount()
             # Get all the entries of this directory in the index.
             dirname = url.path.rstrip(u'/') + u'/'
             dirname_query = xapian.Query(xapian.Query.OP_VALUE_RANGE,
@@ -262,7 +282,7 @@ class IndexProcessor(ResultProcessor):
         """
         value = doc.get_value(slot).decode('utf-8')
         if slot == self._IS_DIR_SLOT:
-            value = (value == self._IS_DIR_TRUE)
+            value = (value == self._TRUE_VALUE)
         return value
 
     def _get_terms(self, path):
@@ -304,12 +324,19 @@ class IndexProcessor(ResultProcessor):
         url = data['url']
         doc = xapian.Document()
         doc.add_term(self._SITE_ID_PREFIX + site_id, 0)
+        doc.add_value(self._SITE_ID_SLOT, site_id)
         if data['is_dir']:
-            doc.add_value(self._IS_DIR_SLOT, self._IS_DIR_TRUE)
-            doc.add_term(self._IS_DIR_PREFIX + self._IS_DIR_TRUE, 0)
+            doc.add_term(self._IS_DIR_PREFIX + self._TRUE_VALUE, 0)
+            doc.add_value(self._IS_DIR_SLOT, self._TRUE_VALUE)
         else:
-            doc.add_value(self._IS_DIR_SLOT, self._IS_DIR_FALSE)
-            doc.add_term(self._IS_DIR_PREFIX + self._IS_DIR_FALSE, 0)
+            doc.add_term(self._IS_DIR_PREFIX + self._FALSE_VALUE, 0)
+            doc.add_value(self._IS_DIR_SLOT, self._FALSE_VALUE)
+        if url.is_root:
+            doc.add_term(self._IS_ROOT_PREFIX + self._TRUE_VALUE, 0)
+            doc.add_value(self._IS_ROOT_SLOT, self._TRUE_VALUE)
+        else:
+            doc.add_term(self._IS_ROOT_PREFIX + self._FALSE_VALUE, 0)
+            doc.add_value(self._IS_ROOT_SLOT, self._FALSE_VALUE)
         stemmed_terms = []
         for term in self._get_terms(url.basename):
             doc.add_term(self._BASENAME_PREFIX + term)
@@ -317,16 +344,16 @@ class IndexProcessor(ResultProcessor):
                 stemmed_term = stemmer(term).decode('utf-8')
                 if stemmed_term not in stemmed_terms:
                     stemmed_terms.append(stemmed_term)
+        doc.add_value(self._BASENAME_SLOT, url.basename)
         for term in self._get_terms(url.dirname):
             doc.add_term(self._DIRNAME_PREFIX + term)
             for stemmer in self._stemmers:
                 stemmed_term = stemmer(term).decode('utf-8')
                 if stemmed_term not in stemmed_terms:
                     stemmed_terms.append(stemmed_term)
+        doc.add_value(self._DIRNAME_SLOT, url.dirname.rstrip(u'/') + u'/')
         for stemmed_term in stemmed_terms:
             doc.add_term(self._STEM_PREFIX + stemmed_term)
-        doc.add_value(self._BASENAME_SLOT, url.basename)
-        doc.add_value(self._DIRNAME_SLOT, url.dirname.rstrip(u'/') + u'/')
         doc.add_value(self._PATH_SLOT, url.path)
         doc.set_data(str(url))
         return doc

@@ -58,7 +58,7 @@ class ArachneDaemon(Daemon):
         # Create URL instances and assign an id to each site.
         self._sites_info = {}
         for site in sites:
-            site['url'] = URL(site['url'])
+            site['url'] = URL(site['url'], True)
             self._sites_info[hashlib.sha1(str(site['url'])).hexdigest()] = site
         # Create or check required directories.
         self._results_dir = os.path.join(spool_dir, 'results')
