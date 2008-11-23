@@ -41,7 +41,7 @@ def _parse_args():
     description = 'Daemon of the Arachne file search engine.'
     parser = optparse.OptionParser(usage=usage, version=version,
                                    description=description)
-    parser.add_option('-f', '--file', metavar='FILE', dest='config_file',
+    parser.add_option('-c', '--conf', metavar='FILE', dest='config_file',
                       help='specify config file (default %default)')
     parser.set_defaults(config_file='/etc/arachne/arachned.conf')
     return parser.parse_args()[0].__dict__
