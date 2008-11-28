@@ -19,6 +19,7 @@
 """Components used to process the crawl results.
 """
 
+import os
 import re
 import time
 import threading
@@ -37,7 +38,7 @@ class ResultProcessor(object):
     Instances of subclasses are used by the `ProcessorManager`.
     """
 
-    def __init__(self, sites_info, index_dir, tasks, results):
+    def __init__(self, sites_info, databse_dir, tasks, results):
         """Initialize the processor.
         """
 
@@ -69,7 +70,7 @@ class NaiveProcessor(ResultProcessor):
     tree.
     """
 
-    def __init__(self, sites_info, index_dir, tasks, results):
+    def __init__(self, sites_info, database_dir, tasks, results):
         """Initialize the processor.
         """
         self._tasks = tasks
@@ -89,28 +90,31 @@ class IndexProcessor(ResultProcessor):
     """Index result processor.
     """
 
+    # Name of the directory containing the Xapian index.
+    INDEX_DIR = 'index'
+
     # Term prefixes.
-    _SITE_ID_PREFIX = u'S'
-    _IS_DIR_PREFIX = u'I'
-    _IS_ROOT_PREFIX = u'R'
-    _BASENAME_PREFIX = u'B'
-    _DIRNAME_PREFIX = u'D'
-    _STEM_PREFIX = u'Z'
+    SITE_ID_PREFIX = u'S'
+    IS_DIR_PREFIX = u'I'
+    IS_ROOT_PREFIX = u'R'
+    BASENAME_PREFIX = u'B'
+    DIRNAME_PREFIX = u'D'
+    STEM_PREFIX = u'Z'
 
     # Boolean values for terms and values.
-    _FALSE_VALUE = u'0'
-    _TRUE_VALUE = u'1'
+    FALSE_VALUE = u'0'
+    TRUE_VALUE = u'1'
 
     # Values slots.
-    _SITE_ID_SLOT = 0
-    _IS_DIR_SLOT = 1
-    _IS_ROOT_SLOT = 2
-    _BASENAME_SLOT = 3
-    _DIRNAME_SLOT = 4
-    _PATH_SLOT = 5
+    SITE_ID_SLOT = 0
+    IS_DIR_SLOT = 1
+    IS_ROOT_SLOT = 2
+    BASENAME_SLOT = 3
+    DIRNAME_SLOT = 4
+    PATH_SLOT = 5
 
     # Stemming languages.
-    _STEM_LANGS = (u'en', u'es')
+    STEM_LANGS = (u'en', u'es')
 
     # Attributes used by the _get_terms() method.
     _MIN_TERM_LENGTH = 2
@@ -144,25 +148,26 @@ class IndexProcessor(ResultProcessor):
         ord(u'ñ') : u'n',
     }
 
-    def __init__(self, sites_info, index_dir, tasks, results):
+    def __init__(self, sites_info, database_dir, tasks, results):
         """Initialize the processor.
         """
         self._tasks = tasks
         self._results = results
+        index_dir = os.path.join(database_dir, self.INDEX_DIR)
         self._db = xapian.WritableDatabase(index_dir, xapian.DB_CREATE_OR_OPEN)
         # Create the stemmers.
         self._stemmers = []
-        for lang in self._STEM_LANGS:
+        for lang in self.STEM_LANGS:
             stemmer = xapian.Stem(lang)
             self._stemmers.append(stemmer)
         # Remove documents of old sites from the index.
-        old_site_ids = [term.term[len(self._SITE_ID_PREFIX):]
-                        for term in self._db.allterms(self._SITE_ID_PREFIX)]
+        old_site_ids = [term.term[len(self.SITE_ID_PREFIX):]
+                        for term in self._db.allterms(self.SITE_ID_PREFIX)]
         for site_id in sites_info.iterkeys():
             if site_id in old_site_ids:
                 old_site_ids.remove(site_id)
         for site_id in old_site_ids:
-            self._db.delete_document(self._SITE_ID_PREFIX + site_id)
+            self._db.delete_document(self.SITE_ID_PREFIX + site_id)
 
     def process(self, result):
         """Process a crawl result.
@@ -174,14 +179,13 @@ class IndexProcessor(ResultProcessor):
         else:
             enquire = xapian.Enquire(self._db)
             enquire.set_docid_order(xapian.Enquire.DONT_CARE)
-            site_id_query = xapian.Query(self._SITE_ID_PREFIX + site_id)
+            site_id_query = xapian.Query(self.SITE_ID_PREFIX + site_id)
             if url.is_root:
                 # The parent of the root directory is not known, or it can even
                 # not exist. We should check that the root directory is indexed
                 # because it is required to search for files in a selected
                 # number of sites.
-                root_query = xapian.Query(self._IS_ROOT_PREFIX
-                                          + self._TRUE_VALUE)
+                root_query = xapian.Query(self.IS_ROOT_PREFIX + self.TRUE_VALUE)
                 query = xapian.Query(xapian.Query.OP_FILTER, site_id_query,
                                      root_query)
                 enquire.set_query(query)
@@ -197,15 +201,15 @@ class IndexProcessor(ResultProcessor):
             # Get all the entries of this directory in the index.
             dirname = url.path.rstrip(u'/') + u'/'
             dirname_query = xapian.Query(xapian.Query.OP_VALUE_RANGE,
-                                         self._DIRNAME_SLOT, dirname, dirname)
+                                         self.DIRNAME_SLOT, dirname, dirname)
             query = xapian.Query(xapian.Query.OP_FILTER, site_id_query,
                                  dirname_query)
             enquire.set_query(query)
             indexed_entries = []
             for match in enquire.get_mset(0, doc_count):
                 doc = match.get_document()
-                is_dir = self._get_doc_value(doc, self._IS_DIR_SLOT)
-                basename = self._get_doc_value(doc, self._BASENAME_SLOT)
+                is_dir = self._get_doc_value(doc, self.IS_DIR_SLOT)
+                basename = self._get_doc_value(doc, self.BASENAME_SLOT)
                 try:
                     data = result[basename]
                 except KeyError:
@@ -255,10 +259,10 @@ class IndexProcessor(ResultProcessor):
         """
         enquire = xapian.Enquire(self._db)
         enquire.set_docid_order(xapian.Enquire.DONT_CARE)
-        site_id_query = xapian.Query(self._SITE_ID_PREFIX + site_id)
+        site_id_query = xapian.Query(self.SITE_ID_PREFIX + site_id)
         # Remove document of the directory itself.
         path_query = xapian.Query(xapian.Query.OP_VALUE_RANGE,
-                                  self._PATH_SLOT, dirpath, dirpath)
+                                  self.PATH_SLOT, dirpath, dirpath)
         query = xapian.Query(xapian.Query.OP_FILTER, site_id_query, path_query)
         enquire.set_query(query)
         for match in enquire.get_mset(0, self._db.get_doccount()):
@@ -268,8 +272,8 @@ class IndexProcessor(ResultProcessor):
         dirname_start = dirpath.rstrip(u'/') + u'/'
         dirname_end = dirname_start + u'\U0010ffff'
         dirname_query = xapian.Query(xapian.Query.OP_VALUE_RANGE,
-                                     self._DIRNAME_SLOT,
-                                     dirname_start, dirname_end)
+                                     self.DIRNAME_SLOT, dirname_start,
+                                     dirname_end)
         query = xapian.Query(xapian.Query.OP_FILTER, site_id_query,
                              dirname_query)
         enquire.set_query(query)
@@ -281,8 +285,8 @@ class IndexProcessor(ResultProcessor):
         """Return the value stored at the given slot.
         """
         value = doc.get_value(slot).decode('utf-8')
-        if slot == self._IS_DIR_SLOT:
-            value = (value == self._TRUE_VALUE)
+        if slot == self.IS_DIR_SLOT or slot == self.IS_ROOT_SLOT:
+            value = (value == self.TRUE_VALUE)
         return value
 
     def _get_terms(self, path):
@@ -323,38 +327,38 @@ class IndexProcessor(ResultProcessor):
         """
         url = data['url']
         doc = xapian.Document()
-        doc.add_term(self._SITE_ID_PREFIX + site_id, 0)
-        doc.add_value(self._SITE_ID_SLOT, site_id)
+        doc.add_term(self.SITE_ID_PREFIX + site_id, 0)
+        doc.add_value(self.SITE_ID_SLOT, site_id)
         if data['is_dir']:
-            doc.add_term(self._IS_DIR_PREFIX + self._TRUE_VALUE, 0)
-            doc.add_value(self._IS_DIR_SLOT, self._TRUE_VALUE)
+            doc.add_term(self.IS_DIR_PREFIX + self.TRUE_VALUE, 0)
+            doc.add_value(self.IS_DIR_SLOT, self.TRUE_VALUE)
         else:
-            doc.add_term(self._IS_DIR_PREFIX + self._FALSE_VALUE, 0)
-            doc.add_value(self._IS_DIR_SLOT, self._FALSE_VALUE)
+            doc.add_term(self.IS_DIR_PREFIX + self.FALSE_VALUE, 0)
+            doc.add_value(self.IS_DIR_SLOT, self.FALSE_VALUE)
         if url.is_root:
-            doc.add_term(self._IS_ROOT_PREFIX + self._TRUE_VALUE, 0)
-            doc.add_value(self._IS_ROOT_SLOT, self._TRUE_VALUE)
+            doc.add_term(self.IS_ROOT_PREFIX + self.TRUE_VALUE, 0)
+            doc.add_value(self.IS_ROOT_SLOT, self.TRUE_VALUE)
         else:
-            doc.add_term(self._IS_ROOT_PREFIX + self._FALSE_VALUE, 0)
-            doc.add_value(self._IS_ROOT_SLOT, self._FALSE_VALUE)
+            doc.add_term(self.IS_ROOT_PREFIX + self.FALSE_VALUE, 0)
+            doc.add_value(self.IS_ROOT_SLOT, self.FALSE_VALUE)
         stemmed_terms = []
         for term in self._get_terms(url.basename):
-            doc.add_term(self._BASENAME_PREFIX + term)
+            doc.add_term(self.BASENAME_PREFIX + term)
             for stemmer in self._stemmers:
                 stemmed_term = stemmer(term).decode('utf-8')
                 if stemmed_term not in stemmed_terms:
                     stemmed_terms.append(stemmed_term)
-        doc.add_value(self._BASENAME_SLOT, url.basename)
+        doc.add_value(self.BASENAME_SLOT, url.basename)
         for term in self._get_terms(url.dirname):
-            doc.add_term(self._DIRNAME_PREFIX + term)
+            doc.add_term(self.DIRNAME_PREFIX + term)
             for stemmer in self._stemmers:
                 stemmed_term = stemmer(term).decode('utf-8')
                 if stemmed_term not in stemmed_terms:
                     stemmed_terms.append(stemmed_term)
-        doc.add_value(self._DIRNAME_SLOT, url.dirname.rstrip(u'/') + u'/')
+        doc.add_value(self.DIRNAME_SLOT, url.dirname.rstrip(u'/') + u'/')
         for stemmed_term in stemmed_terms:
-            doc.add_term(self._STEM_PREFIX + stemmed_term)
-        doc.add_value(self._PATH_SLOT, url.path)
+            doc.add_term(self.STEM_PREFIX + stemmed_term)
+        doc.add_value(self.PATH_SLOT, url.path)
         doc.set_data(str(url))
         return doc
 
@@ -371,13 +375,14 @@ class ProcessorManager(threading.Thread):
     invoked.  It runs in an independent thread of execution.
     """
 
-    def __init__(self, sites_info, index_dir, tasks, results):
+    def __init__(self, sites_info, database_dir, tasks, results):
         """Initialize the processor manager.
         """
         threading.Thread.__init__(self)
         self._sleep = 1
         self._results = results
-        self._processor = IndexProcessor(sites_info, index_dir, tasks, results)
+        self._processor = IndexProcessor(sites_info, database_dir, tasks,
+                                         results)
         # Flag used to stop the loop started by the run() method.
         self._running = False
 

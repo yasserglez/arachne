@@ -67,9 +67,7 @@ class ArachneDaemon(Daemon):
         self._tasks_dir = os.path.join(spool_dir, 'tasks')
         if not os.path.isdir(self._tasks_dir):
             os.mkdir(self._tasks_dir)
-        self._index_dir = os.path.join(database_dir, 'index')
-        if not os.path.isdir(self._index_dir):
-            os.mkdir(self._index_dir)
+        self._database_dir = database_dir
         self._num_crawlers = num_crawlers
         self._running = False
 
@@ -89,7 +87,7 @@ class ArachneDaemon(Daemon):
                                             self._num_crawlers, self._tasks,
                                             self._results)
             self._processor = ProcessorManager(self._sites_info,
-                                               self._index_dir, self._tasks,
+                                               self._database_dir, self._tasks,
                                                self._results)
             # Start components.
             self._crawlers.start()
