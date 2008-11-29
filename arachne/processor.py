@@ -116,7 +116,7 @@ class IndexProcessor(ResultProcessor):
     # Stemming languages.
     STEM_LANGS = (u'en', u'es')
 
-    # Attributes used by the _get_terms() method.
+    # Attributes used by the get_terms() method.
     _MIN_TERM_LENGTH = 2
 
     _VALID_SHORT_TERMS = (u'0', u'1', u'2', u'3', u'4', u'5', u'6', u'7', u'8',
@@ -254,7 +254,7 @@ class IndexProcessor(ResultProcessor):
         self._db.flush()
 
     def _rmtree(self, site_id, dirpath):
-        """Remove documents for entries in the given directory tree.  The
+        """Remove documents for entries in the given directory tree. The
         document of the root of the directory tree is also removed.
         """
         enquire = xapian.Enquire(self._db)
@@ -289,37 +289,31 @@ class IndexProcessor(ResultProcessor):
             value = (value == self.TRUE_VALUE)
         return value
 
-    def _get_terms(self, path):
+    @classmethod
+    def get_terms(cls, path):
         """Extract terms from the given path.
 
         This algorithm treats the slashes correctly, so, the path can be
         absolute or relative.
         """
-        terms = []
-        path = path.translate(self._WHITE_SPACE_TRANSLATION)
-        path = self._WHITE_SPACE_RE.sub(u' ', path)
-        for term in self._SPLIT_RE.split(path):
+        terms = set()
+        path = path.translate(cls._WHITE_SPACE_TRANSLATION)
+        path = cls._WHITE_SPACE_RE.sub(u' ', path)
+        for term in cls._SPLIT_RE.split(path):
             term = term.strip()
-            if (len(term) >= self._MIN_TERM_LENGTH
-                or term in self._VALID_SHORT_TERMS):
-                lower_term = term.lower()
-                if lower_term not in terms:
-                    terms.append(lower_term)
+            if (len(term) >= cls._MIN_TERM_LENGTH
+                or term in cls._VALID_SHORT_TERMS):
+                terms.add(term.lower())
                 # Add translated terms.
-                translated = term.translate(self._TERM_TRANSLATION)
-                if translated != term:
-                    lower_translated = translated.lower()
-                    if lower_translated not in terms:
-                        terms.append(lower_translated)
+                translated = term.translate(cls._TERM_TRANSLATION)
+                terms.add(translated.lower())
                 # Add camel cased words.
-                words = self._CAMEL_CASE_RE.sub(u' ', translated).split(u' ')
+                words = cls._CAMEL_CASE_RE.sub(u' ', translated).split(u' ')
                 for word in words:
                     word = word.strip()
-                    if (len(word) >= self._MIN_TERM_LENGTH
-                        or word in self._VALID_SHORT_TERMS):
-                        lower_word = word.lower()
-                        if lower_word not in terms:
-                            terms.append(lower_word)
+                    if (len(word) >= cls._MIN_TERM_LENGTH
+                        or word in cls._VALID_SHORT_TERMS):
+                        terms.add(word.lower())
         return terms
 
     def _create_document(self, site_id, data):
@@ -341,20 +335,18 @@ class IndexProcessor(ResultProcessor):
         else:
             doc.add_term(self.IS_ROOT_PREFIX + self.FALSE_VALUE, 0)
             doc.add_value(self.IS_ROOT_SLOT, self.FALSE_VALUE)
-        stemmed_terms = []
-        for term in self._get_terms(url.basename):
+        stemmed_terms = set()
+        for term in self.get_terms(url.basename):
             doc.add_term(self.BASENAME_PREFIX + term)
             for stemmer in self._stemmers:
                 stemmed_term = stemmer(term).decode('utf-8')
-                if stemmed_term not in stemmed_terms:
-                    stemmed_terms.append(stemmed_term)
+                stemmed_terms.add(stemmed_term)
         doc.add_value(self.BASENAME_SLOT, url.basename)
-        for term in self._get_terms(url.dirname):
+        for term in self.get_terms(url.dirname):
             doc.add_term(self.DIRNAME_PREFIX + term)
             for stemmer in self._stemmers:
                 stemmed_term = stemmer(term).decode('utf-8')
-                if stemmed_term not in stemmed_terms:
-                    stemmed_terms.append(stemmed_term)
+                stemmed_terms.add(stemmed_term)
         doc.add_value(self.DIRNAME_SLOT, url.dirname.rstrip(u'/') + u'/')
         for stemmed_term in stemmed_terms:
             doc.add_term(self.STEM_PREFIX + stemmed_term)
@@ -366,13 +358,13 @@ class IndexProcessor(ResultProcessor):
 class ProcessorManager(threading.Thread):
     """Processor manager.
 
-    Create and feed the processor.  The processor that will be used is
-    currently set in the `__init__()` method but it should be configurable in
-    future versions.
+    Create and feed the processor. The processor that will be used is currently
+    set in the `__init__()` method but it should be configurable in future
+    versions.
 
     When the `start()` method is invoked it enters in a loop feeding the
     processor with results from the `ResultQueue` until the `stop()` method is
-    invoked.  It runs in an independent thread of execution.
+    invoked. It runs in an independent thread of execution.
     """
 
     def __init__(self, sites_info, database_dir, tasks, results):
