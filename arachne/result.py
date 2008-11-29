@@ -79,8 +79,8 @@ class CrawlResult(object):
         self._found = state['found']
         self._entries = state['entries']
 
-    def append(self, entry, data):
-        """Append a new entry.
+    def add_entry(self, entry, data):
+        """Add a new entry.
         """
         data['url'] = self._task.url.join(entry)
         self._entries[entry] = data

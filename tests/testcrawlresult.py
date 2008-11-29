@@ -48,9 +48,9 @@ class TestCrawlResult(unittest.TestCase):
         self.assertEquals(str(self._result.task.url), str(self._task.url))
         self.assertEquals(self._result.found, self._found)
 
-    def test_append_and_iter(self):
+    def test_add_entry_and_iter(self):
         for entry, data in self._entries:
-            self._result.append(entry, data)
+            self._result.add_entry(entry, data)
         entries = map(lambda i: i[0], self._entries)
         for entry, data in self._result:
             entries.remove(entry)
@@ -58,24 +58,24 @@ class TestCrawlResult(unittest.TestCase):
 
     def test_contains(self):
         entry, data = self._entries[0]
-        self._result.append(entry, data)
+        self._result.add_entry(entry, data)
         self.assertTrue(entry in self._result)
         self.assertFalse(entry * 2 in self._result)
 
     def test_len(self):
         for entry, data in self._entries:
-            self._result.append(entry, data)
+            self._result.add_entry(entry, data)
         self.assertEquals(len(self._result), self._num_entries)
 
     def test_getitem(self):
         entry, data = self._entries[0]
-        self._result.append(entry, data)
+        self._result.add_entry(entry, data)
         self.assertEquals(self._result[entry], data)
         self.assertRaises(KeyError, self._result.__getitem__, entry * 2)
 
     def test_pickling(self):
         for entry, data in self._entries:
-            self._result.append(entry, data)
+            self._result.add_entry(entry, data)
         result = pickle.loads(pickle.dumps(self._result))
         self.assertEquals(self._result.task.site_id, result.task.site_id)
         self.assertEquals(str(self._result.task.url), str(result.task.url))

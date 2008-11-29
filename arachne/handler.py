@@ -85,7 +85,7 @@ class FileHandler(ProtocolHandler):
                     data = {}
                     entry_url = url.join(entry_name)
                     data['is_dir'] = os.path.isdir(entry_url.path)
-                    result.append(entry_url.basename, data)
+                    result.add_entry(entry_url.basename, data)
             else:
                 result = CrawlResult(task, False)
         except OSError, error:
@@ -139,7 +139,7 @@ class FTPHandler(ProtocolHandler):
                 # It seems to be a valid directory.
                 result = CrawlResult(task, True)
                 entries = []
-                callback = lambda line: entries.append(self._parse_list(line))
+                callback = lambda line: entries.add_entry(self._parse_list(line))
                 ftp.retrlines('LIST', callback)
                 for entry_name, is_dir in (entry for entry in entries
                                            if entry is not None):
@@ -157,7 +157,7 @@ class FTPHandler(ProtocolHandler):
                             data['is_dir'] = False
                         else:
                             data['is_dir'] = True
-                    result.append(entry_name, data)
+                    result.add_entry(entry_name, data)
             ftp.quit()
         except socket.error, error:
             self._tasks.report_error_site(task)
