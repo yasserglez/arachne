@@ -35,15 +35,14 @@ from arachne.url import URL
 class TestIndexProcessor(unittest.TestCase):
 
     def setUp(self):
-        self._index_dir = os.path.join(TESTDIR, 'testindexprocessor')
+        self._index_dir = os.path.join(TESTDIR, IndexProcessor.INDEX_DIR)
         self._sites_info = {
             'a78e6853355ad5cdc751ad678d15339382f9ed21':
                 {'url': URL('ftp://atlantis.uh.cu/')},
             '7e019d6f671d336a0cc31f137ba034efb13fc327':
                 {'url': URL('ftp://andromeda.uh.cu/')},
         }
-        self._processor = IndexProcessor(self._sites_info, self._index_dir,
-                                         None, None)
+        self._processor = IndexProcessor(self._sites_info, TESTDIR, None, None)
 
     def test_get_terms(self):
         test_data = (
