@@ -133,19 +133,19 @@ class IndexProcessor(ResultProcessor):
         _WHITE_SPACE_TRANSLATION[ord(c)] = u' '
 
     _TERM_TRANSLATION = {
-        ord(u'á') : u'a',
-        ord(u'Á') : u'A',
-        ord(u'é') : u'e',
-        ord(u'É') : u'E',
-        ord(u'í') : u'i',
-        ord(u'Í') : u'I',
-        ord(u'ó') : u'o',
-        ord(u'Ó') : u'O',
-        ord(u'ú') : u'u',
-        ord(u'Ú') : u'U',
-        ord(u'ü') : u'u',
-        ord(u'Ü') : u'U',
-        ord(u'ñ') : u'n',
+        ord(u'á'): u'a',
+        ord(u'Á'): u'A',
+        ord(u'é'): u'e',
+        ord(u'É'): u'E',
+        ord(u'í'): u'i',
+        ord(u'Í'): u'I',
+        ord(u'ó'): u'o',
+        ord(u'Ó'): u'O',
+        ord(u'ú'): u'u',
+        ord(u'Ú'): u'U',
+        ord(u'ü'): u'u',
+        ord(u'Ü'): u'U',
+        ord(u'ñ'): u'n',
     }
 
     def __init__(self, sites_info, database_dir, tasks, results):
@@ -321,19 +321,19 @@ class IndexProcessor(ResultProcessor):
         """
         url = data['url']
         doc = xapian.Document()
-        doc.add_term(self.SITE_ID_PREFIX + site_id, 0)
+        doc.add_term(self.SITE_ID_PREFIX + site_id)
         doc.add_value(self.SITE_ID_SLOT, site_id)
         if data['is_dir']:
-            doc.add_term(self.IS_DIR_PREFIX + self.TRUE_VALUE, 0)
+            doc.add_term(self.IS_DIR_PREFIX + self.TRUE_VALUE)
             doc.add_value(self.IS_DIR_SLOT, self.TRUE_VALUE)
         else:
-            doc.add_term(self.IS_DIR_PREFIX + self.FALSE_VALUE, 0)
+            doc.add_term(self.IS_DIR_PREFIX + self.FALSE_VALUE)
             doc.add_value(self.IS_DIR_SLOT, self.FALSE_VALUE)
         if url.is_root:
-            doc.add_term(self.IS_ROOT_PREFIX + self.TRUE_VALUE, 0)
+            doc.add_term(self.IS_ROOT_PREFIX + self.TRUE_VALUE)
             doc.add_value(self.IS_ROOT_SLOT, self.TRUE_VALUE)
         else:
-            doc.add_term(self.IS_ROOT_PREFIX + self.FALSE_VALUE, 0)
+            doc.add_term(self.IS_ROOT_PREFIX + self.FALSE_VALUE)
             doc.add_value(self.IS_ROOT_SLOT, self.FALSE_VALUE)
         stemmed_terms = set()
         for term in self.get_terms(url.basename):

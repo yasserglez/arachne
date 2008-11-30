@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Index searcher.
+"""Index searcher and related classes.
 """
 
 import os
@@ -24,6 +24,35 @@ import os
 import xapian
 
 from arachne.processor import IndexProcessor
+
+
+class _QuerySet(object):
+    """Results of a query.
+
+    This is a container for the results of a query. The `search()` method of
+    `IndexSearcher` return instances of this class.
+    """
+
+    def __init__(self, mset):
+        """Initialize the query set from the given Xapian MSet.
+        """
+
+    def __len__(self):
+        """Return the number of results in the query set.
+        """
+        return len(self._mset)
+
+    def __iter__(self):
+        """Iterate over all results in the query set.
+        """
+
+    def __getitem__(self, index):
+        """Return the item at the given index.
+        """
+
+    def __getslice__(self, start, end):
+        """Return the slice fron index `start` to `end` - 1.
+        """
 
 
 class IndexSearcher(object):
@@ -66,10 +95,125 @@ class IndexSearcher(object):
             sites.append((site_id.decode('utf-8'), url.decode('utf-8')))
         return sites
 
-    def search(self, query, sites=(), filetype=SEARCH_ALL):
+    def search(self, query, site_ids=(), filetype=SEARCH_ALL):
         """Query the index.
 
-        The `query` argument is the user supplied query as string. The `sites`
-        and `filetype` arguments can be used to restrict the domain of the
-        search.
+        The `query` argument is the user supplied query string. The `sites` and
+        `filetype` arguments can be used to restrict the domain of the search.
         """
+        if type(query) is not unicode:
+            query = query.decode('utf-8')
+        doc_count = self._db.get_doccount()
+        enquire = xapian.Enquire(self._db)
+        xapian_query = self._parse_query(query, site_ids, filetype)
+        enquire.set_query(xapian_query)
+        mset = enquire.get_mset(0, doc_count)
+        return _QuerySet(mset)
+
+    def _parse_query(self, query, site_ids, filetype):
+        """Parse the query string and return a Xapian query.
+        """
+        # Parse the query string.
+        plus_terms = set()
+        minus_terms = set()
+        normal_terms = set()
+        for query_term in query.split():
+            query_term = query_term.strip()
+            if query_term.startswith('+'):
+                query_term = query_term[1:]
+                if query_term:
+                    plus_terms.update(IndexProcessor.get_terms(query_term))
+            elif query_term.startswith('-'):
+                query_term = query_term[1:]
+                if query_term:
+                    minus_terms.update(IndexProcessor.get_terms(query_term))
+            else:
+                if query_term:
+                    normal_terms.update(IndexProcessor.get_terms(query_term))
+        # Build the queries for plus, minus and normal terms.
+        if plus_terms:
+            plus_terms = [IndexProcessor.BASENAME_PREFIX + plus_term
+                          for plus_term in plus_terms]
+            plus_query = xapian.Query(xapian.Query.OP_AND, plus_terms)
+        else:
+            plus_query = None
+        if minus_terms:
+            minus_terms = [IndexProcessor.BASENAME_PREFIX + minus_term
+                           for minus_term in minus_terms]
+            minus_query = xapian.Query(xapian.Query.OP_OR, minus_terms)
+        else:
+            minus_query = None
+        if normal_terms:
+            basename_terms = [IndexProcessor.BASENAME_PREFIX + normal_term
+                              for normal_term in normal_terms]
+            basename_query = xapian.Query(xapian.Query.OP_OR, basename_terms)
+            basename_query = xapian.Query(xapian.Query.OP_SCALE_WEIGHT,
+                                          basename_query, 10)
+            dirname_terms = [IndexProcessor.DIRNAME_PREFIX + normal_term
+                             for normal_term in normal_terms]
+            dirname_query = xapian.Query(xapian.Query.OP_OR, dirname_terms)
+            dirname_query = xapian.Query(xapian.Query.OP_SCALE_WEIGHT,
+                                         dirname_query, 2)
+            normal_query = xapian.Query(xapian.Query.OP_OR, basename_query,
+                                        dirname_query)
+        else:
+            normal_query = None
+        # Stem normal terms.
+        stemmed_terms = set()
+        for term in normal_terms:
+            for stemmer in self._stemmers:
+                stemmed_terms.add(stemmer(term))
+        # Build the query for the stemmed terms.
+        if stemmed_terms:
+            stemmed_terms = [IndexProcessor.STEM_PREFIX + stemmed_term
+                             for stemmed_term in stemmed_terms]
+            stemmed_query = xapian.Query(xapian.Query.OP_OR, stemmed_terms)
+        else:
+            stemmed_query = None
+        # Build the query for the given filetype.
+        if filetype == self.SEARCH_FILE:
+            filetype_query = xapian.Query(IndexProcessor.IS_DIR_PREFIX
+                                          + IndexProcessor.FALSE_VALUE)
+        elif filetype == self.SEARCH_DIRECTORY:
+            filetype_query = xapian.Query(IndexProcessor.IS_DIR_PREFIX
+                                          + IndexProcessor.TRUE_VALUE)
+        else:
+            filetype_query = None
+        # Build the query for the sites.
+        if site_ids:
+            site_ids_terms = [IndexProcessor.SITE_ID_PREFIX + site_id
+                              for site_id in site_ids]
+            site_ids_query = xapian.Query(xapian.Query.OP_OR, site_ids_terms)
+        else:
+            site_ids_query = None
+        # Build the final query from the sub-queries.
+        query = None
+        if plus_query:
+            query = plus_query
+        if normal_query:
+            common_query = xapian.Query(xapian.Query.OP_OR,
+                                        normal_query, stemmed_query)
+            if query is not None:
+                query = xapian.Query(xapian.Query.OP_AND_MAYBE,
+                                     query, common_query)
+            else:
+                query = common_query
+        if minus_query:
+            if query is not None:
+                query = xapian.Query(xapian.Query.OP_AND_NOT,
+                                     query, minus_query)
+            else:
+                query = xapian.Query(xapian.Query.OP_AND_NOT,
+                                     xapian.Query(''), minus_query)
+        # Query without terms? Return a query that generate an empty MSet.
+        if query is None:
+            query = xapian.Query()
+        else:
+            # Apply filters for site and filetype.
+            if site_ids_query:
+                query = xapian.Query(xapian.Query.OP_FILTER,
+                                     query, site_ids_query)
+            if filetype_query:
+                query = xapian.Query(xapian.Query.OP_FILTER,
+                                     query, filetype_query)
+        return query
