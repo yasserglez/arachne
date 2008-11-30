@@ -26,35 +26,6 @@ import xapian
 from arachne.processor import IndexProcessor
 
 
-class _QuerySet(object):
-    """Results of a query.
-
-    This is a container for the results of a query. The `search()` method of
-    `IndexSearcher` return instances of this class.
-    """
-
-    def __init__(self, mset):
-        """Initialize the query set from the given Xapian MSet.
-        """
-
-    def __len__(self):
-        """Return the number of results in the query set.
-        """
-        return len(self._mset)
-
-    def __iter__(self):
-        """Iterate over all results in the query set.
-        """
-
-    def __getitem__(self, index):
-        """Return the item at the given index.
-        """
-
-    def __getslice__(self, start, end):
-        """Return the slice fron index `start` to `end` - 1.
-        """
-
-
 class IndexSearcher(object):
     """Index searcher.
     """
@@ -95,7 +66,8 @@ class IndexSearcher(object):
             sites.append((site_id.decode('utf-8'), url.decode('utf-8')))
         return sites
 
-    def search(self, query, site_ids=(), filetype=SEARCH_ALL):
+    def search(self, query, offset, count, check_at_least, site_ids=(),
+               filetype=SEARCH_ALL):
         """Query the index.
 
         The `query` argument is the user supplied query string. The `sites` and
@@ -103,12 +75,20 @@ class IndexSearcher(object):
         """
         if type(query) is not unicode:
             query = query.decode('utf-8')
-        doc_count = self._db.get_doccount()
         enquire = xapian.Enquire(self._db)
         xapian_query = self._parse_query(query, site_ids, filetype)
         enquire.set_query(xapian_query)
-        mset = enquire.get_mset(0, doc_count)
-        return _QuerySet(mset)
+        mset = enquire.get_mset(offset, offset + count, check_at_least)
+        results = []
+        for match in mset:
+            doc = match.get_document()
+            url = doc.get_data().decode('utf-8')
+            data = {}
+            value = doc.get_value(IndexProcessor.IS_DIR_SLOT).decode('utf-8')
+            data['is_dir'] = (value == IndexProcessor.TRUE_VALUE)
+            results.append((url, data))
+        estimated_total = mset.get_matches_estimated()
+        return (estimated_total, results)
 
     def _parse_query(self, query, site_ids, filetype):
         """Parse the query string and return a Xapian query.
