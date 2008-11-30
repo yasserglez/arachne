@@ -117,7 +117,7 @@ class IndexProcessor(ResultProcessor):
     STEM_LANGS = (u'en', u'es')
 
     # Attributes used by the get_terms() method.
-    _MIN_TERM_LENGTH = 2
+    _MIN_TERM_LENGTH = 3
 
     _VALID_SHORT_TERMS = (u'0', u'1', u'2', u'3', u'4', u'5', u'6', u'7', u'8',
                           u'9', u'c', u'C')
