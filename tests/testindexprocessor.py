@@ -43,10 +43,10 @@ class TestIndexProcessor(unittest.TestCase):
              [u'yasser', u'gonzález', u'gonzalez', u'fernández', u'fernandez']),
 
             (u'Python-3.0rc1.tar.bz2',
-             [u'python', u'3.0', u'rc', u'1', u'tar', u'bz', u'2']),
+             [u'python', u'3.0', u'1', u'tar', u'2']),
 
             (u'07. (Let me be your) Teddy bear.mp3',
-             [u'07', u'let', u'me', u'be', u'your', u'teddy', u'bear', u'mp', u'3']),
+             [u'let', u'your', u'teddy', u'bear', u'3']),
 
             (u'dive_into_python.zip',
              [u'dive', u'into', u'python', u'zip']),
@@ -55,10 +55,10 @@ class TestIndexProcessor(unittest.TestCase):
              [u'afewcamelcasedwords', u'few', u'camel', u'cased', u'words']),
 
             (u'It should ignore this: ! # &.',
-             [u'it', u'should', u'ignore', u'this']),
+             [u'should', u'ignore', u'this']),
 
             (u'Please, please me',
-             [u'please', u'me']),
+             [u'please']),
 
             (u'/Books/Programming/Python/dive_into_python',
              [u'books', u'programming', u'python', u'dive', u'into']),
