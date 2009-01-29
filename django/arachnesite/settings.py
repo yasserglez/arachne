@@ -51,7 +51,8 @@ ROOT_URLCONF = 'arachnesite.urls'
 
 TEMPLATE_DIRS = (
     # Add the path to the directory with the templates here. Use absolute
-    # paths, not relative paths. Maybe you will want to remove this entry used
-    # during the development of Arachne.
-    os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates'),
+    # paths, not relative paths.
 )
+
+# Directory where the index files are located.
+DATABASE_DIR = ''

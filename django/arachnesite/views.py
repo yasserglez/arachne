@@ -21,6 +21,8 @@
 
 from django.shortcuts import render_to_response
 
+from arachnesite.settings import DATABASE_DIR
+
 
 def search(request):
     """Execute the query and show results.
