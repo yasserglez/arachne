@@ -19,6 +19,8 @@
 """Settings for the Arachne website.
 """
 
+import os
+
 # Debug settings. Set this to False in a production environment.
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -49,5 +51,7 @@ ROOT_URLCONF = 'arachnesite.urls'
 
 TEMPLATE_DIRS = (
     # Add the path to the directory with the templates here. Use absolute
-    # paths, not relative paths.
+    # paths, not relative paths. Maybe you will want to remove this entry used
+    # during the development of Arachne.
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), 'templates'),
 )

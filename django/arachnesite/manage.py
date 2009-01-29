@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Arachne, a search engine for files and directories.
@@ -16,13 +17,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Django views for the Arachne website.
-"""
+from django.core.management import execute_manager
 
-from django.shortcuts import render_to_response
+import settings
 
 
-def search(request):
-    """Execute the query and show results.
-    """
-    return render_to_response('results.html')
+if __name__ == "__main__":
+    execute_manager(settings)
