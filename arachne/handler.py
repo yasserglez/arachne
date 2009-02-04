@@ -19,10 +19,10 @@
 """Protocol handlers.
 """
 
+import os
 import errno
 import ftplib
 import logging
-import os
 import socket
 
 from arachne.result import CrawlResult
@@ -139,7 +139,7 @@ class FTPHandler(ProtocolHandler):
                 # It seems to be a valid directory.
                 result = CrawlResult(task, True)
                 entries = []
-                callback = lambda line: entries.add_entry(self._parse_list(line))
+                callback = lambda line: entries.append(self._parse_list(line))
                 ftp.retrlines('LIST', callback)
                 for entry_name, is_dir in (entry for entry in entries
                                            if entry is not None):
