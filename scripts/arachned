@@ -147,7 +147,7 @@ def _parse_sites_file(sites_file):
                     info[key] = str_to_secs(info[key])
                     if info[key] is None:
                         _error('invalid value of "%s" for the site "%s"'
-                               % (key, site['url'])
+                               % (key, site['url']))
             return sites
 
 

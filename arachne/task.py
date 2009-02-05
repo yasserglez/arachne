@@ -31,7 +31,7 @@ import logging
 import threading
 
 from arachne.error import EmptyQueue
-from arachne.utils.time import secs_to_readable
+from arachne.util.time import secs_to_readable
 
 
 class CrawlTask(object):
