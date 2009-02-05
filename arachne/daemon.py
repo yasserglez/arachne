@@ -54,7 +54,7 @@ class ArachneDaemon(Daemon):
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')
         logging.info('Starting Arachne daemon %s' % __version__)
-        logging.info('Running with %d sites configured' % len(sites))
+        logging.info('Running for %d sites' % len(sites))
         # Create URL instances and assign an id to each site.
         self._sites_info = {}
         for site in sites:
