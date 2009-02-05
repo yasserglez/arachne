@@ -31,6 +31,7 @@ import logging
 import threading
 
 from arachne.error import EmptyQueue
+from arachne.utils.time import secs_to_readable
 
 
 class CrawlTask(object):
@@ -219,8 +220,8 @@ class TaskQueue(object):
             if task.revisit_count == 0:
                 # First visit.  Set default values.
                 task.revisit_wait = site_info['default_revisit_wait']
-                logging.info('Setting revisit frequency for "%s" to '
-                             '%d seconds' % (task.url, task.revisit_wait))
+                logging.info('Setting revisit frequency for "%s" to %s'
+                             % (task.url, secs_to_readable(task.revisit_wait)))
             else:
                 if task.revisit_count >= self._revisits:
                     minimum = site_info['min_revisit_wait']
@@ -228,8 +229,8 @@ class TaskQueue(object):
                     estimated = self._estimate_revisit_wait(task)
                     task.revisit_wait = min(maximum, max(minimum, estimated))
                     task.reset_counters()
-                    logging.info('Changing revisit frequency for "%s" to '
-                                 '%d seconds' % (task.url, task.revisit_wait))
+                    logging.info('Changing revisit frequency for "%s" to %s'
+                                 % (task.url, secs_to_readable(task.revisit_wait)))
             self._put(task, task.revisit_wait)
         finally:
             self._mutex.release()

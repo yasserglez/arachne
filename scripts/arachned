@@ -27,6 +27,7 @@ import ConfigParser
 
 from arachne import __author__, __version__
 from arachne.daemon import ArachneDaemon
+from arachne.util.time import str_to_secs
 
 
 def _parse_args():
@@ -138,12 +139,15 @@ def _parse_sites_file(sites_file):
         if not sites:
             _error('failed to read the sites file or no sites configured.')
         else:
-            int_keys = ('request_wait', 'error_site_wait', 'error_dir_wait',
-                        'min_revisit_wait', 'max_revisit_wait',
-                        'default_revisit_wait')
+            time_keys = ('request_wait', 'error_site_wait', 'error_dir_wait',
+                         'min_revisit_wait', 'max_revisit_wait',
+                         'default_revisit_wait')
             for info in sites:
-                for key in int_keys:
-                    info[key] = int(info[key])
+                for key in time_keys:
+                    info[key] = str_to_secs(info[key])
+                    if info[key] is None:
+                        _error('invalid value of "%s" for the site "%s"'
+                               % (key, site['url'])
             return sites
 
 
