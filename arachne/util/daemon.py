@@ -16,6 +16,10 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Based on the description found in the Python Cookbook 2nd Edition and the
+# implementation of the Living Logic collection of Python modules
+# (http://www.livinglogic.de/Python/index.html).
+
 """Base class to create UNIX daemon processes.
 """
 
@@ -24,11 +28,6 @@ import sys
 import signal
 import pwd
 import grp
-
-
-# Based on the description found in the Python Cookbook 2nd Edition and the
-# implementation of the Living Logic collection of Python modules
-# (http://www.livinglogic.de/Python/index.html).
 
 
 class Daemon(object):
