@@ -1,7 +1,52 @@
-<html>
-  <head>
-    <title>Search results</title>
-  </head>
-  <body>
-  </body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}{{ query }} - Arachne{% endblock %}
+
+{% block content %}
+<div id="searchbox">
+  <form action="{{ site_root }}search/" method="post">
+    <img id="logosmall" src="logosmall.png"
+         alt="Arachne, un motor de búsqueda para archivos y directorios" />
+    <input type="text" name="query" value="{{ query }}" size="42" maxlength="2048" />
+    <input type="submit" name="search" value="Buscar" />
+    <input type="hidden" name="search_type" value="{{ search_type }}" />
+    {% ifequal search_type "advanced" %}
+    {# Add hidden fiels for the selected sites. #}
+    {% endifequal %}
+  </form>
+</div>
+<div id="resultsbox">
+  {% if has_results %}
+  <table id="results">
+    {% for result in results %}
+    {% if result.is_odd %}
+    <tr class="odd">
+    {% else %}
+    <tr>
+    {% endif %}
+      <td class="resultnum">{{ result.num }}.</td>
+      {% if result.is_dir %}
+      <td class="resulttype"><img src="directory.png" alt="Directory" /></td>
+      {% else %}
+      <td class="resulttype"><img src="file.png" alt="File" /></td>
+      {% endif %}
+      <td><a href="{{ result.url }}">{{ result.url }}</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p id="noresults"><strong>No se obtuvo ningún resultado.</strong></p>
+  {% endif %}
+</div>
+{% if has_results %}
+<div id="navigationbox">
+  {% if has_previous %}
+  <strong><a href="">&lt; Anterior</a></strong>
+  {% endif %}
+  <strong>{{ first_result }} - {{ last_result }}</strong> de <strong>{{ total_result }}</strong>
+  {% if has_next %}
+  <strong><a href="">Siguiente &gt;</a></strong>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
