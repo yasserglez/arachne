@@ -20,14 +20,13 @@
 """
 
 from django.conf.urls.defaults import *
-from django.views.generic.simple import direct_to_template
 
-from arachnesite.views import search
+from arachnesite.views import basic, advanced, search
 
 
 urlpatterns = patterns('',
-    (r'^$', direct_to_template, {'template': 'basic.html'}),
-    (r'^basic/$', direct_to_template, {'template': 'basic.html'}),
-    (r'^advanced/$', direct_to_template, {'template': 'advanced.html'}),
+    (r'^$', basic),
+    (r'^basic/$', basic),
+    (r'^advanced/$', advanced),
     (r'^search/$', search),
 )

@@ -21,10 +21,38 @@
 
 from django.shortcuts import render_to_response
 
-from arachnesite.settings import DATABASE_DIR
+from arachne.searcher import IndexSearcher
+
+from arachnesite import settings
+
+
+def basic(request):
+    """Show the basic search form.
+    """
+    context = {
+        'media_url': settings.MEDIA_URL,
+        'search_type': 'basic',
+    }
+    return render_to_response('search.html', context)
+
+
+def advanced(request):
+    """Show the advanced search form.
+    """
+    searcher = IndexSearcher(settings.DATABASE_DIR)
+    context = {
+        'media_url': settings.MEDIA_URL,
+        'search_type': 'advanced',
+        'sites': searcher.get_sites(),
+    }
+    return render_to_response('search.html', context)
 
 
 def search(request):
     """Execute the query and show results.
     """
-    return render_to_response('results.html')
+    context = {
+        'media_url': settings.MEDIA_URL,
+        'results': results,
+    }
+    return render_to_response('results.html', context)

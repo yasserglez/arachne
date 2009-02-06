@@ -1,0 +1,115 @@
+/* Common style. */
+
+body {
+    font-size: 80%;
+    font-family: sans-serif;
+    background-color: #ffffff;
+}
+
+a {
+    color: #0132c8;
+}
+
+#contentbox {
+    width: 80%;
+    min-width: 55em;
+    margin-top: 4em;
+    margin-bottom: 2em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#footerbox {
+    text-align: center;
+    font-size: 0.8em;
+    margin-top: 4em;
+}
+
+/* Search form style. */
+
+#logobigbox {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#othersearch {
+    font-size: 0.8em;
+}
+
+#basicbox {
+    text-align: center;
+}
+
+#advancedbox {
+    margin-top: 2em;
+}
+
+#advancedoptions {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#advancedoptions td {
+    vertical-align: top;
+    text-align: left;
+    padding-bottom: 1em;
+}
+
+#advancedoptions .optionname {
+    text-align: right;
+    padding-top: 0.5em;
+    padding-right: 0.5em;
+}
+
+#advancedoptions .optionvalue {
+    padding-left: 0.5em;
+}
+
+#advancedoptions ul {
+    list-style-type: none;
+    padding: 0em;
+    margin: 0em;
+}
+
+/* Results page style. */
+
+#logosmall {
+    vertical-align: bottom;
+    margin-right: 0.6em;
+}
+
+#results {
+    width: 100%;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    border-collapse: collapse;
+}
+
+#results tr {
+    border: 1px solid #b7b7b7;
+}
+
+#results .odd {
+    background-color: #e5e5e5;
+}
+
+#results td {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    vertical-align: middle;
+}
+
+#results .resultnum {
+    color: #565656;
+    text-align: right;
+}
+
+#results .resulttype {
+    margin: 0;
+    padding: 2px;
+    text-align: center;
+}
+
+#navigationbox {
+    text-align: center;
+}

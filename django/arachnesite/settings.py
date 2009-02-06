@@ -40,9 +40,6 @@ LANGUAGE_CODE = 'es-es'
 # load the internationalization machinery.
 USE_I18N = False
 
-# Absolute path to the directory that holds media.
-MEDIA_ROOT = ''
-
 # URL that handles the media served from MEDIA_ROOT.
 MEDIA_URL = ''
 
@@ -54,5 +51,5 @@ TEMPLATE_DIRS = (
     # paths, not relative paths.
 )
 
-# Directory where the index files are located.
-DATABASE_DIR = ''
+# Directory where the index directory is located.
+DATABASE_DIR = '/var/lib/arachne/'

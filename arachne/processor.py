@@ -210,25 +210,29 @@ class IndexProcessor(ResultProcessor):
                 doc = match.get_document()
                 is_dir = self._get_doc_value(doc, self.IS_DIR_SLOT)
                 basename = self._get_doc_value(doc, self.BASENAME_SLOT)
-                try:
-                    data = result[basename]
-                except KeyError:
-                    # Entry removed from the directory in the site.
-                    result_changed = True
-                    if is_dir:
-                        # Remove entries in the sub-tree of the directory.
-                        self._rmtree(site_id, dirname + basename + u'/')
-                    else:
-                        self._db.delete_document(doc.get_docid())
-                else:
-                    # Check if metadata is updated.
-                    if is_dir == data['is_dir']:
-                        indexed_entries.append(basename)
-                    else:
+                # I check this as an ugly hack to avoid removing the root
+                # directory of the site if we are processing the result for the
+                # root directory itself.
+                if basename != '/':
+                    try:
+                        data = result[basename]
+                    except KeyError:
+                        # Entry removed from the directory in the site.
                         result_changed = True
-                        # Lazy solution.  Remove the document from the index
-                        # and then add it again with the right data.
-                        self._db.delete_document(doc.get_docid())
+                        if is_dir:
+                            # Remove entries in the sub-tree of the directory.
+                            self._rmtree(site_id, dirname + basename + u'/')
+                        else:
+                            self._db.delete_document(doc.get_docid())
+                    else:
+                        # Check if metadata is updated.
+                        if is_dir == data['is_dir']:
+                            indexed_entries.append(basename)
+                        else:
+                            result_changed = True
+                            # Lazy solution.  Remove the document from the
+                            # index and then add it again with the right data.
+                            self._db.delete_document(doc.get_docid())
             # Add new or modified entries.
             for entry, data in result:
                 if entry not in indexed_entries:

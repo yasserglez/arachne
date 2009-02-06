@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Arachne{% endblock %}
+
+{% block content %}
+<div id="logobigbox">
+  <img id="logobig" src="{{ media_url }}logobig.png"
+       alt="Arachne, un motor de búsqueda para archivos y directorios" />
+</div>
+<div id="searchbox">
+  <form action="search/" method="post">
+    <div id="basicbox">
+      <input type="text" name="query" value="" size="36" maxlength="2048" />
+      <input type="submit" name="search" value="Buscar" />
+      {% ifequal search_type "advanced" %}
+      <a id="othersearch" href="basic/">Búsqueda básica</a>
+      {% else %}
+      <a id="othersearch" href="advanced/">Búsqueda avanzada</a>
+      {% endifequal %}
+      <input type="hidden" name="search_type" value="{{ search_type }}" />
+    </div>
+    {% ifequal search_type "advanced" %}
+    <div id="advancedbox">
+      <table id="advancedoptions">
+        <tr>
+          <td class="optionname"><strong>Tipos de archivo</strong></td>
+          <td class="optionvalue">
+            <ul>
+              <li>
+                <input id="file" type="radio" name="filetype" value="file" />
+                <label for="file">Buscar archivos solamente</label>
+              </li>
+              <li>
+                <input id="dir" type="radio" name="filetype" value="dir" />
+                <label for="dir">Buscar directorios solamente</label>
+              </li>
+              <li>
+                <input id="both" type="radio" name="filetype" value="both" checked="checked" />
+                <label for="both">Buscar archivos y directorios</label>
+              </li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class="optionname"><strong>Sitios</strong></td>
+          <td class="optionvalue">
+            <ul>
+              {% for site in sites %}
+              <li>
+                <input id="{{ site.id }}" type="checkbox" name="{{ site.id }}" checked="checked" />
+                <label for="{{ site.id }}"><a href="{{ site.url }}">{{ site.url }}</a></label>
+              </li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </div>
+    {% endifequal %}
+  </form>
+{% endblock %}

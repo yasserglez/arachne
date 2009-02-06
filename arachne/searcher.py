@@ -49,8 +49,9 @@ class IndexSearcher(object):
     def get_sites(self):
         """Return the list of indexed sites.
 
-        This method returns a list with a tuple containing the id and the URL
-        of the root directory for each indexed site.
+        This method returns a list with a dictionary for each site. Each
+        dictionary contains the id of the site (id key) and the URL of the root
+        directory (url key).
         """
         doc_count = self._db.get_doccount()
         enquire = xapian.Enquire(self._db)
@@ -61,9 +62,11 @@ class IndexSearcher(object):
         sites = []
         for match in enquire.get_mset(0, doc_count):
             doc = match.get_document()
-            site_id = doc.get_value(IndexProcessor.SITE_ID_SLOT)
-            url = doc.get_data()
-            sites.append((site_id.decode('utf-8'), url.decode('utf-8')))
+            site = {
+                'id': doc.get_value(IndexProcessor.SITE_ID_SLOT).decode('utf-8'),
+                'url': doc.get_data().decode('utf-8')
+            }
+            sites.append(site)
         return sites
 
     def search(self, query, offset, count, check_at_least, site_ids=(),
