@@ -19,11 +19,10 @@
 """Django views for the Arachne website.
 """
 
+from django.conf import settings
 from django.shortcuts import render_to_response
 
 from arachne.searcher import IndexSearcher
-
-from arachnesite import settings
 
 
 def basic(request):

@@ -21,12 +21,10 @@
 
 from django.conf.urls.defaults import *
 
-from arachnesite.views import basic, advanced, search
-
 
 urlpatterns = patterns('',
-    (r'^$', basic),
-    (r'^basic/$', basic),
-    (r'^advanced/$', advanced),
-    (r'^search/$', search),
+    (r'^$', 'arachnesite.views.basic'),
+    (r'^basic/$', 'arachnesite.views.basic'),
+    (r'^advanced/$', 'arachnesite.views.advanced'),
+    (r'^search/$', 'arachnesite.views.search'),
 )

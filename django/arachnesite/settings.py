@@ -19,8 +19,6 @@
 """Settings for the Arachne website.
 """
 
-import os
-
 # Debug settings. Set this to False in a production environment.
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -40,16 +38,25 @@ LANGUAGE_CODE = 'es-es'
 # load the internationalization machinery.
 USE_I18N = False
 
-# URL that handles the media served from MEDIA_ROOT.
-MEDIA_URL = ''
-
 # Full name of the URLconf root module.
 ROOT_URLCONF = 'arachnesite.urls'
+
+# Directory where the index directory is located.
+DATABASE_DIR = '/var/lib/arachne/'
+
+# URL that handles the media served from MEDIA_ROOT.
+MEDIA_URL = ''
 
 TEMPLATE_DIRS = (
     # Add the path to the directory with the templates here. Use absolute
     # paths, not relative paths.
 )
 
-# Directory where the index directory is located.
-DATABASE_DIR = '/var/lib/arachne/'
+# Not needed.
+TEMPLATE_CONTEXT_PROCESSORS = ()
+
+# This site does not need any middleware but leave this as sugested in the
+# Django documentation.
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+)
