@@ -8,14 +8,14 @@
        alt="Arachne, un motor de búsqueda para archivos y directorios" />
 </div>
 <div id="searchbox">
-  <form action="search/" method="post">
+  <form action="{{ site_root }}search/" method="post">
     <div id="basicbox">
       <input type="text" name="query" value="" size="36" maxlength="2048" />
       <input type="submit" name="search" value="Buscar" />
       {% ifequal search_type "advanced" %}
-      <a id="othersearch" href="basic/">Búsqueda básica</a>
+      <a id="othersearch" href="{{ site_root }}basic/">Búsqueda básica</a>
       {% else %}
-      <a id="othersearch" href="advanced/">Búsqueda avanzada</a>
+      <a id="othersearch" href="{{ site_root }}advanced/">Búsqueda avanzada</a>
       {% endifequal %}
       <input type="hidden" name="search_type" value="{{ search_type }}" />
     </div>

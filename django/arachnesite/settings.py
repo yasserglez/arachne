@@ -20,7 +20,7 @@
 """
 
 # Debug settings. Set this to False in a production environment.
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
 # Local time zone for this installation. Choices can be found here:
@@ -43,6 +43,9 @@ ROOT_URLCONF = 'arachnesite.urls'
 
 # Directory where the index directory is located.
 DATABASE_DIR = '/var/lib/arachne/'
+
+# Path (from the root of the web server) where this site is located.
+SITE_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT.
 MEDIA_URL = ''

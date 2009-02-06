@@ -19,6 +19,9 @@
 """Django views for the Arachne website.
 """
 
+import sys
+sys.path.append('/home/ygonzalez/Projects/arachne/Arachne')
+
 from django.conf import settings
 from django.shortcuts import render_to_response
 
@@ -29,6 +32,7 @@ def basic(request):
     """Show the basic search form.
     """
     context = {
+        'site_root': settings.SITE_ROOT,
         'media_url': settings.MEDIA_URL,
         'search_type': 'basic',
     }
@@ -40,6 +44,7 @@ def advanced(request):
     """
     searcher = IndexSearcher(settings.DATABASE_DIR)
     context = {
+        'site_root': settings.SITE_ROOT,
         'media_url': settings.MEDIA_URL,
         'search_type': 'advanced',
         'sites': searcher.get_sites(),
@@ -51,6 +56,7 @@ def search(request):
     """Execute the query and show results.
     """
     context = {
+        'site_root': settings.SITE_ROOT,
         'media_url': settings.MEDIA_URL,
         'results': results,
     }
