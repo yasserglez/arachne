@@ -10,14 +10,14 @@
 <div id="searchbox">
   <form action="{{ site_root }}search/" method="post">
     <div id="basicbox">
-      <input type="text" name="query" value="" size="36" maxlength="2048" />
+      <input id="query" type="text" name="query" value="" size="36" maxlength="2048" />
       <input type="submit" name="search" value="Buscar" />
       {% ifequal search_type "advanced" %}
       <a id="othersearch" href="{{ site_root }}basic/">Búsqueda básica</a>
       {% else %}
       <a id="othersearch" href="{{ site_root }}advanced/">Búsqueda avanzada</a>
       {% endifequal %}
-      <input type="hidden" name="search_type" value="{{ search_type }}" />
+      <input type="hidden" name="searchtype" value="{{ search_type }}" />
     </div>
     {% ifequal search_type "advanced" %}
     <div id="advancedbox">
