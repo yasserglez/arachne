@@ -19,13 +19,13 @@
 """Django views for the Arachne website.
 """
 
-import sys
-sys.path.append('/home/ygonzalez/Projects/arachne/Arachne')
-
 from django.conf import settings
 from django.shortcuts import render_to_response
 
 from arachne.searcher import IndexSearcher
+
+
+RESULTS_PER_PAGE = 20
 
 
 def basic(request):
@@ -58,6 +58,55 @@ def search(request):
     context = {
         'site_root': settings.SITE_ROOT,
         'media_url': settings.MEDIA_URL,
-        'results': results,
     }
+    query = request.POST.get('query', '')
+    context['query'] = query
+    if query:
+        search_type = request.POST.get('search_type', 'basic')
+        context['search_type'] = search_type
+        offset = int(request.POST.get('offset', 0))
+        check_at_least = offset + RESULTS_PER_PAGE + 1
+        searcher = IndexSearcher(settings.DATABASE_DIR)
+        if search_type == 'advanced':
+            # Advanced search.
+            site_ids = []
+            for site in searcher.get_sites():
+                included = request.POST.get(site['id'], None) != None
+                if included:
+                    site_ids.append(site['id'])
+            filetype = request.POST.get('filetype', 'both')
+            if filetype == 'file':
+                filetype = IndexSearcher.SEARCH_FILE
+            elif filetype == 'dir':
+                filetype = IndexSearcher.SEARCH_DIRECTORY
+            else:
+                filetype = IndexSearcher.SEARCH_ALL
+            estimated_results, results = \
+                searcher.search(query, offset, RESULTS_PER_PAGE,
+                                check_at_least, site_ids, filetype)
+        else:
+            # Basic search.
+            estimated_results, results = \
+                searcher.search(query, offset, RESULTS_PER_PAGE,
+                                check_at_least)
+        context['has_results'] = len(results) != 0
+        if context['has_results']:
+            for num, result in enumerate(results):
+                result['num'] = offset + 1 + num
+                result['is_odd'] = num % 2 == 0
+            context['results'] = results
+            context['total_results'] = estimated_results
+            context['first_result'] = offset + 1
+            context['last_result'] = min(offset + RESULTS_PER_PAGE,
+                                         estimated_results)
+            context['has_previous'] = offset != 0
+            if context['has_previous']:
+                context['previous_offset'] = offset - RESULTS_PER_PAGE
+            context['has_next'] = (estimated_results >
+                                   offset + RESULTS_PER_PAGE)
+            if context['has_next']:
+                context['next_offset'] = offset + RESULTS_PER_PAGE
+
+    else:
+        context['has_results'] = False
     return render_to_response('results.html', context)

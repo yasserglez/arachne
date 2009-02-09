@@ -81,15 +81,15 @@ class IndexSearcher(object):
         enquire = xapian.Enquire(self._db)
         xapian_query = self._parse_query(query, site_ids, filetype)
         enquire.set_query(xapian_query)
-        mset = enquire.get_mset(offset, offset + count, check_at_least)
+        mset = enquire.get_mset(offset, count, check_at_least)
         results = []
         for match in mset:
+            result = {}
             doc = match.get_document()
-            url = doc.get_data().decode('utf-8')
-            data = {}
+            result['url'] = doc.get_data().decode('utf-8')
             value = doc.get_value(IndexProcessor.IS_DIR_SLOT).decode('utf-8')
-            data['is_dir'] = (value == IndexProcessor.TRUE_VALUE)
-            results.append((url, data))
+            result['is_dir'] = (value == IndexProcessor.TRUE_VALUE)
+            results.append(result)
         estimated_total = mset.get_matches_estimated()
         return (estimated_total, results)
 

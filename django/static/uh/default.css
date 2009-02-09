@@ -113,3 +113,11 @@ a {
 #navigationbox {
     text-align: center;
 }
+
+#nextform {
+    display: none;
+}
+
+#previousform {
+    display: none;
+}

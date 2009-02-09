@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}{{ query }} - Arachne{% endblock %}
+{% block title %}{{ query|escape }} - Arachne{% endblock %}
 
 {% block content %}
 <div id="searchbox">
   <form action="{{ site_root }}search/" method="post">
-    <img id="logosmall" src="logosmall.png"
+    <img id="logosmall" src="{{ media_url }}logosmall.png"
          alt="Arachne, un motor de búsqueda para archivos y directorios" />
-    <input type="text" name="query" value="{{ query }}" size="42" maxlength="2048" />
+    <input type="text" name="query" value="{{ query|escape }}" size="42" maxlength="2048" />
     <input type="submit" name="search" value="Buscar" />
     <input type="hidden" name="search_type" value="{{ search_type }}" />
     {% ifequal search_type "advanced" %}
@@ -26,9 +26,9 @@
     {% endif %}
       <td class="resultnum">{{ result.num }}.</td>
       {% if result.is_dir %}
-      <td class="resulttype"><img src="directory.png" alt="Directory" /></td>
+      <td class="resulttype"><img src="{{ media_url }}directory.png" alt="Directory" /></td>
       {% else %}
-      <td class="resulttype"><img src="file.png" alt="File" /></td>
+      <td class="resulttype"><img src="{{ media_url }}file.png" alt="File" /></td>
       {% endif %}
       <td><a href="{{ result.url }}">{{ result.url }}</a></td>
     </tr>
@@ -41,11 +41,19 @@
 {% if has_results %}
 <div id="navigationbox">
   {% if has_previous %}
-  <strong><a href="">&lt; Anterior</a></strong>
+  <form id="previousform" action="{{ site_root }}search/" method="post">
+    <input type="hidden" name="query" value="{{ query|escape }}" />
+    <input type="hidden" name="offset" value="{{ previous_offset }}" />
+  </form>
+  <strong><a href="#" onclick="document.getElementById('previousform').submit(); return false;">&lt; Anterior</a></strong>
   {% endif %}
-  <strong>{{ first_result }} - {{ last_result }}</strong> de <strong>{{ total_result }}</strong>
+  <strong>{{ first_result }} - {{ last_result }}</strong> de <strong>{{ total_results }}</strong>
   {% if has_next %}
-  <strong><a href="">Siguiente &gt;</a></strong>
+  <form id="nextform" action="{{ site_root }}search/" method="post">
+    <input type="hidden" name="query" value="{{ query|escape }}" />
+    <input type="hidden" name="offset" value="{{ next_offset }}" />
+  </form>
+  <strong><a href="#" onclick="document.getElementById('nextform').submit(); return false;">Siguiente &gt;</a></strong>
   {% endif %}
 </div>
 {% endif %}
