@@ -4,7 +4,7 @@
 
 {% block content %}
 <div id="searchbox">
-  <form action="{{ site_root }}search/" method="post">
+  <form action="{{ site_root }}results/" method="post">
     <img id="logosmall" src="{{ media_url }}logosmall.png"
          alt="Arachne, un motor de búsqueda para archivos y directorios" />
     <input type="text" name="query" value="{{ query|escape }}" size="42" maxlength="2048" />
@@ -41,7 +41,7 @@
 {% if has_results %}
 <div id="navigationbox">
   {% if has_previous %}
-  <form id="previousform" action="{{ site_root }}search/" method="post">
+  <form id="previousform" action="{{ site_root }}results/" method="post">
     <input type="hidden" name="query" value="{{ query|escape }}" />
     <input type="hidden" name="offset" value="{{ previous_offset }}" />
   </form>
@@ -49,7 +49,7 @@
   {% endif %}
   <strong>{{ first_result }} - {{ last_result }}</strong> de <strong>{{ total_results }}</strong>
   {% if has_next %}
-  <form id="nextform" action="{{ site_root }}search/" method="post">
+  <form id="nextform" action="{{ site_root }}results/" method="post">
     <input type="hidden" name="query" value="{{ query|escape }}" />
     <input type="hidden" name="offset" value="{{ next_offset }}" />
   </form>

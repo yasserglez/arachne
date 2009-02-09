@@ -52,7 +52,7 @@ def advanced(request):
     return render_to_response('search.html', context)
 
 
-def search(request):
+def results(request):
     """Execute the query and show results.
     """
     context = {
@@ -106,7 +106,6 @@ def search(request):
                                    offset + RESULTS_PER_PAGE)
             if context['has_next']:
                 context['next_offset'] = offset + RESULTS_PER_PAGE
-
     else:
         context['has_results'] = False
     return render_to_response('results.html', context)
