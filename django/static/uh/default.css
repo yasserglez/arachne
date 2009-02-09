@@ -32,6 +32,10 @@ a {
     margin-bottom: 20px;
 }
 
+#logobig {
+    border: 0px;
+}
+
 #othersearch {
     font-size: 0.8em;
 }
@@ -67,8 +71,8 @@ a {
 
 #advancedoptions ul {
     list-style-type: none;
-    padding: 0em;
-    margin: 0em;
+    padding: 0px;
+    margin: 0px;
 }
 
 /* Results page style. */
@@ -76,6 +80,7 @@ a {
 #logosmall {
     vertical-align: bottom;
     margin-right: 0.6em;
+    border: 0px;
 }
 
 #results {
@@ -105,7 +110,7 @@ a {
 }
 
 #results .resulttype {
-    margin: 0;
+    margin: 0px;
     padding: 2px;
     text-align: center;
 }
