@@ -19,8 +19,12 @@
 """Settings for the Arachne website.
 """
 
+import sys
+sys.path.append('/home/ygonzalez/Projects/arachne/Arachne')
+
+
 # Debug settings. Set this to False in a production environment.
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 # Local time zone for this installation. Choices can be found here:
@@ -42,17 +46,18 @@ USE_I18N = False
 ROOT_URLCONF = 'arachnesite.urls'
 
 # Directory where the index directory is located.
-DATABASE_DIR = '/var/lib/arachne/'
+DATABASE_DIR = '/home/ygonzalez/Projects/arachne/Sandbox/'
 
 # Path (from the root of the web server) where this site is located.
-SITE_ROOT = ''
+SITE_ROOT = '/'
 
 # URL that handles the media served from MEDIA_ROOT.
-MEDIA_URL = ''
+MEDIA_URL = '/static/'
 
 TEMPLATE_DIRS = (
     # Add the path to the directory with the templates here. Use absolute
     # paths, not relative paths.
+    '/home/ygonzalez/Projects/arachne/Arachne/django/templates/uh/',
 )
 
 # Not needed.

@@ -93,7 +93,7 @@ def results(request):
         if context['has_results']:
             for num, result in enumerate(results):
                 result['num'] = offset + 1 + num
-                result['is_odd'] = num % 2 == 0
+                result['is_even'] = num % 2 != 0
             context['results'] = results
             context['total_results'] = estimated_results
             context['first_result'] = offset + 1
