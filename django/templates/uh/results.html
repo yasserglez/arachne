@@ -40,7 +40,9 @@
     {% endfor %}
   </table>
   {% else %}
-  <p id="noresults"><strong>No se obtuvo ningún resultado.</strong></p>
+  <div id="noresults">
+    <strong>No se obtuvo ningún resultado</strong>
+  </div>
   {% endif %}
 </div>
 {% if has_results %}

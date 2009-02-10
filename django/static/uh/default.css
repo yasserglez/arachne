@@ -83,6 +83,12 @@ a {
     border: 0px;
 }
 
+#noresults {
+    text-align: center;
+    margin-top: 2em;
+    margin-bottom: 1em;
+}
+
 #results {
     width: 100%;
     margin-top: 2em;
