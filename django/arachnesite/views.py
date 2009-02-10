@@ -62,7 +62,7 @@ def results(request):
     query = request.POST.get('query', '')
     context['query'] = query
     if query:
-        search_type = request.POST.get('search_type', 'basic')
+        search_type = request.POST.get('searchtype', 'basic')
         context['search_type'] = search_type
         offset = int(request.POST.get('offset', 0))
         # Ensure valid page links, at least, for the next 10 pages.
@@ -70,12 +70,16 @@ def results(request):
         searcher = IndexSearcher(settings.DATABASE_DIR)
         if search_type == 'advanced':
             # Advanced search.
+            sites = []
             site_ids = []
             for site in searcher.get_sites():
                 included = request.POST.get(site['id'], None) != None
                 if included:
+                    sites.append(site)
                     site_ids.append(site['id'])
+            context['sites'] = sites
             filetype = request.POST.get('filetype', 'both')
+            context['filetype'] = filetype
             if filetype == 'file':
                 filetype = IndexSearcher.SEARCH_FILE
             elif filetype == 'dir':

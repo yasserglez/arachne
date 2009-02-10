@@ -101,6 +101,8 @@ a {
 #results td {
     padding-left: 0.5em;
     padding-right: 0.5em;
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;
     vertical-align: middle;
 }
 

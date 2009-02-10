@@ -11,9 +11,12 @@
     </a>
     <input type="text" name="query" value="{{ query|escape }}" size="42" maxlength="2048" />
     <input type="submit" name="search" value="Buscar" />
-    <input type="hidden" name="search_type" value="{{ search_type }}" />
+    <input type="hidden" name="searchtype" value="{{ search_type }}" />
     {% ifequal search_type "advanced" %}
-    {# Add hidden fiels for the selected sites. #}
+    {% for site in sites %}
+    <input type="hidden" name="{{ site.id }}" value="on" />
+    {% endfor %}
+    <input type="hidden" name="filetype" value="{{ filetype }}" />
     {% endifequal %}
   </form>
 </div>
@@ -45,7 +48,14 @@
   {% if has_previous %}
   <form id="previousform" action="{{ site_root }}results/" method="post">
     <input type="hidden" name="query" value="{{ query|escape }}" />
+    <input type="hidden" name="searchtype" value="{{ search_type }}" />
     <input type="hidden" name="offset" value="{{ previous_offset }}" />
+    {% ifequal search_type "advanced" %}
+    {% for site in sites %}
+    <input type="hidden" name="{{ site.id }}" value="on" />
+    {% endfor %}
+    <input type="hidden" name="filetype" value="{{ filetype }}" />
+    {% endifequal %}
   </form>
   <strong><a href="#" onclick="document.getElementById('previousform').submit(); return false;">&lt; Anterior</a></strong>
   {% endif %}
@@ -53,7 +63,14 @@
   {% if has_next %}
   <form id="nextform" action="{{ site_root }}results/" method="post">
     <input type="hidden" name="query" value="{{ query|escape }}" />
+    <input type="hidden" name="searchtype" value="{{ search_type }}" />
     <input type="hidden" name="offset" value="{{ next_offset }}" />
+    {% ifequal search_type "advanced" %}
+    {% for site in sites %}
+    <input type="hidden" name="{{ site.id }}" value="on" />
+    {% endfor %}
+    <input type="hidden" name="filetype" value="{{ filetype }}" />
+    {% endifequal %}
   </form>
   <strong><a href="#" onclick="document.getElementById('nextform').submit(); return false;">Siguiente &gt;</a></strong>
   {% endif %}
