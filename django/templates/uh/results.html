@@ -13,6 +13,7 @@
     <input type="submit" name="search" value="Buscar" />
     <input type="hidden" name="searchtype" value="{{ search_type }}" />
     {% ifequal search_type "advanced" %}
+    <a id="othersearch" href="{{ site_root }}advanced/">Redefinir búsqueda avanzada</a>
     {% for site in sites %}
     <input type="hidden" name="{{ site.id }}" value="on" />
     {% endfor %}
