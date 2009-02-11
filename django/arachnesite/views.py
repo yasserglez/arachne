@@ -22,6 +22,7 @@
 from django.conf import settings
 from django.shortcuts import render_to_response
 
+from arachne import __version__
 from arachne.searcher import IndexSearcher
 
 
@@ -32,6 +33,7 @@ def basic(request):
     """Show the basic search form.
     """
     context = {
+        'version': __version__,
         'site_root': settings.SITE_ROOT,
         'media_url': settings.MEDIA_URL,
         'search_type': 'basic',
@@ -44,6 +46,7 @@ def advanced(request):
     """
     searcher = IndexSearcher(settings.DATABASE_DIR)
     context = {
+        'version': __version__,
         'site_root': settings.SITE_ROOT,
         'media_url': settings.MEDIA_URL,
         'search_type': 'advanced',
@@ -56,6 +59,7 @@ def results(request):
     """Execute the query and show results.
     """
     context = {
+        'version': __version__,
         'site_root': settings.SITE_ROOT,
         'media_url': settings.MEDIA_URL,
     }
