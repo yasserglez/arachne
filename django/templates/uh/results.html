@@ -5,7 +5,7 @@
 {% block content %}
 <div id="searchbox">
   <form action="{{ site_root }}results/" method="post">
-    <a href="{{ site_root }}" alt="Ir a la página principal">
+    <a href="{{ site_root }}" title="Ir a la página principal">
       <img id="logosmall" src="{{ media_url }}logosmall.png"
            alt="Arachne, un motor de búsqueda para archivos y directorios" />
     </a>
@@ -13,7 +13,8 @@
     <input type="submit" name="search" value="Buscar" />
     <input type="hidden" name="searchtype" value="{{ search_type }}" />
     {% ifequal search_type "advanced" %}
-    <a id="othersearch" href="{{ site_root }}advanced/">Redefinir búsqueda avanzada</a>
+    <a id="othersearch" href="{{ site_root }}advanced/"
+       title="Redefinir opciones de la búsqueda avanzada">Redefinir búsqueda avanzada</a>
     {% for site in sites %}
     <input type="hidden" name="{{ site.id }}" value="on" />
     {% endfor %}
@@ -23,7 +24,7 @@
 </div>
 <div id="resultsbox">
   {% if has_results %}
-  <table id="results">
+  <table id="results" summary="Resultados de la búsqueda">
     {% for result in results %}
     {% if result.is_even %}
     <tr class="even">
@@ -32,13 +33,12 @@
     {% endif %}
       <td class="resultnum">{{ result.num }}.</td>
       {% if result.is_dir %}
-      <td class="resulttype"><img src="{{ media_url }}directory.png" alt="Directory" /></td>
+      <td class="resulttype"><img src="{{ media_url }}directory.png" alt="Directory" title="Directory" /></td>
       {% else %}
-      <td class="resulttype"><img src="{{ media_url }}file.png" alt="File" /></td>
+      <td class="resulttype"><img src="{{ media_url }}file.png" alt="File" title="File" /></td>
       {% endif %}
-      <td><a href="{{ result.url }}">{{ result.url }}</a></td>
-    </tr>
-    {% endfor %}
+      <td><a href="{{ result.url|escape }}" title="Visitar sitio">{{ result.url|escape }}</a></td>
+    </tr>{% endfor %}
   </table>
   {% else %}
   <div id="noresults">
@@ -60,7 +60,8 @@
     <input type="hidden" name="filetype" value="{{ filetype }}" />
     {% endifequal %}
   </form>
-  <strong><a href="#" onclick="document.getElementById('previousform').submit(); return false;">&lt; Anterior</a></strong>
+  <strong><a href="#" onclick="document.getElementById('previousform').submit(); return false;"
+             title="Ir a la página anterior">&lt; Anterior</a></strong>
   {% endif %}
   <strong>{{ first_result }} - {{ last_result }}</strong> de <strong>{{ total_results }}</strong>
   {% if has_next %}
@@ -70,12 +71,13 @@
     <input type="hidden" name="offset" value="{{ next_offset }}" />
     {% ifequal search_type "advanced" %}
     {% for site in sites %}
-    <input type="hidden" name="{{ site.id }}" value="on" />
+    <input type="hidden" name="{{ site.id|escape }}" value="on" />
     {% endfor %}
     <input type="hidden" name="filetype" value="{{ filetype }}" />
     {% endifequal %}
   </form>
-  <strong><a href="#" onclick="document.getElementById('nextform').submit(); return false;">Siguiente &gt;</a></strong>
+  <strong><a href="#" onclick="document.getElementById('nextform').submit(); return false;"
+             title="Ir a la página siguiente">Siguiente &gt;</a></strong>
   {% endif %}
 </div>
 {% endif %}
