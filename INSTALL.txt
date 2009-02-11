@@ -5,5 +5,10 @@ run this command from the command prompt:
     python setup.py install
 
   Although it is not a requirement, you should consider installing a DNS cache
-server (such as the provided in the djbdns Debian/Ubuntu package) in the host
-running Arachne to speed up the DNS queries.
+server (such as the provided in the djbdns or pdnsd Debian/Ubuntu packages) in
+the host running Arachne to speed up the DNS queries.
+
+  You should also install (in the same host running the Arachne daemon) the web
+interface provided by the Django project located in the django directory of the
+source distribution of Arachne.  For instructions installing a Django
+application refer to the Django Website.

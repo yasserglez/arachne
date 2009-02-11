@@ -37,8 +37,8 @@ setup(name='Arachne',
       data_files=[
         ('/etc/init.d/', ['data/arachned']),
         ('/etc/arachne/', ['data/arachned.conf', 'data/sites.conf']),
-        ('/share/doc/arachne/', ['AUTHORS', 'INSTALL', 'LICENSE', 'README',
-                                 'THANKS']),
+        ('/share/doc/arachne/', ['AUTHORS.txt', 'INSTALL.txt', 'LICENSE.txt',
+                                 'README.txt', 'THANKS.txt']),
         # The daemon script should be copied to the /usr/sbin/ directory.
         ('/usr/sbin/', ['scripts/arachned']),
         # Empty directories required by the default configuration.
