@@ -23,8 +23,6 @@ from django.conf.urls.defaults import *
 
 
 urlpatterns = patterns('',
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-     {'document_root': '/home/ygonzalez/Projects/arachne/Arachne/django/static/uh'}),
     (r'^$', 'arachnesite.views.basic'),
     (r'^basic/$', 'arachnesite.views.basic'),
     (r'^advanced/$', 'arachnesite.views.advanced'),
