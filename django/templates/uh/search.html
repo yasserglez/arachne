@@ -22,10 +22,11 @@
       <input type="hidden" name="searchtype" value="{{ search_type }}" />
     </div>
     <div id="helpbox">
-      <p>Introduzca, separados por espacios, los términos para realizar la
-      búsqueda. Puede utilizar <code>+término</code> para garantizar que todos
-      los resultados contengan el término y/o <code>-término</code> para que
-      ninguno lo contenga.</p>
+      <p>Introduzca, los términos para realizar la búsqueda, aquellos que
+      tengan menos de 3 caracteres serán ignorados. Puede utilizar
+      <code>+término</code> para indicar que todos los resultados deben
+      contener el término y/o <code>-término</code> para que ninguno lo
+      contenga.</p>
     </div>
     {% ifequal search_type "advanced" %}
     <div id="advancedbox">
