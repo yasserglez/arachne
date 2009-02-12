@@ -35,11 +35,10 @@ class ProtocolHandler(object):
     crawler.  This provides a way to extend the crawler to support new
     protocols.  Instances of this class are used by the `SiteCrawler`.
 
-    The subclasses should set the `scheme` class attribute to the URL scheme
-    specifier for the protocol.
+    The subclasses should set the `name` class attribute.
     """
 
-    scheme = ''
+    name = ''
 
     def __init__(self, sites_info, tasks, results):
         """Initialize the protocol handler.
@@ -65,7 +64,7 @@ class FileHandler(ProtocolHandler):
     """Handler for local files.
     """
 
-    scheme = 'file'
+    name = 'file'
 
     def __init__(self, sites_info, tasks, results):
         """Initialize handler.
@@ -106,7 +105,7 @@ class FTPHandler(ProtocolHandler):
     """Handler for FTP sites.
     """
 
-    scheme = 'ftp'
+    name = 'ftp'
 
     def __init__(self, sites_info, tasks, results):
         """Initialize the handler.

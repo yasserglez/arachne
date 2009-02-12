@@ -41,12 +41,13 @@ class SiteCrawler(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._sleep = 1
+        self._sites_info = sites_info
         self._tasks = tasks
         self._results = results
         self._handlers = {}
         for handler_class in ProtocolHandler.__subclasses__():
             handler = handler_class(sites_info, tasks, results)
-            self._handlers[handler_class.scheme] = handler
+            self._handlers[handler_class.name] = handler
         # Flag used to stop the loop started by the run() method.
         self._running = False
 
@@ -77,12 +78,13 @@ class SiteCrawler(threading.Thread):
         Call the handler to execute the crawl task and report the result to the
         result queue.
         """
-        scheme = task.url.scheme
+        site_info = self._sites_info[task.site_id]
+        handler_name = site_info.get('handler', task.url.scheme)
         try:
-            handler = self._handlers[scheme]
+            handler = self._handlers[handler_name]
         except KeyError:
             self._tasks.report_error(task)
-            logging.error('Scheme of "%s" is not supported' % task.url)
+            logging.error('Could not find a handler for "%s"' % handler_name)
         else:
             if task.revisit_count == -1:
                 logging.info('Visiting "%s"' % task.url)
