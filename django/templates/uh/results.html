@@ -7,8 +7,7 @@
   <form action="{{ site_root }}results/" method="post">
     <a href="{{ site_root }}" title="Ir a la página principal">
       <img id="logosmall" src="{{ media_url }}logosmall.png"
-           alt="Arachne, un motor de búsqueda para archivos y directorios" />
-    </a>
+           alt="Arachne, un motor de búsqueda para archivos y directorios" /></a>
     <input type="text" name="query" value="{{ query|escape }}" size="42" maxlength="2048" />
     <input type="submit" name="search" value="Buscar" />
     <input type="hidden" name="searchtype" value="{{ search_type }}" />
