@@ -14,21 +14,29 @@ case "$1" in
 	start)
 		echo -n "Starting $DESC: "
 		start-stop-daemon --start --quiet --pidfile $PIDFILE \
-			--exec $DAEMON
+            # Uncomment this to enable running as the arachne user.
+			# --user arachne --chuid arachne:arachne \
+			--startas $DAEMON
 		echo "$NAME."
 		;;
 	stop)
 		echo -n "Stopping $DESC: "
 		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
-			--retry=TERM/30/KILL/forever
+            # Uncomment this to enable running as the arachne user.
+			# --user arachne \
+            --retry=TERM/30/KILL/forever
 		echo "$NAME."
 		;;
 	restart|force-reload)
 		echo -n "Restarting $DESC: "
 		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
-			--retry=TERM/30/KILL/forever
+            # Uncomment this to enable running as the arachne user.
+			# --user arachne \
+            --retry=TERM/30/KILL/forever
 		start-stop-daemon --start --quiet --pidfile $PIDFILE \
-			--exec $DAEMON
+            # Uncomment this to enable running as the arachne user.
+			# --user arachne --chuid arachne:arachne \
+			--startas $DAEMON
 		echo "$NAME."
 		;;
 	*)
