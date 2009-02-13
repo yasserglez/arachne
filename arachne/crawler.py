@@ -83,7 +83,7 @@ class SiteCrawler(threading.Thread):
         try:
             handler = self._handlers[handler_name]
         except KeyError:
-            self._tasks.report_error(task)
+            self._tasks.report_error_site(task)
             logging.error('Could not find a handler for "%s"' % handler_name)
         else:
             if task.revisit_count == -1:
