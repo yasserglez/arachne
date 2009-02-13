@@ -42,14 +42,14 @@ class ArachneDaemon(Daemon):
     """
 
     def __init__(self, sites, num_crawlers, spool_dir, database_dir, log_file,
-                 log_level, pid_file, user, group):
+                 log_level, pid_file):
         """Initialize the daemon.
 
         Creates the `TaskQueue`, `ResultQueue`, `CrawlerManager` and
         `ProcessorManager` instances.  The `sites` argument should be a list
         with the information for each site.
         """
-        Daemon.__init__(self, pid_file=pid_file, user=user, group=group)
+        Daemon.__init__(self, pid_file=pid_file)
         logging.basicConfig(filename=log_file, level=log_level,
                             format='%(asctime)s %(levelname)s %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S')

@@ -53,8 +53,6 @@ def _parse_config_file(configfile):
     """
     config = {
         'num_crawlers': 3,
-        'user': None,
-        'group': None,
         'sites_file': '/etc/arachne/sites.conf',
         'pid_file': '/var/run/arachne/arachned.pid',
         'spool_dir': '/var/lib/spool/arachne/',
@@ -87,16 +85,6 @@ def _parse_config_file(configfile):
                 raise ValueError('Invalid number of crawlers.')
         except ValueError:
             _error('invalid value for num_crawlers in the config file.')
-        if config['user'] is not None:
-            try:
-                config['user'] = int(config['user'])
-            except ValueError:
-                pass
-        if config['group'] is not None:
-            try:
-                config['group'] = int(config['group'])
-            except ValueError:
-                pass
         if isinstance(config['log_level'], basestring):
             values = {
                 'DEBUG': logging.DEBUG,
@@ -166,8 +154,7 @@ def main():
     sites = _parse_sites_file(config['sites_file'])
     daemon = ArachneDaemon(sites, config['num_crawlers'], config['spool_dir'],
                            config['database_dir'], config['log_file'],
-                           config['log_level'], config['pid_file'],
-                           config['user'], config['group'])
+                           config['log_level'], config['pid_file'])
     daemon.start()
     sys.exit(0)
 
