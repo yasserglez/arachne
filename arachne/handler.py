@@ -20,11 +20,16 @@
 """
 
 import os
+import re
 import errno
 import ftplib
+import urllib
+import urllib2
 import logging
 import socket
+import htmlentitydefs
 
+from arachne import __version__
 from arachne.result import CrawlResult
 
 
@@ -92,10 +97,10 @@ class FileHandler(ProtocolHandler):
                 self._tasks.report_error_dir(task)
             else:
                 self._tasks.report_error_site(task)
-            logging.error('Error visiting %s (%s)' % (url, error.strerror))
+            logging.error('Error visiting "%s" (%s)' % (url, error.strerror))
         except IOError, error:
             self._tasks.report_error_site(task)
-            logging.error('Error visiting %s (%s)' % (url, error.strerror))
+            logging.error('Error visiting "%s" (%s)' % (url, error.strerror))
         else:
             self._results.put(result)
             self._tasks.report_done(task)
@@ -165,7 +170,7 @@ class FTPHandler(ProtocolHandler):
             logging.error('Error visiting "%s" (%s)' % (url, error))
         except IOError, error:
             self._tasks.report_error_site(task)
-            logging.error('Error visiting %s (%s)' % (url, error.strerror))
+            logging.error('Error visiting "%s" (%s)' % (url, error.strerror))
         except EOFError:
             ftp.close()
             self._tasks.report_error_site(task)
@@ -242,3 +247,80 @@ class FTPHandler(ProtocolHandler):
             # format or it contains additional information provided by the FTP
             # server that can be ignored.
             return None
+
+
+class ApacheHandler(ProtocolHandler):
+    """Handler for sites using Apache autoindex.
+    """
+
+    name = 'apache'
+
+    _ENTRIES_RE = re.compile(r'alt="\[([^\]]+)\]".+<a[^>]+>([^<]+?)/?</a>.*[0-9]{2}-[a-zA-Z]{3}-[0-9]{4}', re.I)
+
+    _ENTITIES_RE = re.compile(r'&(\w+?);')
+
+    def __init__(self, sites_info, tasks, results):
+        """Initialize the handler.
+        """
+        self._encoding = 'utf-8'
+        self._tasks = tasks
+        self._results = results
+
+    def execute(self, task):
+        """Execute the task and return the result.
+        """
+        url = task.url
+        encoded_url = str(url)
+        path_encoded = url.path.encode(self._encoding)
+        encoded_url = '%s%s/' % (encoded_url[:-len(path_encoded)],
+                                 urllib.quote(path_encoded))
+        opener = urllib2.build_opener()
+        opener.addheaders = [('User-agent', 'Arachne/%s' % __version__)]
+        try:
+            fp = opener.open(encoded_url)
+            data = fp.read()
+            # Everything seems to be OK, add entries to the result.
+            result = CrawlResult(task, True)
+            for match in self._ENTRIES_RE.finditer(data):
+                entry_data = {}
+                entry_data['is_dir'] = (match.group(1).lower() == 'dir')
+                entry_name = self._ENTITIES_RE.sub(self._sub_entity, match.group(2))
+                result.add_entry(entry_name, entry_data)
+            fp.close()
+            self._results.put(result)
+            self._tasks.report_done(task)
+        except urllib2.HTTPError, error:
+            if error.code == 404:
+                # The directory does not exists. Generate a not-found result
+                # because the entire directory tree should be removed from the
+                # index.
+                result = CrawlResult(task, False)
+                self._results.put(result)
+                self._tasks.report_done(task)
+            else:
+                self._tasks.report_error_site(task)
+                logging.error('Error visiting "%s" (%s: %s)' % (url, error.code, error.msg))
+        except urllib2.URLError, error:
+            self._tasks.report_error_site(task)
+            reason = error.reason
+            if not isinstance(reason, basestring):
+                reason = reason[1]
+            logging.error('Error visiting "%s" (%s)' % (url, reason))
+        except socket.error, error:
+            self._tasks.report_error_site(task)
+            if not isinstance(error, basestring):
+                error = error[1]
+            logging.error('Error visiting "%s" (%s)' % (url, error))
+        except EOFError:
+            fp.close()
+            self._tasks.report_error_site(task)
+            logging.error('Error visiting "%s" (Error reading data)' % url)
+
+    @staticmethod
+    def _sub_entity(match):
+        """Callback used to substitute HTML entities.
+        """
+        try:
+            return htmlentitydefs.entitydefs[match.group(1)]
+        except KeyError:
+            return match.group(0)
