@@ -298,7 +298,7 @@ class ApacheHandler(ProtocolHandler):
                 self._results.put(result)
                 self._tasks.report_done(task)
             else:
-                self._tasks.report_error_site(task)
+                self._tasks.report_error_dir(task)
                 logging.error('Error visiting "%s" (%s: %s)' % (url, error.code, error.msg))
         except urllib2.URLError, error:
             self._tasks.report_error_site(task)
