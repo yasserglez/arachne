@@ -14,33 +14,21 @@ case "$1" in
 	start)
 		echo -n "Starting $DESC: "
 		start-stop-daemon --start --quiet --pidfile $PIDFILE \
-			--startas $DAEMON
-            # Add this options to enable running as the arachne user.
-			# --user arachne --chuid arachne:arachne
+            --startas $DAEMON
+            # Add this to enable running as the arachne user.
+            # --user arachne --chuid arachne:arachne
 		echo "$NAME."
 		;;
 	stop)
 		echo -n "Stopping $DESC: "
 		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
             --retry=TERM/30/KILL/forever
-            # Add this options to enable running as the arachne user.
-			# --user arachne
-		echo "$NAME."
-		;;
-	restart|force-reload)
-		echo -n "Restarting $DESC: "
-		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
-            --retry=TERM/30/KILL/forever
-            # Add this options to enable running as the arachne user.
-			# --user arachne
-		start-stop-daemon --start --quiet --pidfile $PIDFILE \
-			--startas $DAEMON
-            # Add this options to enable running as the arachne user.
-			# --user arachne --chuid arachne:arachne
+            # Add this to enable running as the arachne user.
+            # --user arachne
 		echo "$NAME."
 		;;
 	*)
-		echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+		echo "Usage: $SCRIPTNAME {start|stop}" >&2
 		exit 1
 		;;
 esac
