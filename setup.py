@@ -41,7 +41,7 @@ setup(name='Arachne',
         ('/usr/share/doc/arachne/', ['AUTHORS.txt', 'INSTALL.txt',
                                      'LICENSE.txt', 'README.txt',
                                      'THANKS.txt']),
-        # The daemon script should be copied to the /usr/sbin/ directory.
+        # The arachned script should be copied to the /usr/sbin/ directory.
         ('/usr/sbin/', ['scripts/arachned']),
         # Empty directories required by the default configuration.
         ('/var/run/arachne/', []),
