@@ -45,7 +45,7 @@ setup(name='Arachne',
         ('/usr/sbin/', ['scripts/arachned']),
         # Empty directories required by the default configuration.
         ('/var/run/arachne/', []),
-        ('/var/lib/spool/arachne', []),
+        ('/var/spool/arachne', []),
         ('/var/lib/arachne/', []),
         ('/var/log/arachne/', []),
       ],
