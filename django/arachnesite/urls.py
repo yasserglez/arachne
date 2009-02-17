@@ -22,6 +22,8 @@
 from django.conf.urls.defaults import *
 
 
+handler500 = 'arachnesite.views.server_error'
+
 urlpatterns = patterns('',
     (r'^$', 'arachnesite.views.basic'),
     (r'^basic/$', 'arachnesite.views.basic'),

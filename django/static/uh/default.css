@@ -142,3 +142,11 @@ a {
 #previousform {
     display: none;
 }
+
+/* Server error page style. */
+
+#errorbox {
+    text-align: center;
+    margin-top: 2em;
+    margin-bottom: 1em;
+}

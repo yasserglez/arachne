@@ -118,3 +118,12 @@ def results(request):
     else:
         context['has_results'] = False
     return render_to_response('results.html', context)
+
+
+def server_error(request):
+    context = {
+        'version': __version__,
+        'site_root': settings.SITE_ROOT,
+        'media_url': settings.MEDIA_URL,
+    }
+    return render_to_response('500.html', context)
