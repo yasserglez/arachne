@@ -1,3 +1,6 @@
 Yasser González Fernández <yglez@uh.cu>
 
+  Arachne is based on the ideas from FTPLocate by Andy Teijelo Pérez
+  <ateijelo@uh.cu>.
+
   See also THANKS.txt for a list of people who have contributed to the project.
