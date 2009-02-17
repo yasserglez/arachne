@@ -13,15 +13,15 @@ SCRIPTNAME=/etc/init.d/arachned
 case "$1" in
 	start)
 		echo -n "Starting $DESC: "
-		start-stop-daemon --start --quiet --pidfile $PIDFILE \
-            --startas $DAEMON
+		start-stop-daemon --start --quiet --pidfile "$PIDFILE" \
+            --startas" $DAEMON"
             # Add this to enable running as the arachne user.
             # --user arachne --chuid arachne:arachne
 		echo "$NAME."
 		;;
 	stop)
 		echo -n "Stopping $DESC: "
-		start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+		start-stop-daemon --stop --quiet --pidfile "$PIDFILE" \
             --retry=TERM/30/KILL/forever
             # Add this to enable running as the arachne user.
             # --user arachne
