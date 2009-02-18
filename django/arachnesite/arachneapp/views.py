@@ -114,6 +114,6 @@ def results(request):
     return render_to_response('results.html', context)
 
 
-def server_error(request):
+def handler500(request):
     context = DEFAULT_CONTEXT.copy()
     return render_to_response('500.html', context)

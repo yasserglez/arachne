@@ -22,12 +22,9 @@
 from django.conf.urls.defaults import *
 
 
-handler500 = 'arachneapps.views.server_error'
-
 urlpatterns = patterns('arachneapp.views',
     (r'^$', 'basic'),
     (r'^basic/$', 'basic'),
     (r'^advanced/$', 'advanced'),
     (r'^results/$', 'results'),
-    (r'^error/$', 'server_error'),
 )
