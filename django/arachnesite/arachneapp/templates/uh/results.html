@@ -2,7 +2,7 @@
 
 {% load arachnefilters %}
 
-{% block title %}{{ query|escape }} - Arachne{% endblock %}
+{% block title %}{{ query }} - Arachne{% endblock %}
 
 {% block content %}
 <div id="searchbox">
@@ -10,7 +10,7 @@
     <a href="{{ root }}" title="Ir a la página principal">
       <img id="logosmall" src="{{ media_url }}logosmall.png"
            alt="Arachne, un motor de búsqueda para archivos y directorios" /></a>
-    <input type="text" name="query" value="{{ query|escape }}" size="42" maxlength="2048" />
+    <input type="text" name="query" value="{{ query }}" size="42" maxlength="2048" />
     <input type="submit" name="search" value="Buscar" />
     <input type="hidden" name="searchtype" value="{{ search_type }}" />
     {% ifequal search_type "advanced" %}
@@ -52,7 +52,7 @@
 <div id="navigationbox">
   {% if has_previous %}
   <form id="previousform" action="{{ root }}results/" method="post">
-    <input type="hidden" name="query" value="{{ query|escape }}" />
+    <input type="hidden" name="query" value="{{ query }}" />
     <input type="hidden" name="searchtype" value="{{ search_type }}" />
     <input type="hidden" name="offset" value="{{ previous_offset }}" />
     {% ifequal search_type "advanced" %}
@@ -68,12 +68,12 @@
   <strong>{{ first_result }} - {{ last_result }}</strong> de <strong>{{ total_results }}</strong>
   {% if has_next %}
   <form id="nextform" action="{{ root }}results/" method="post">
-    <input type="hidden" name="query" value="{{ query|escape }}" />
+    <input type="hidden" name="query" value="{{ query }}" />
     <input type="hidden" name="searchtype" value="{{ search_type }}" />
     <input type="hidden" name="offset" value="{{ next_offset }}" />
     {% ifequal search_type "advanced" %}
     {% for site in sites %}
-    <input type="hidden" name="{{ site.id|escape }}" value="on" />
+    <input type="hidden" name="{{ site.id }}" value="on" />
     {% endfor %}
     <input type="hidden" name="filetype" value="{{ filetype }}" />
     {% endifequal %}

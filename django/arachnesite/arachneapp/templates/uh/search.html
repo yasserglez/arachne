@@ -61,9 +61,9 @@
             <ul>
               {% for site in sites %}
               <li>
-                <input id="{{ site.id|escape }}" type="checkbox" name="{{ site.id|escape }}" checked="checked" />
-                <label for="{{ site.id|escape }}">
-                  <a href="{{ site.url|escape }}" title="Ir al sitio">{{ site.url|escape }}</a>
+                <input id="{{ site.id }}" type="checkbox" name="{{ site.id }}" checked="checked" />
+                <label for="{{ site.id }}">
+                  <a href="{{ site.url }}" title="Ir al sitio">{{ site.url }}</a>
                 </label>
               </li>
               {% endfor %}
