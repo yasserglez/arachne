@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load arachnefilters %}
+
 {% block title %}{{ query|escape }} - Arachne{% endblock %}
 
 {% block content %}
@@ -30,13 +32,14 @@
     {% else %}
     <tr>
     {% endif %}
-      <td class="resultnum">{{ result.num }}.</td>
-      {% if result.is_dir %}
-      <td class="resulttype"><img src="{{ media_url }}directory.png" alt="Directory" title="Directory" /></td>
-      {% else %}
-      <td class="resulttype"><img src="{{ media_url }}file.png" alt="File" title="File" /></td>
-      {% endif %}
-      <td><a href="{{ result.url|escape }}" title="Visitar sitio">{{ result.url|escape }}</a></td>
+    <td class="resultnum">{{ result.num }}.</td>
+    {% if result.is_dir %}
+    <td class="resulttype"><img src="{{ media_url }}directory.png" alt="Directory" title="Directory" /></td>
+    <td>{{ result.url|urlize_dirname:"Ir al directorio" }}/<strong>{{ result.url|urlize_basename:"Ir al directorio"}}</strong></td>
+    {% else %}
+    <td class="resulttype"><img src="{{ media_url }}file.png" alt="File" title="File" /></td>
+    <td>{{ result.url|urlize_dirname:"Ir al directorio" }}/<strong>{{ result.url|urlize_basename:"Descargar archivo"}}</strong></td>
+    {% endif %}
     </tr>{% endfor %}
   </table>
   {% else %}
