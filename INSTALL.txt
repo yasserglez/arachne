@@ -8,9 +8,5 @@ run this command from the command prompt:
 server (such as the provided in the djbdns or pdnsd Debian/Ubuntu packages) in
 the host running Arachne to speed up the DNS queries.
 
-  You should also install (in the same host running the Arachne daemon) the web
-interface provided by the Django project located in the django directory.  For
-instructions installing a Django application refer to the Django Website.  You
-should carefully setup the options in the settings.py file, especially
-DATABASE_DIR, SITE_ROOT and MEDIA_URL (see the comments in the file for a
-description).
+  See django/README.txt for instructions installing the Django application for
+  Arachne.
