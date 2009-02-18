@@ -117,3 +117,8 @@ def results(request):
 def handler500(request):
     context = DEFAULT_CONTEXT.copy()
     return render_to_response('500.html', context)
+
+
+def handler404(request):
+    context = DEFAULT_CONTEXT.copy()
+    return render_to_response('404.html', context)

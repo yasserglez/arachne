@@ -24,6 +24,8 @@ from django.conf.urls.defaults import *
 
 handler500 = 'arachneapp.views.handler500'
 
+handler404 = 'arachneapp.views.handler404'
+
 urlpatterns = patterns('',
     (r'^', include('arachneapp.urls')),
 )
