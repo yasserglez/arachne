@@ -48,7 +48,7 @@ def urlize_dirname(url, title='Go to directory'):
             cur_url += '/' + part
             parts.append(LINK % (escape(cur_url), escape(part)))
         resp = '/'.join(parts)
-    except IndexError:
+    except Exception:
         resp = LINK % (escape(url), escape(url))
     return mark_safe(resp)
 
@@ -62,6 +62,6 @@ def urlize_basename(url, title='Go to directory'):
     try:
         match = _URLIZEPARTS_RE.match(url)
         resp = LINK % (escape(url), escape(match.group('basename')))
-    except IndexError:
+    except Exception:
         resp = LINK % (escape(url), escape(url))
     return mark_safe(resp)
