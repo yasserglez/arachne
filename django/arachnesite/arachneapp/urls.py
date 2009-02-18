@@ -16,12 +16,18 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Django URL settings module for the Arachne site.
+"""Django URL settings module for the Arache application.
 """
 
 from django.conf.urls.defaults import *
 
 
-urlpatterns = patterns('',
-    (r'^', include('arachneapp.urls')),
+handler500 = 'arachneapps.views.server_error'
+
+urlpatterns = patterns('arachneapp.views',
+    (r'^$', 'basic'),
+    (r'^basic/$', 'basic'),
+    (r'^advanced/$', 'advanced'),
+    (r'^results/$', 'results'),
+    (r'^error/$', 'server_error'),
 )

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Settings for the Arachne website.
+"""Django settings for the Arachne site.
 """
 
 # Debug settings. Set this to False in a production environment.
@@ -41,21 +41,16 @@ USE_I18N = False
 # Full name of the URLconf root module.
 ROOT_URLCONF = 'arachnesite.urls'
 
-# Directory where the index directory is located.
-DATABASE_DIR = ''
-
-# Path (from the root of the web server) where this site is located.
-SITE_ROOT = ''
-
-# URL that handles the media served from MEDIA_ROOT.
-MEDIA_URL = ''
-
-TEMPLATE_DIRS = (
-    # Add the path to the directory with the templates here. Use absolute
-    # paths, not relative paths.
+# List of strings representing installed apps.
+INSTALLED_APPS = (
+    'arachnesite.arachneapp',
 )
 
-# Not needed.
+# Add the path to the directory with the templates here.
+TEMPLATE_DIRS = (
+)
+
+# We don't need any context processor.
 TEMPLATE_CONTEXT_PROCESSORS = ()
 
 # This site does not need any middleware but leave this as sugested in the
@@ -63,3 +58,12 @@ TEMPLATE_CONTEXT_PROCESSORS = ()
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
 )
+
+# Path to the index directory. This should match the value in arachned.conf.
+ARACHNE_DATABASE_DIR = '/var/lib/arachne'
+
+# Path, from the root of the site, where the Arachne site is located.
+ARACHNE_ROOT = '/'
+
+# URL where the Arachne media is located. The leading / is required!
+ARACHNE_MEDIA_URL = '/static/'

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Django views for the Arachne website.
+"""Django views for the Arachne application.
 """
 
 from django.conf import settings
@@ -28,41 +28,35 @@ from arachne.searcher import IndexSearcher
 
 RESULTS_PER_PAGE = 20
 
+DEFAULT_CONTEXT = {
+    'version': __version__,
+    'root': settings.ARACHNE_ROOT,
+    'media_url': settings.ARACHNE_MEDIA_URL,
+}
+
 
 def basic(request):
     """Show the basic search form.
     """
-    context = {
-        'version': __version__,
-        'site_root': settings.SITE_ROOT,
-        'media_url': settings.MEDIA_URL,
-        'search_type': 'basic',
-    }
+    context = DEFAULT_CONTEXT.copy()
+    context['search_type'] = 'basic'
     return render_to_response('search.html', context)
 
 
 def advanced(request):
     """Show the advanced search form.
     """
-    searcher = IndexSearcher(settings.DATABASE_DIR)
-    context = {
-        'version': __version__,
-        'site_root': settings.SITE_ROOT,
-        'media_url': settings.MEDIA_URL,
-        'search_type': 'advanced',
-        'sites': searcher.get_sites(),
-    }
+    searcher = IndexSearcher(settings.ARACHNE_DATABASE_DIR)
+    context = DEFAULT_CONTEXT.copy()
+    context['search_type'] = 'advanced'
+    context['sites'] = searcher.get_sites()
     return render_to_response('search.html', context)
 
 
 def results(request):
     """Execute the query and show results.
     """
-    context = {
-        'version': __version__,
-        'site_root': settings.SITE_ROOT,
-        'media_url': settings.MEDIA_URL,
-    }
+    context = DEFAULT_CONTEXT.copy()
     query = request.POST.get('query', '')
     context['query'] = query
     if query:
@@ -71,7 +65,7 @@ def results(request):
         offset = int(request.POST.get('offset', 0))
         # Ensure valid page links, at least, for the next 10 pages.
         check_at_least = offset + (11 * RESULTS_PER_PAGE)
-        searcher = IndexSearcher(settings.DATABASE_DIR)
+        searcher = IndexSearcher(settings.ARACHNE_DATABASE_DIR)
         if search_type == 'advanced':
             # Advanced search.
             sites = []
@@ -121,9 +115,5 @@ def results(request):
 
 
 def server_error(request):
-    context = {
-        'version': __version__,
-        'site_root': settings.SITE_ROOT,
-        'media_url': settings.MEDIA_URL,
-    }
+    context = DEFAULT_CONTEXT.copy()
     return render_to_response('500.html', context)

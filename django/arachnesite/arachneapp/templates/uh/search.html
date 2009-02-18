@@ -4,20 +4,20 @@
 
 {% block content %}
 <div id="logobigbox">
-  <a href="{{ site_root }}" title="Ir a la página principal">
+  <a href="{{ root }}" title="Ir a la página principal">
     <img id="logobig" src="{{ media_url }}logobig.png"
          alt="Arachne, un motor de búsqueda para archivos y directorios" />
   </a>
 </div>
 <div id="searchbox">
-  <form action="{{ site_root }}results/" method="post">
+  <form action="{{ root }}results/" method="post">
     <div id="basicbox">
       <input id="query" type="text" name="query" value="" size="36" maxlength="2048" />
       <input type="submit" name="search" value="Buscar" />
       {% ifequal search_type "advanced" %}
-      <a id="othersearch" href="{{ site_root }}basic/" title="Búsqueda básica">Búsqueda básica</a>
+      <a id="othersearch" href="{{ root }}basic/" title="Búsqueda básica">Búsqueda básica</a>
       {% else %}
-      <a id="othersearch" href="{{ site_root }}advanced/" title="Búsqueda avanzada">Búsqueda avanzada</a>
+      <a id="othersearch" href="{{ root }}advanced/" title="Búsqueda avanzada">Búsqueda avanzada</a>
       {% endifequal %}
       <input type="hidden" name="searchtype" value="{{ search_type }}" />
     </div>
