@@ -66,4 +66,4 @@ ARACHNE_DATABASE_DIR = '/var/lib/arachne'
 ARACHNE_ROOT = '/'
 
 # URL where the Arachne media is located. The leading / is required!
-ARACHNE_MEDIA_URL = '/static/'
+ARACHNE_MEDIA_URL = '/media/'
