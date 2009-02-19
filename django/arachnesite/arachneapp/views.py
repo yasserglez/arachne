@@ -19,11 +19,20 @@
 """Django views for the Arachne application.
 """
 
+import logging
+
 from django.conf import settings
 from django.shortcuts import render_to_response
 
 from arachne import __version__
 from arachne.searcher import IndexSearcher
+
+
+if settings.ARACHNE_SEARCH_LOG:
+    logging.basicConfig(filename=settings.ARACHNE_SEARCH_LOG,
+                        level=logging.INFO,
+                        format='%(asctime)s %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S')
 
 
 RESULTS_PER_PAGE = 20
@@ -109,8 +118,16 @@ def results(request):
                                    offset + RESULTS_PER_PAGE)
             if context['has_next']:
                 context['next_offset'] = offset + RESULTS_PER_PAGE
+        else:
+            context['total_results'] = 0
     else:
         context['has_results'] = False
+        context['total_results'] = 0
+    # Print a log message if logging is enabled.
+    if settings.ARACHNE_SEARCH_LOG and offset == 0:
+        logging.info('%s searched for "%s" getting %s results' %
+                     (request.META['REMOTE_ADDR'], query,
+                      context['total_results']))
     return render_to_response('results.html', context)
 
 

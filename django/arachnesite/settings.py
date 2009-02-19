@@ -59,8 +59,13 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
 )
 
-# Path to the index directory. This should match the value in arachned.conf.
+# Absolute path to the database directory. This should match the value in
+# arachned.conf.
 ARACHNE_DATABASE_DIR = '/var/lib/arachne'
+
+# Absolute path to a file where the search log should be located.  If set to an
+# empty string logging is disabled.
+ARACHNE_SEARCH_LOG = ''
 
 # Path, from the root of the site, where the Arachne site is located.
 ARACHNE_ROOT = '/'
