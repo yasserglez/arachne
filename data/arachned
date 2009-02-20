@@ -5,7 +5,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 NAME=arachned
 DESC="file search engine"
 DAEMON=/usr/sbin/arachned
-PIDFILE=/var/run/arachne/arachned.pid
+PIDFILE=/var/run/arachne/daemon.pid
 SCRIPTNAME=/etc/init.d/arachned
 
 [ -x "$DAEMON" ] || exit 0

@@ -60,7 +60,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 # Absolute path to the database directory. This should match the value in
-# arachned.conf.
+# /etc/arachne/daemon.conf.
 ARACHNE_DATABASE_DIR = '/var/lib/arachne'
 
 # Absolute path to a file where the search log should be located.  If set to an

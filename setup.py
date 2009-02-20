@@ -37,7 +37,7 @@ setup(name='Arachne',
       package_dir={'arachne': 'arachne'},
       data_files=[
         ('/etc/init.d/', ['data/arachned']),
-        ('/etc/arachne/', ['data/arachned.conf', 'data/sites.conf']),
+        ('/etc/arachne/', ['data/daemon.conf', 'data/sites.conf']),
         ('/usr/share/doc/arachne/', ['AUTHORS.txt', 'INSTALL.txt',
                                      'LICENSE.txt', 'README.txt',
                                      'THANKS.txt']),

@@ -44,7 +44,7 @@ def _parse_args():
                                    description=description)
     parser.add_option('-c', '--conf', metavar='FILE', dest='config_file',
                       help='specify config file (default %default)')
-    parser.set_defaults(config_file='/etc/arachne/arachned.conf')
+    parser.set_defaults(config_file='/etc/arachne/daemon.conf')
     return parser.parse_args()[0].__dict__
 
 
@@ -54,10 +54,10 @@ def _parse_config_file(configfile):
     config = {
         'num_crawlers': 3,
         'sites_file': '/etc/arachne/sites.conf',
-        'pid_file': '/var/run/arachne/arachned.pid',
-        'spool_dir': '/var/lib/spool/arachne/',
+        'pid_file': '/var/run/arachne/daemon.pid',
+        'spool_dir': '/var/spool/arachne/',
         'database_dir': '/var/lib/arachne/',
-        'log_file': '/var/log/arachne/arachned.log',
+        'log_file': '/var/log/arachne/daemon.log',
         'log_level': logging.INFO,
     }
     parser = ConfigParser.ConfigParser()
@@ -65,7 +65,7 @@ def _parse_config_file(configfile):
         parser.read(configfile)
         for option in config.iterkeys():
             try:
-                value = parser.get('arachned', option)
+                value = parser.get('daemon', option)
             except ConfigParser.NoOptionError:
                 # Ignore missing options, use default values.
                 pass
@@ -73,7 +73,7 @@ def _parse_config_file(configfile):
                 # Use the value from the configuration file.
                 config[option] = value
     except ConfigParser.NoSectionError:
-        _error('failed to read config file or arachned section is missing.')
+        _error('failed to read config file or daemon section is missing.')
     except ConfigParser.ParsingError:
         _error('invalid syntax in the config file.')
     except ConfigParser.Error:
