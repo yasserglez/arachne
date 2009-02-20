@@ -277,8 +277,8 @@ class ApacheHandler(ProtocolHandler):
         opener = urllib2.build_opener()
         opener.addheaders = [('User-agent', 'Arachne/%s' % __version__)]
         try:
-            fp = opener.open(encoded_url)
-            data = fp.read()
+            handler = opener.open(encoded_url)
+            data = handler.read()
             # Everything seems to be OK, add entries to the result.
             result = CrawlResult(task, True)
             for match in self._ENTRIES_RE.finditer(data):
@@ -286,7 +286,7 @@ class ApacheHandler(ProtocolHandler):
                 entry_data['is_dir'] = (match.group(1).lower() == 'dir')
                 entry_name = self._ENTITIES_RE.sub(self._sub_entity, match.group(2))
                 result.add_entry(entry_name, entry_data)
-            fp.close()
+            handler.close()
             self._results.put(result)
             self._tasks.report_done(task)
         except urllib2.HTTPError, error:
@@ -312,7 +312,7 @@ class ApacheHandler(ProtocolHandler):
                 error = error[1]
             logging.error('Error visiting "%s" (%s)' % (url, error))
         except EOFError:
-            fp.close()
+            handler.close()
             self._tasks.report_error_site(task)
             logging.error('Error visiting "%s" (Error reading data)' % url)
 

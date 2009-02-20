@@ -77,31 +77,29 @@ class ArachneDaemon(Daemon):
         try:
             self._running = True
             # Initialize components.
-            self._tasks = TaskQueue(self._sites_info, self._tasks_dir)
+            tasks = TaskQueue(self._sites_info, self._tasks_dir)
             logging.info('There are %d tasks waiting for execution'
-                         % len(self._tasks))
-            self._results = ResultQueue(self._sites_info, self._results_dir)
+                         % len(tasks))
+            results = ResultQueue(self._sites_info, self._results_dir)
             logging.info('There are %d results waiting for processing'
-                         % len(self._results))
-            self._crawlers = CrawlerManager(self._sites_info,
-                                            self._num_crawlers, self._tasks,
-                                            self._results)
-            self._processor = ProcessorManager(self._sites_info,
-                                               self._database_dir, self._tasks,
-                                               self._results)
+                         % len(results))
+            crawlers = CrawlerManager(self._sites_info, self._num_crawlers,
+                                      tasks, results)
+            processor = ProcessorManager(self._sites_info, self._database_dir,
+                                         tasks, results)
             # Start components.
-            self._crawlers.start()
-            self._processor.start()
+            crawlers.start()
+            processor.start()
             # Run the main loop.
             while self._running:
                 signal.pause()
             # Stop and close components.
-            self._crawlers.stop()
-            self._processor.stop()
-            self._crawlers.join()
-            self._processor.join()
-            self._results.close()
-            self._tasks.close()
+            crawlers.stop()
+            processor.stop()
+            crawlers.join()
+            processor.join()
+            results.close()
+            tasks.close()
             logging.info('Daemon stopped, exiting')
         except:
             logging.exception('Unhandled exception, printing traceback')

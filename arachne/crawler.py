@@ -64,7 +64,7 @@ class SiteCrawler(threading.Thread):
                     time.sleep(self._sleep)
                 else:
                     self._execute(task)
-        except:
+        except Exception:
             logging.exception('Unhandled exception, printing traceback')
 
     def stop(self):
@@ -75,8 +75,7 @@ class SiteCrawler(threading.Thread):
     def _execute(self, task):
         """Execute a crawl task.
 
-        Call the handler to execute the crawl task and report the result to the
-        result queue.
+        Call the handler to execute the crawl task.
         """
         site_info = self._sites_info[task.site_id]
         handler_name = site_info.get('handler', task.url.scheme)
@@ -90,7 +89,7 @@ class SiteCrawler(threading.Thread):
                 logging.info('Visiting "%s"' % task.url)
             else:
                 logging.info('Revisiting "%s"' % task.url)
-            result = handler.execute(task)
+            handler.execute(task)
 
 
 class CrawlerManager(object):
