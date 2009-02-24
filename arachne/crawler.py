@@ -107,7 +107,10 @@ class CrawlerManager(object):
         """
         self._crawlers = [SiteCrawler(sites_info, tasks, results)
                           for i in range(num_crawlers)]
-        logging.info('Using %d site crawlers' % num_crawlers)
+        if num_crawlers > 0:
+            logging.info('Using %d site crawlers' % num_crawlers)
+        else:
+            logging.info('Running without site crawlers')
 
     def start(self):
         """Start the site crawlers.
