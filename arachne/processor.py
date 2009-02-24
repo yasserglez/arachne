@@ -256,6 +256,7 @@ class IndexProcessor(ResultProcessor):
         """
         # There is currently no close() method for Xapian databases.
         self._db.flush()
+        del self._db
 
     def _rmtree(self, site_id, dirpath):
         """Remove documents for entries in the given directory tree. The
