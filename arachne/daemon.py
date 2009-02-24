@@ -19,9 +19,9 @@
 """UNIX daemon of the Arachne file search engine.
 """
 
+import os
 import hashlib
 import logging
-import os
 import signal
 
 from arachne import __version__

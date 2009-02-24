@@ -99,14 +99,8 @@ class Daemon(object):
         signal.signal(signal.SIGTERM, self._sigterm_handler)
         # Now it's a daemon process.  Invoke run().
         self.run()
-
-    def stop(self):
-        """Stop the daemon.
-
-        Remove the PID file and then invoke the `terminate()` method.
-        """
+        # When the run() method returns the daemon should stop.
         self._remove_pid_file()
-        self.terminate()
 
     def run(self):
         """This method represents the daemon activity.
@@ -116,15 +110,11 @@ class Daemon(object):
         """
 
     def terminate(self):
-        """Terminate the process.
+        """Order the daemon to stop.
 
-        This method is responsible of doing any required cleanup (e.g. closing
-        connections, file descriptors, etc) and exiting the process
-        (e.g. invoke `sys.exit()`).  It gets invoked by the `stop()`
-        method. The implementation provided by the `Daemon` class just invokes
-        `sys.exit()`), maybe you want to override this.
+        This method should order to stop the main loop of the daemon.  It gets
+        invoked when the SIGTERM signal is received.
         """
-        sys.exit()
 
     def _switch_user(self):
         """Switch current process user and group ID.
@@ -188,6 +178,6 @@ class Daemon(object):
     def _sigterm_handler(self, signum, frame):
         """SIGTERM signal handler.
 
-        Invoke the `stop()` method.
+        Invoke the `terminate()` method.
         """
-        self.stop()
+        self.terminate()
