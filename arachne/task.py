@@ -239,8 +239,9 @@ class TaskQueue(object):
         """Return an executable task.
 
         Return a task executable right now.  The task should be reported later
-        as done or error using `report_done()` and `report_error()`.  If there
-        is not executable task an `EmptyQueue` exception is raised.
+        as done or error using `report_done()`, `report_error_dir()` or
+        `report_error_site()`.  If there is not executable task an `EmptyQueue`
+        exception is raised.
         """
         self._mutex.acquire()
         try:

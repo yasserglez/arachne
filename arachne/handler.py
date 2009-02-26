@@ -19,6 +19,13 @@
 """Protocol handlers.
 """
 
+# Before creating any socket, set the default timeout for all
+# sockets. Currently there is no way to specify timeout values using the
+# urllib, urllib2 and ftplib interfaces. This should change in future Python
+# releases.
+import socket
+socket.setdefaulttimeout(5 * 60)
+
 import os
 import re
 import errno
@@ -26,7 +33,6 @@ import ftplib
 import urllib
 import urllib2
 import logging
-import socket
 import htmlentitydefs
 
 from arachne import __version__
@@ -163,6 +169,9 @@ class FTPHandler(ProtocolHandler):
                             data['is_dir'] = True
                     result.add_entry(entry_name, data)
             ftp.quit()
+        except socket.timeout, error:
+            self._tasks.report_error_site(task)
+            logging.error('Error visiting "%s" (%s)' % (url, error))
         except socket.error, error:
             self._tasks.report_error_site(task)
             if not isinstance(error, basestring):
@@ -273,7 +282,7 @@ class ApacheHandler(ProtocolHandler):
         encoded_url = str(url)
         path_encoded = url.path.encode(self._encoding)
         encoded_url = '%s%s/' % (encoded_url[:-len(path_encoded)],
-                                 urllib.quote(path_encoded))
+                                 urllib.quote(path_encoded.rstrip('/')))
         opener = urllib2.build_opener()
         opener.addheaders = [('User-agent', 'Arachne/%s' % __version__)]
         try:
@@ -304,13 +313,11 @@ class ApacheHandler(ProtocolHandler):
             self._tasks.report_error_site(task)
             reason = error.reason
             if not isinstance(reason, basestring):
-                reason = reason[1]
+                try:
+                    reason = reason[1]
+                except IndexError:
+                    reason = str(reason)
             logging.error('Error visiting "%s" (%s)' % (url, reason))
-        except socket.error, error:
-            self._tasks.report_error_site(task)
-            if not isinstance(error, basestring):
-                error = error[1]
-            logging.error('Error visiting "%s" (%s)' % (url, error))
         except EOFError:
             handler.close()
             self._tasks.report_error_site(task)
