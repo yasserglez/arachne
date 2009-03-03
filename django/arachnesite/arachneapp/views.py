@@ -120,14 +120,14 @@ def results(request):
                 context['next_offset'] = offset + RESULTS_PER_PAGE
         else:
             context['total_results'] = 0
+        # Print a log message if logging is enabled.
+        if settings.ARACHNE_SEARCH_LOG and offset == 0:
+            logging.info('%s searched for "%s" getting %s results' %
+                         (request.META['REMOTE_ADDR'], query,
+                          context['total_results']))
     else:
         context['has_results'] = False
         context['total_results'] = 0
-    # Print a log message if logging is enabled.
-    if settings.ARACHNE_SEARCH_LOG and offset == 0:
-        logging.info('%s searched for "%s" getting %s results' %
-                     (request.META['REMOTE_ADDR'], query,
-                      context['total_results']))
     return render_to_response('results.html', context)
 
 
