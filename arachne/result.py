@@ -117,7 +117,13 @@ class ResultQueue(object):
         self._db_env.open(db_home, bsddb.db.DB_CREATE | bsddb.db.DB_RECOVER
                           | bsddb.db.DB_INIT_TXN | bsddb.db.DB_INIT_LOG
                           | bsddb.db.DB_INIT_MPOOL | bsddb.db.DB_THREAD)
-        self._db_key = '0'.zfill(len(str(sys.maxint)))
+        # Define keys used as priority for the results in the queue. This
+        # values should guarranty that the greater priority is assigned to the
+        # results of the new directories and if an error is reported processing
+        # a result it should be inserted in the tail of the queue.
+        self._new_key = '0'
+        self._normal_key = '1'
+        self._error_key = '2'
         # Create the database for the sites.
         sites_db_name = 'sites.db'
         self._sites_db = bsddb.db.DB(self._db_env)
@@ -163,9 +169,13 @@ class ResultQueue(object):
         try:
             site_id = result.task.site_id
             result_db = self._result_dbs[site_id]
+            if result.task.revisit_count == 0:
+                key = self._new_key
+            else:
+                key = self._normal_key
             txn = self._db_env.txn_begin()
-            self._sites_db.put(self._db_key, site_id, txn)
-            result_db.put(self._db_key, cPickle.dumps(result, 2), txn)
+            self._sites_db.put(key, site_id, txn)
+            result_db.put(key, cPickle.dumps(result, 2), txn)
             txn.commit()
         finally:
             self._mutex.release()
@@ -260,8 +270,8 @@ class ResultQueue(object):
             result_cursor.first()
             result_cursor.delete()
             result_cursor.close()
-            self._sites_db.put(self._db_key, site_id, txn)
-            result_db.put(self._db_key, cPickle.dumps(result, 2), txn)
+            self._sites_db.put(self._error_key, site_id, txn)
+            result_db.put(self._error_key, cPickle.dumps(result, 2), txn)
             txn.commit()
         finally:
             self._mutex.release()

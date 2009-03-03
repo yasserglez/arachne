@@ -19,7 +19,6 @@
 """Crawl task and task queue.
 """
 
-
 import os
 import sys
 import time
@@ -81,10 +80,12 @@ class CrawlTask(object):
             self._change_count += 1
         self._revisit_count += 1
 
-    def reset_counters(self):
-        """Reset counters for revisit and changes.
+    def reset_change_count(self):
+        """Reset the change counter.
+
+        This method sets to zero the counter for the number of changes detected
+        in the current cycle of visits.
         """
-        self._revisit_count = 0
         self._change_count = 0
 
     def _get_site_id(self):
@@ -228,7 +229,7 @@ class TaskQueue(object):
                     maximum = site_info['max_revisit_wait']
                     estimated = self._estimate_revisit_wait(task)
                     task.revisit_wait = min(maximum, max(minimum, estimated))
-                    task.reset_counters()
+                    task.reset_change_count()
                     logging.info('Changing revisit frequency for "%s" to %s'
                                  % (task.url, secs_to_readable(task.revisit_wait)))
             self._put(task, task.revisit_wait)

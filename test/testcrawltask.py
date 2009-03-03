@@ -62,9 +62,9 @@ class TestCrawlTask(unittest.TestCase):
         self._task.report_visit(True)
         self._task.report_visit(True)
         self._task.revisit_wait = 60
-        self._task.reset_counters()
+        self._task.reset_change_count()
         self.assertEquals(self._task.revisit_wait, 60)
-        self.assertEquals(self._task.revisit_count, 0)
+        self.assertEquals(self._task.revisit_count, 1)
         self.assertEquals(self._task.change_count, 0)
 
     def test_report_visit(self):
