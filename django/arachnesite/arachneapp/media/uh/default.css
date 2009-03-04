@@ -33,7 +33,7 @@ a {
 }
 
 #logobig {
-    border: 0px;
+    border: 0em;
 }
 
 #othersearch {
@@ -79,8 +79,8 @@ a {
 
 #advancedoptions ul {
     list-style-type: none;
-    padding: 0px;
-    margin: 0px;
+    padding: 0em;
+    margin: 0em;
 }
 
 /* Results page style. */
@@ -106,18 +106,13 @@ a {
 
 #results td {
     border: 1px solid #b7b7b7;
+    padding: 0.5em;
+    margin: 0em;
+    vertical-align: middle;
 }
 
 #results .even {
     background-color: #f1f1f1;
-}
-
-#results td {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-    padding-top: 0.4em;
-    padding-bottom: 0.4em;
-    vertical-align: middle;
 }
 
 #results .resultnum {
@@ -126,8 +121,7 @@ a {
 }
 
 #results .resulttype {
-    margin: 0px;
-    padding: 2px;
+    padding: 5px;
     text-align: center;
 }
 
