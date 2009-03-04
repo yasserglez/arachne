@@ -62,7 +62,7 @@
     <input type="hidden" name="filetype" value="{{ filetype }}" />
     {% endifequal %}
   </form>
-  <strong><a href="#" onclick="document.getElementById('previousform').submit(); return false;"
+  <strong><a href="#" onclick="previous(); return false;"
              title="Ir a la página anterior">&lt; Anterior</a></strong>
   {% endif %}
   <strong>{{ first_result }} - {{ last_result }}</strong> de <strong>{{ total_results }}</strong>
@@ -78,7 +78,7 @@
     <input type="hidden" name="filetype" value="{{ filetype }}" />
     {% endifequal %}
   </form>
-  <strong><a href="#" onclick="document.getElementById('nextform').submit(); return false;"
+  <strong><a href="#" onclick="next(); return false;"
              title="Ir a la página siguiente">Siguiente &gt;</a></strong>
   {% endif %}
 </div>
