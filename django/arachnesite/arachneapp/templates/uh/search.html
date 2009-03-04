@@ -58,7 +58,12 @@
         <tr>
           <td class="optionname"><strong>Sitios</strong></td>
           <td class="optionvalue">
-            <ul>
+            <p>Selección:
+              <a href="#" onclick="changeSites(1); return false;">Todos</a> |
+              <a href="#" onclick="changeSites(-1); return false;">Invertir</a> |
+              <a href="#" onclick="changeSites(0); return false;">Ninguno</a>
+            </p>
+            <ul id="sites">
               {% for site in sites %}
               <li>
                 <input id="{{ site.id }}" type="checkbox" name="{{ site.id }}" checked="checked" />

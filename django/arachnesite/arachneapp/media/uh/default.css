@@ -77,6 +77,14 @@ a {
     padding-left: 0.5em;
 }
 
+#advancedoptions .optionvalue p {
+    font-size: 0.8em;
+    margin-top: 0.6em;
+    margin-bottom: 1em;
+    margin-left: 0.4em;
+    padding: 0em;
+}
+
 #advancedoptions ul {
     list-style-type: none;
     padding: 0em;
