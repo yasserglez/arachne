@@ -66,7 +66,7 @@ def results(request):
     """Execute the query and show results.
     """
     context = DEFAULT_CONTEXT.copy()
-    query = request.POST.get('query', '')
+    query = request.GET.get('query', request.POST.get('query', ''))
     context['query'] = query
     if query:
         search_type = request.POST.get('searchtype', 'basic')
