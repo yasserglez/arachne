@@ -72,8 +72,8 @@ def results(request):
         search_type = request.POST.get('searchtype', 'basic')
         context['search_type'] = search_type
         offset = int(request.POST.get('offset', 0))
-        # Ensure valid page links, at least, for the next 10 pages.
-        check_at_least = offset + (11 * RESULTS_PER_PAGE)
+        # Ensure valid page links, at least, for the next page.
+        check_at_least = offset + (2 * RESULTS_PER_PAGE)
         searcher = IndexSearcher(settings.ARACHNE_DATABASE_DIR)
         if search_type == 'advanced':
             # Advanced search.
