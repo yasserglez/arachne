@@ -189,6 +189,9 @@ class FTPHandler(ProtocolHandler):
                 ftp.quit()
             except ftplib.Error:
                 ftp.close()
+            except (IOError, EOFError, socket.timeout, socket.error):
+                # Ignore possible exceptions executing QUIT.
+                pass
             self._tasks.report_error_dir(task)
             msg = 'Error visiting "%s" (%s)' % (url, str(error).strip())
             logging.error(msg)
