@@ -19,11 +19,11 @@
 """Crawl result and result queue.
 """
 
-import bsddb
-import cPickle
-import glob
 import os
 import sys
+import glob
+import bsddb
+import cPickle
 import threading
 
 from arachne.error import EmptyQueue
@@ -169,7 +169,7 @@ class ResultQueue(object):
         try:
             site_id = result.task.site_id
             result_db = self._result_dbs[site_id]
-            if result.task.revisit_count == 0:
+            if result.task.revisit_count == -1:
                 key = self._new_key
             else:
                 key = self._normal_key
