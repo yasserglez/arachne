@@ -121,9 +121,10 @@ class ResultQueue(object):
         # values should guarranty that the greater priority is assigned to the
         # results of the new directories and if an error is reported processing
         # a result it should be inserted in the tail of the queue.
-        self._new_key = '0'
-        self._normal_key = '1'
-        self._error_key = '2'
+        self._notfound_key = '0'
+        self._new_key = '1'
+        self._normal_key = '2'
+        self._error_key = '3'
         # Create the database for the sites.
         sites_db_name = 'sites.db'
         self._sites_db = bsddb.db.DB(self._db_env)
@@ -169,7 +170,10 @@ class ResultQueue(object):
         try:
             site_id = result.task.site_id
             result_db = self._result_dbs[site_id]
-            if result.task.revisit_count == -1:
+            # Assign the right key to the result.
+            if not result.found:
+                key = self._notfound_key
+            elif result.task.revisit_count == -1:
                 key = self._new_key
             else:
                 key = self._normal_key
