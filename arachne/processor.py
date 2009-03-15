@@ -196,7 +196,7 @@ class IndexProcessor(ResultProcessor):
                     doc = self._create_document(site_id, data)
                     self._db.add_document(doc)
             # Process entries of the directory.
-            result_changed = False
+            dir_changed = False
             doc_count = self._db.get_doccount()
             # Get all the entries of this directory in the index.
             dirname = url.path.rstrip(u'/') + u'/'
@@ -218,7 +218,7 @@ class IndexProcessor(ResultProcessor):
                         data = result[basename]
                     except KeyError:
                         # Entry removed from the directory in the site.
-                        result_changed = True
+                        dir_changed = True
                         if is_dir:
                             # Remove entries in the sub-tree of the directory.
                             self._rmtree(site_id, dirname + basename + u'/')
@@ -229,20 +229,24 @@ class IndexProcessor(ResultProcessor):
                         if is_dir == data['is_dir']:
                             indexed_entries.append(basename)
                         else:
-                            result_changed = True
+                            dir_changed = True
                             # Lazy solution.  Remove the document from the
                             # index and then add it again with the right data.
                             self._db.delete_document(doc.get_docid())
             # Add new or modified entries.
             for entry, data in result:
                 if entry not in indexed_entries:
+                    # New entry found in the directory. Mark as changed, index
+                    # the entry and if it is a directory add a new task to
+                    # visit it.
+                    dir_changed = True
                     doc = self._create_document(site_id, data)
                     self._db.add_document(doc)
                     if data['is_dir']:
                         task = CrawlTask(result.task.site_id, data['url'])
                         self._tasks.put_new(task)
             # Put a new task to visit the directory again.
-            self._tasks.put_visited(result.task, result_changed)
+            self._tasks.put_visited(result.task, dir_changed)
         # Result sucessfully processed.
         self._results.report_done(result)
 
