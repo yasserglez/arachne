@@ -131,6 +131,21 @@ def results(request):
     return render_to_response('results.html', context)
 
 
+def opensearch(request):
+    """Serve OpenSearch description.
+    """
+    context = DEFAULT_CONTEXT.copy()
+    if request.META['SERVER_PORT'] == '80':
+        server_host = 'http://%s' % request.META['SERVER_NAME']
+    else:
+        server_host = 'http://%s:%s' % (request.META['SERVER_NAME'],
+                                        request.META['SERVER_PORT'])
+    context['server_host'] = server_host
+    response = render_to_response('opensearch.xml', context)
+    response['Content-Type'] = 'application/opensearchdescription+xml'
+    return response
+
+
 def handler500(request):
     """Handler for 500 HTTP errors.
     """

@@ -27,4 +27,5 @@ urlpatterns = patterns('arachneapp.views',
     (r'^basic/$', 'basic'),
     (r'^advanced/$', 'advanced'),
     (r'^results/$', 'results'),
+    (r'^opensearch.xml$', 'opensearch'),
 )

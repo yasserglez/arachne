@@ -15,9 +15,9 @@
    inkscape:version="0.46"
    sodipodi:docname="favicon.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
-   inkscape:export-filename="/home/ygonzalez/Projects/arachne/Arachne/django/arachnesite/arachneapp/media/uh/favicon.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   inkscape:export-filename="/home/ygonzalez/Projects/arachne/Arachne/django/arachnesite/arachneapp/media/uh/favicon-64x64.png"
+   inkscape:export-xdpi="180"
+   inkscape:export-ydpi="180">
   <defs
      id="defs2393">
     <inkscape:perspective
@@ -42,10 +42,10 @@
      showgrid="true"
      inkscape:grid-bbox="true"
      inkscape:document-units="px"
-     inkscape:window-width="1280"
-     inkscape:window-height="800"
-     inkscape:window-x="0"
-     inkscape:window-y="0" />
+     inkscape:window-width="1007"
+     inkscape:window-height="726"
+     inkscape:window-x="117"
+     inkscape:window-y="37" />
   <metadata
      id="metadata2396">
     <rdf:RDF>
@@ -63,9 +63,9 @@
      inkscape:groupmode="layer">
     <text
        xml:space="preserve"
-       style="font-size:40px;font-style:oblique;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#0132c8;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold Oblique"
-       x="3.4804688"
-       y="30.580078"
+       style="font-size:36px;font-style:oblique;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#0132c8;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold Oblique"
+       x="4.7324219"
+       y="29.12207"
        id="text2393"
        sodipodi:linespacing="100%"
        inkscape:export-xdpi="96"
@@ -73,7 +73,7 @@
        inkscape:export-filename="/home/ygonzalez/Projects/arachne/logosmall.png"><tspan
          sodipodi:role="line"
          id="tspan2395"
-         x="3.4804688"
-         y="30.580078">A</tspan></text>
+         x="4.7324219"
+         y="29.12207">A</tspan></text>
   </g>
 </svg>

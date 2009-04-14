@@ -6,7 +6,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <script type="text/javascript" src="{{ media_url }}functions.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ media_url }}default.css" />
-    <link rel="shortcut icon" href="{{ media_url }}favicon.ico">
+    <link rel="shortcut icon" href="{{ media_url }}favicon.ico" />
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="Arachne" href="{{ root }}opensearch.xml">
     <title>{% block title %}{% endblock %}</title>
   </head>
   <body>
@@ -14,9 +16,8 @@
       {% block content %}{% endblock %}
     </div>
     <div id="footerbox">
-      <p>Arachne v{{ version }}<br />Copyright © 2008, 2009 Yasser González
-        Fernández &lt;<a href="mailto:yglez@uh.cu"
-                         title="Contactar al autor">yglez@uh.cu</a>&gt;</p>
+      <p>Arachne v{{ version }}<br />Copyright © 2008, 2009 Yasser González Fernández
+        &lt;<a href="mailto:yglez@uh.cu" title="Contactar al autor">yglez@uh.cu</a>&gt;</p>
     </div>
   </body>
 </html>
