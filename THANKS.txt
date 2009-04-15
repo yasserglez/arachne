@@ -2,10 +2,14 @@
 development of Arachne (the names are in alphabetical order):
 
 Andy Teijelo Pérez <ateijelo@uh.cu>
+Andy Venet Pompa <vangelis@lab.matcom.uh.cu>
 Ariel Hernández Amador <gnuaha7@uh.cu>
+Carlos M. Pérez Penichet <cperez@fises.fisica.uh.cu>
 Ernesto Rodríguez Reina <erreina@gmail.com>
 Julio Carlos Menéndez <godinblack@gmail.com>
+Leslie León Sinclair <leslie.ls@feestudiantes.cujae.edu.cu>
 Luis A. Zarrabeitia <kyrie@uh.cu>
+Orapma Ramos Vidot <orapma@uh.cu>
 Susana Arias Lazo <sariaslazo@gmail.com>
 Yoanis Gil Delgado <fred@uh.cu>
 Yudivián Almeida Cruz <yudy@uh.cu>
