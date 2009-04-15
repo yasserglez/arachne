@@ -145,7 +145,7 @@ class IndexSearcher(object):
         stemmed_terms = set()
         for term in normal_terms:
             for stemmer in self._stemmers:
-                stemmed_terms.add(stemmer(term))
+                stemmed_terms.add(stemmer(term).decode('utf-8'))
         # Build the query for the stemmed terms.
         if stemmed_terms:
             stemmed_terms = [IndexProcessor.STEM_PREFIX + stemmed_term
