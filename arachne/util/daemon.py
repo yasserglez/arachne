@@ -41,8 +41,7 @@ class Daemon(object):
     `Daemon` instance is created its activity must be started by calling the
     daemon's `start()` method.  This invokes the `run()` method when the
     process is daemonized.  The daemon stops when the process receives a
-    SIGTERM signal or the `stop()` method gets invoked and then the
-    `terminate()` method is invoked.
+    SIGTERM signal and then the `terminate()` method is invoked.
     """
 
     def __init__(self, pid_file=None, stdin='/dev/null', stdout='/dev/null',
