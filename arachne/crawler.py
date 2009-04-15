@@ -63,7 +63,7 @@ class SiteCrawler(threading.Thread):
                     time.sleep(self._sleep)
                 else:
                     self._execute(task)
-        except Exception:
+        except:
             logging.exception('Unhandled exception, printing traceback')
 
     def stop(self):
