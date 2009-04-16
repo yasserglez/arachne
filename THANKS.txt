@@ -12,6 +12,7 @@ Idis González Castaño <idis@uh.cu>
 Julio Carlos Menéndez <godinblack@gmail.com>
 Leslie León Sinclair <leslie.ls@feestudiantes.cujae.edu.cu>
 Luis A. Zarrabeitia <kyrie@uh.cu>
+Manuel Mely <mely@minbas.cu>
 Orapma Ramos Vidot <orapma@uh.cu>
 Susana Arias Lazo <sariaslazo@gmail.com>
 Yoanis Gil Delgado <fred@uh.cu>
