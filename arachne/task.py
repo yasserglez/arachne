@@ -232,6 +232,9 @@ class TaskQueue(object):
                     task.reset_change_count()
                     logging.info('Changing revisit frequency for "%s" to %s'
                                  % (task.url, secs_to_readable(task.revisit_wait)))
+                else:
+                    logging.info('Missing %s visits to "%s" before estimating change frequency.'
+                                 % (self._revisits - task.revisit_count,task.url))
             self._put(task, task.revisit_wait)
         finally:
             self._mutex.release()

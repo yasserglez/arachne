@@ -20,4 +20,4 @@
 """
 
 __author__ = 'Yasser González Fernández <yglez@uh.cu>'
-__version__ = '1.4.0'
+__version__ = '1.4.1'
