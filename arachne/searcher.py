@@ -144,7 +144,9 @@ class IndexSearcher(object):
             dirname_query = xapian.Query(xapian.Query.OP_SCALE_WEIGHT,
                                          dirname_query, 2)
             normal_query = xapian.Query(xapian.Query.OP_OR, basename_query,
-                                        dirname_query, content_query)
+                                        dirname_query)
+            normal_query = xapian.Query(xapian.Query.OP_OR, normal_query,
+                                        content_query)            
         else:
             normal_query = None
         # Stem normal terms.
