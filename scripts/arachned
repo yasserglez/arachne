@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 #
 # Arachne, a search engine for files and directories.
-# Copyright (C) 2008, 2009 Yasser González Fernández <yglez@uh.cu>
+# Copyright (C) 2008, 2009, 2010 Yasser González Fernández <ygonzalezfernandez@gmail.com>
+# Copyright (C) 2008, 2009, 2010 Ariel Hernández Amador <gnuaha7@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -25,7 +26,7 @@ import logging
 import optparse
 import ConfigParser
 
-from arachne import __author__, __version__
+from arachne import __version__
 from arachne.daemon import ArachneDaemon
 from arachne.util.time import str_to_secs
 
@@ -34,11 +35,13 @@ def _parse_args():
     """Parse the command line arguments.
     """
     usage = '%prog [options]'
-    version = 'arachned (Arachne) %s\nCopyright (C) 2008, 2009 %s.\nYou may ' \
-        'redistribute copies of Arachne under the terms of the GNU General\n' \
+    version = 'arachned (Arachne) %s\n' \
+	'Copyright (C) 2008-2010 Yasser González Fernández <ygonzalezfernandez@gmail.com>\n' \
+	'Copyright (C) 2008-2010 Ariel Hernández Amador <gnuaha7@gmail.com>\n\n' \
+        'You may redistribute copies of Arachne under the terms of the GNU General\n' \
         'Public License version 3 or later.  For more information about' \
         ' these matters,\nsee the file named LICENSE found in the source' \
-        ' distribution.' % (__version__, ' '.join(__author__.split()[:-1]))
+        ' distribution.' % __version__
     description = 'Daemon of the Arachne file search engine.'
     parser = optparse.OptionParser(usage=usage, version=version,
                                    description=description)

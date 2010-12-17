@@ -5,7 +5,6 @@ Abel Marrero Santos <marrero@uh.cu>
 Abel Puentes Luberta <abelchino@lab.matcom.uh.cu>
 Andy Teijelo Pérez <ateijelo@uh.cu>
 Andy Venet Pompa <vangelis@lab.matcom.uh.cu>
-Ariel Hernández Amador <gnuaha7@uh.cu>
 Carlos M. Pérez Penichet <cperez@fises.fisica.uh.cu>
 Ernesto Rodríguez Reina <erreina@gmail.com>
 Idis González Castaño <idis@uh.cu>
@@ -14,7 +13,7 @@ Leslie León Sinclair <leslie.ls@feestudiantes.cujae.edu.cu>
 Luis A. Zarrabeitia <kyrie@uh.cu>
 Manuel Mely <mely@minbas.cu>
 Orapma Ramos Vidot <orapma@uh.cu>
-Susana Arias Lazo <sariaslazo@gmail.com>
+Susana Arias Laso <sariaslaso@gmail.com>
 Yoanis Gil Delgado <fred@uh.cu>
 Yudivián Almeida Cruz <yudy@uh.cu>
 Zilia Lavastida López <zilia@uh.cu>

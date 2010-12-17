@@ -1,4 +1,5 @@
-Yasser González Fernández <yglez@uh.cu>
+Yasser González Fernández <ygonzalezfernandez@gmail.com>
+Ariel Hernández Amador <gnuaha7@gmail.com>
 
   Arachne was inspired by Andy Teijelo's FTP Locate.  See also THANKS.txt for a
   list of other people who have contributed to the project.

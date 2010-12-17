@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
   <ShortName>Arachne</ShortName>
-  <Contact>yglez@uh.cu</Contact>
   <Description>Motor de búsqueda para archivos y directorios</Description>
   <Image height="16" width="16" type="image/vnd.microsoft.icon">{{ server_host }}{{ media_url }}favicon.ico</Image>
   <Image height="16" width="16" type="image/png">{{ server_host }}{{ media_url }}favicon-16x16.png</Image>

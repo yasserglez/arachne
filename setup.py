@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 #
 # Arachne, a search engine for files and directories.
-# Copyright (C) 2008, 2009 Yasser González Fernández <yglez@uh.cu>
+# Copyright (C) 2008, 2009, 2010 Yasser González Fernández <ygonzalezfernandez@gmail.com>
+# Copyright (C) 2008, 2009, 2010 Ariel Hernández Amador <gnuaha7@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +20,7 @@
 
 from distutils.core import setup
 
-from arachne import __author__, __version__
+from arachne import __version__
 
 
 setup(name='Arachne',
@@ -28,10 +29,6 @@ setup(name='Arachne',
       description='Search engine for files and directories.',
       long_description='Arachne is a search engine for files and directories' \
           + ' shared by FTP and similar\nprotocols in a networked environment.',
-      url='http://deltha.uh.cu/~yglez/arachne/',
-      download_url='http://deltha.uh.cu/~yglez/arachne/Arachne-%s.tar.gz' % __version__,
-      author=' '.join(__author__.split()[:-1]),
-      author_email=__author__.split()[-1].strip('<>'),
       platforms=['POSIX'],
       packages=['arachne', 'arachne.util'],
       package_dir={'arachne': 'arachne'},
