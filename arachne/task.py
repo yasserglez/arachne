@@ -200,7 +200,12 @@ class TaskQueue(object):
         """
         self._mutex.acquire()
         try:
-            self._put(task)
+            site_id = task.site_id
+            site_info = self._sites_info[site_id]
+            max_depth = site_info['max_depth']
+            current_depth = task.url.path.count(u'/')
+            if current_depth <= max_depth:
+                self._put(task)
         finally:
             self._mutex.release()
 
