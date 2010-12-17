@@ -128,6 +128,11 @@ class IndexSearcher(object):
         else:
             minus_query = None
         if normal_terms:
+            content_terms = [IndexProcessor.CONTENT_PREFIX + normal_term
+                             for normal_term in normal_terms]
+            content_query = xapian.Query(xapian.Query.OP_OR, content_terms)
+            content_query = xapian.Query(xapian.Query.OP_SCALE_WEIGHT,
+                                         content_query, 20)
             basename_terms = [IndexProcessor.BASENAME_PREFIX + normal_term
                               for normal_term in normal_terms]
             basename_query = xapian.Query(xapian.Query.OP_OR, basename_terms)
@@ -139,7 +144,7 @@ class IndexSearcher(object):
             dirname_query = xapian.Query(xapian.Query.OP_SCALE_WEIGHT,
                                          dirname_query, 2)
             normal_query = xapian.Query(xapian.Query.OP_OR, basename_query,
-                                        dirname_query)
+                                        dirname_query, content_query)
         else:
             normal_query = None
         # Stem normal terms.

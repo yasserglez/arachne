@@ -101,6 +101,7 @@ class IndexProcessor(ResultProcessor):
     BASENAME_PREFIX = u'B'
     DIRNAME_PREFIX = u'D'
     STEM_PREFIX = u'Z'
+    CONTENT_PREFIX = u'C'
 
     # Boolean values for terms and values.
     FALSE_VALUE = u'0'
@@ -352,6 +353,12 @@ class IndexProcessor(ResultProcessor):
                 stemmed_term = stemmer(term).decode('utf-8')
                 stemmed_terms.add(stemmed_term)
         doc.add_value(self.BASENAME_SLOT, url.basename)
+        if 'content' in data:
+            generator = xapian.TermGenerator()
+            for stemmer in self._stemmers:
+                generator.set_stemmer(stemmer)
+            generator.set_document(doc)
+            generator.index_text_without_positions(data['content'], 1, self.CONTENT_PREFIX)
         for term in self.get_terms(url.dirname):
             doc.add_term(self.DIRNAME_PREFIX + term)
             for stemmer in self._stemmers:
@@ -383,8 +390,7 @@ class ProcessorManager(threading.Thread):
         threading.Thread.__init__(self)
         self._sleep = 1
         self._results = results
-        self._processor = IndexProcessor(sites_info, database_dir, tasks,
-                                         results)
+        self._processor = IndexProcessor(sites_info, database_dir, tasks, results)
         # Flag used to stop the loop started by the run() method.
         self._running = False
 
