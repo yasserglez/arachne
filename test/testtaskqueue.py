@@ -72,6 +72,7 @@ class TestTaskQueue(unittest.TestCase):
         self._num_tasks = self._num_sites * self._tasks_per_site
         for site_id, info in self._sites_info.iteritems():
             # Set common information.
+            info['max_depth'] = 100
             info['request_wait'] = self._request_wait
             info['error_dir_wait'] = self._error_dir_wait
             info['error_site_wait'] = self._error_site_wait
