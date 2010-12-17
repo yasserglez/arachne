@@ -168,6 +168,10 @@ class FTPHandler(ProtocolHandler):
                             data['is_dir'] = False
                         else:
                             data['is_dir'] = True
+                    if not data['is_dir']:
+                        content = self._get_content(str(task.url.join(entry_name)))
+                        if content:
+                            data['content'] = content
                     result.add_entry(entry_name, data)
             ftp.quit()
         except socket.timeout, error:
@@ -260,6 +264,55 @@ class FTPHandler(ProtocolHandler):
             # format or it contains additional information provided by the FTP
             # server that can be ignored.
             return None
+        
+    @staticmethod
+    def _get_content(url):
+        """Get the UTF-8 text to be indexed as the content of the file.
+        """
+        return u''
+
+class FTPContentHandler(FTPHandler):
+    """A proof-of-concept FTP handler.
+    
+    This class extends the FTP handler to support downloading the files 
+    to index its content. Currently only the metadata of MP3 files
+    is indexed.
+    """
+    
+    name = 'ftp_content'
+    
+    def __init__(self, sites_info, tasks, results):
+        super(FTPContentHandler, self).__init__(sites_info, tasks, results)
+        
+    @staticmethod
+    def _get_content(url):
+        """Get the UTF-8 text to be indexed as the content of the file.
+        """
+        content = u''
+        if url.lower().endswith(u'.mp3'):
+            try:
+                import tempfile
+                from mutagen.easyid3 import EasyID3
+                # Download the file.
+                remote_handler = urllib2.urlopen(url)
+                local_handler = tempfile.NamedTemporaryFile(delete = False)
+                local_name = local_handler.name
+                local_handler.write(remote_handler.read())
+                local_handler.close()
+                remote_handler.close()
+                # Extract the metadata.
+                metadata = []
+                audio = EasyID3(local_name)
+                for tag in (u'artist', u'album', u'title'):
+                    try:
+                        metadata.extend(audio[tag])
+                    except:
+                        pass
+                os.remove(local_name)
+                content = u' '.join(metadata)
+            except Exception:
+                pass
+        return content
 
 
 class ApacheHandler(ProtocolHandler):

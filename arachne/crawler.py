@@ -46,7 +46,7 @@ class SiteCrawler(threading.Thread):
         self._tasks = tasks
         self._results = results
         self._handlers = {}
-        for handler_class in ProtocolHandler.__subclasses__():
+        for handler_class in self._get_handler_classes():
             handler = handler_class(sites_info, tasks, results)
             self._handlers[handler_class.name] = handler
         # Flag used to stop the loop started by the run() method.
@@ -90,7 +90,16 @@ class SiteCrawler(threading.Thread):
             else:
                 logging.info('Revisiting "%s"' % task.url)
             handler.execute(task)
-
+            
+    def _get_handler_classes(self):
+        """Get the classes of the protocol handlers.
+        """
+        def f(baseclass):
+            for subclass in baseclass.__subclasses__():
+                yield subclass
+                for subsubclass in f(subclass):
+                    yield subsubclass
+        return f(ProtocolHandler)
 
 class CrawlerManager(object):
     """Crawler manager.
