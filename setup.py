@@ -28,7 +28,7 @@ setup(name='Arachne',
       license='GNU General Public License version 3 or any later version.',
       description='Search engine for files and directories.',
       long_description='Arachne is a search engine for files and directories' \
-          + ' shared by FTP and similar\nprotocols in a networked environment.',
+          + ' shared via FTP and similar\nprotocols in a networked environment.',
       platforms=['POSIX'],
       packages=['arachne', 'arachne.util'],
       package_dir={'arachne': 'arachne'},
