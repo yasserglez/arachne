@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #
-# Arachne, a search engine for files and directories.
-# Copyright (C) 2008, 2009, 2010 Yasser González Fernández <ygonzalezfernandez@gmail.com>
-# Copyright (C) 2008, 2009, 2010 Ariel Hernández Amador <gnuaha7@gmail.com>
+# Arachne: Search engine for files shared via FTP and similar protocols.
+# Copyright (C) 2008-2010 Yasser González Fernández <ygonzalezfernandez@gmail.com>
+# Copyright (C) 2008-2010 Ariel Hernández Amador <gnuaha7@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -264,7 +264,7 @@ class FTPHandler(ProtocolHandler):
             # format or it contains additional information provided by the FTP
             # server that can be ignored.
             return None
-        
+
     @staticmethod
     def _get_content(url):
         """Get the UTF-8 text to be indexed as the content of the file.
@@ -273,17 +273,17 @@ class FTPHandler(ProtocolHandler):
 
 class FTPContentHandler(FTPHandler):
     """A proof-of-concept FTP handler.
-    
-    This class extends the FTP handler to support downloading the files 
+
+    This class extends the FTP handler to support downloading the files
     to index its content. Currently only the metadata of MP3 files
     is indexed.
     """
-    
+
     name = 'ftp_content'
-    
+
     def __init__(self, sites_info, tasks, results):
         super(FTPContentHandler, self).__init__(sites_info, tasks, results)
-        
+
     @staticmethod
     def _get_content(url):
         """Get the UTF-8 text to be indexed as the content of the file.
