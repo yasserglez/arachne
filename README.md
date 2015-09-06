@@ -25,12 +25,9 @@ application.
 Authors
 -------
 
-Yasser González Fernández
-* Email - ygonzalezfernandez@gmail.com
+* Yasser González Fernández
+* Ariel Hernández Amador
 
-Ariel Hernández Amador
-* Email - gnuaha7@gmail.com
-
-Arachne was inspired by Andy Teijelo's FTP Locate. See also
-`THANKS.md` for a list of other people who have contributed to the
-project.
+Arachne was inspired by FTP Locate, which was created by Andy Teijelo
+Pérez. See also `THANKS.md` for a list of other people who have
+contributed to the project.
