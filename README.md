@@ -1,8 +1,6 @@
 Arachne
 =======
 
-[![Build Status](https://travis-ci.org/yasserglez/arachne.svg?branch=master)](https://travis-ci.org/yasserglez/arachne)
-
 Arachne is a search engine for files and directories shared via FTP
 and similar protocols.
 
